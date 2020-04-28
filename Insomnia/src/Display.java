@@ -156,6 +156,7 @@ public class Display {
         //JScrollPane formScroller = new JScrollPane();
         //formPanel.setLayout(new BoxLayout(formPanel,BoxLayout.PAGE_AXIS));
         JButton addFormButton = new JButton("Add new form");
+
         addFormButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -164,6 +165,7 @@ public class Display {
             }
         });
         formPanel.add(addFormButton);
+
         JPanel noBodyPanel = new JPanel();
 
         bodyPanel.add(noBodyPanel);
@@ -189,36 +191,94 @@ public class Display {
                     bodyPanel.remove(1);
                     bodyPanel.add(noBodyPanel, BorderLayout.CENTER);
                 }
-                frame.validate();
+                requestsPanel.updateUI();
             }
         });
         //////////////////////////////////////////
 
 
+        //////////////////////making Auth panel
+
+        JLabel tokenLabel = new JLabel("TOKEN");
+        JLabel prefixLabel = new JLabel("PREFIX");
+        JTextField tokenField = new JTextField("");
+        tokenField.setMinimumSize(new Dimension(FRAME_WIDTH/8,20));
+        tokenField.setPreferredSize(new Dimension(2*FRAME_WIDTH/9,20));
+        JTextField prefixField = new JTextField("");
+        prefixField.setMinimumSize(new Dimension(FRAME_WIDTH/8,20));
+        prefixField.setPreferredSize(new Dimension(2*FRAME_WIDTH/9,20));
+        JCheckBox isEnabled = new JCheckBox("ENABLED");
+        isEnabled.setHorizontalTextPosition(SwingConstants.LEFT);
+
+        authPanel.add(tokenLabel);
+        authPanel.add(tokenField);
+        authPanel.add(prefixLabel);
+        authPanel.add(prefixField);
+        authPanel.add(isEnabled);
+        //////////////////////////////////////////////////////
+
+
+        /////////////////////making header panel
+        JButton addHeaderButton = new JButton("Add new header");
+
+        addHeaderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                headerPanel.add(formMaker());
+                headerPanel.updateUI();
+            }
+        });
+        headerPanel.add(addHeaderButton);
+        /////////////////////////////////////////////////////
+
+
+        ////////////////////making query panel
+        JLabel urlPreviewLabel = new JLabel("URL preview");
+        JTextField urlPreviewField = new JTextField();
+        urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH/6,30));
+        JButton copyURLButton = new JButton();
+
+        queryPanel.add(urlPreviewLabel);
+        queryPanel.add(urlPreviewField);
+        queryPanel.add(copyURLButton);
+        JButton addQueryButton = new JButton("Add new query");
+        addQueryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                queryPanel.add(formMaker());
+                queryPanel.updateUI();
+            }
+        });
+        queryPanel.add(addQueryButton);
+
+        //////////////////////////////////////////////////////
+
         newRequestPanel.add(tabs, BorderLayout.CENTER);
 
 
     }
+
     private void makeResponsePanel() {
         responsePanel = new JPanel();
         responsePanel.setBackground(Color.DARK_GRAY);
         //responsePanel.setBounds(2*FRAME_WIDTH/3,0,FRAME_WIDTH/3,FRAME_HEIGHT);
         responsePanel.setLayout(new BorderLayout());
     }
-    private JPanel formMaker(){
+
+    private JPanel formMaker() {
         JPanel formPanel = new JPanel();
 
         JTextField nameField = new JTextField("Name");
-        nameField.setMinimumSize(new Dimension(FRAME_WIDTH/8-80,20));
-        nameField.setPreferredSize(new Dimension(FRAME_WIDTH/8-30,20));
-        nameField.setMaximumSize(new Dimension(FRAME_WIDTH/8+20,20));
+        nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 20));
+        nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 20));
+        nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 20));
         JTextField valueField = new JTextField("Value");
-        valueField.setMinimumSize(new Dimension(FRAME_WIDTH/8-80,20));
-        valueField.setPreferredSize(new Dimension(FRAME_WIDTH/8-30,20));
-        valueField.setMaximumSize(new Dimension(FRAME_WIDTH/8+20,20));
+        valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 20));
+        valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 20));
+        valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 20));
         JCheckBox isActive = new JCheckBox();
         JButton removeForm = new JButton("x");
-        removeForm.setPreferredSize(new Dimension(15,15));
+        removeForm.setPreferredSize(new Dimension(15, 15));
 
         formPanel.add(nameField);
         formPanel.add(valueField);
@@ -226,6 +286,7 @@ public class Display {
         formPanel.add(removeForm);
         return formPanel;
     }
+
     private void darkTheme() {
     }
 
