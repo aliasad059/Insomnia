@@ -54,12 +54,11 @@ public class Display {
 
         addNewRequestButton = new JButton("add new request");
 
-
         parallel = requestsPanelLayout.createParallelGroup();
         requestsPanelLayout.setHorizontalGroup(
                 requestsPanelLayout.createParallelGroup()
-                        .addComponent(insomniaButton, 100, 200, 200)
-                        .addComponent(addNewRequestButton, 100, 200, 200)
+                        .addComponent(insomniaButton, 100, 200, 300)
+                        .addComponent(addNewRequestButton, 100, 200, 300)
                         .addGroup(parallel));
         sequential = requestsPanelLayout.createSequentialGroup();
         requestsPanelLayout.setVerticalGroup(
@@ -89,6 +88,7 @@ public class Display {
         sequential.addGroup(requestsPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
                 addComponent(label).addComponent(requestButton));
         frame.validate();
+        frame.pack();
     }
 
     private void makeNewRequestPanel() {
@@ -153,7 +153,17 @@ public class Display {
         JSONPanel.add(sp, BorderLayout.CENTER);
 
         JPanel formPanel = new JPanel();
-
+        //JScrollPane formScroller = new JScrollPane();
+        //formPanel.setLayout(new BoxLayout(formPanel,BoxLayout.PAGE_AXIS));
+        JButton addFormButton = new JButton("Add new form");
+        addFormButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                formPanel.add(formMaker());
+                formPanel.updateUI();
+            }
+        });
+        formPanel.add(addFormButton);
         JPanel noBodyPanel = new JPanel();
 
         bodyPanel.add(noBodyPanel);
@@ -195,7 +205,27 @@ public class Display {
         //responsePanel.setBounds(2*FRAME_WIDTH/3,0,FRAME_WIDTH/3,FRAME_HEIGHT);
         responsePanel.setLayout(new BorderLayout());
     }
+    private JPanel formMaker(){
+        JPanel formPanel = new JPanel();
 
+        JTextField nameField = new JTextField("Name");
+        nameField.setMinimumSize(new Dimension(FRAME_WIDTH/8-80,20));
+        nameField.setPreferredSize(new Dimension(FRAME_WIDTH/8-30,20));
+        nameField.setMaximumSize(new Dimension(FRAME_WIDTH/8+20,20));
+        JTextField valueField = new JTextField("Value");
+        valueField.setMinimumSize(new Dimension(FRAME_WIDTH/8-80,20));
+        valueField.setPreferredSize(new Dimension(FRAME_WIDTH/8-30,20));
+        valueField.setMaximumSize(new Dimension(FRAME_WIDTH/8+20,20));
+        JCheckBox isActive = new JCheckBox();
+        JButton removeForm = new JButton("x");
+        removeForm.setPreferredSize(new Dimension(15,15));
+
+        formPanel.add(nameField);
+        formPanel.add(valueField);
+        formPanel.add(isActive);
+        formPanel.add(removeForm);
+        return formPanel;
+    }
     private void darkTheme() {
     }
 
