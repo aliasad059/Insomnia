@@ -1,6 +1,9 @@
 package GUI;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.text.Highlighter;
+import javax.swing.text.IconView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,39 +18,54 @@ public class RequestsPanel {
     private GroupLayout.ParallelGroup parallel;
     private GroupLayout.SequentialGroup sequential;
     private ArrayList<JButton> requestsButton;
+    private JTextField filterField;
 
 
     public RequestsPanel() {
         requestsButton = new ArrayList<>();
-        requestsPanel = new JPanel();
-        requestsPanelLayout = new GroupLayout(requestsPanel);
-        requestsPanel.setLayout(requestsPanelLayout);
+        requestsPanel = new JPanel(new BorderLayout());
+        JPanel northRequestPanel = new JPanel();
+        JPanel centerRequestPanel = new JPanel(new BorderLayout());
+        JPanel northCenterRequestPanel= new JPanel();
+        JPanel centerCenterRequestPanel = new JPanel();
+
+        requestsPanelLayout = new GroupLayout(centerCenterRequestPanel);
+        centerCenterRequestPanel.setLayout(requestsPanelLayout);
+        centerCenterRequestPanel.setBorder(new TitledBorder("Requests"));
         requestsPanelLayout.setAutoCreateGaps(true);
         requestsPanelLayout.setAutoCreateContainerGaps(true);
 
         JButton insomniaButton = new JButton("Insomnia");
+        insomniaButton.setPreferredSize(new Dimension(200,30));
+        addNewRequestButton = new JButton("+");
+        addNewRequestButton.setPreferredSize(new Dimension(50,25));
+        filterField = new JTextField("");
+        filterField.setPreferredSize(new Dimension(150,25));
+        insomniaButton.setBackground(Color.MAGENTA);
 
-        addNewRequestButton = new JButton("add new request");
+        northRequestPanel.add(insomniaButton);
+        northCenterRequestPanel.add(filterField);
+        northCenterRequestPanel.add(addNewRequestButton);
+
+        requestsPanel.add(northRequestPanel,BorderLayout.NORTH);
+        centerRequestPanel.add(northCenterRequestPanel , BorderLayout.NORTH);
+        centerRequestPanel.add(centerCenterRequestPanel, BorderLayout.CENTER);
+        requestsPanel.add(centerRequestPanel,BorderLayout.CENTER);
 
         parallel = requestsPanelLayout.createParallelGroup();
         requestsPanelLayout.setHorizontalGroup(
                 requestsPanelLayout.createParallelGroup()
-                        .addComponent(insomniaButton, 100, 200, 300)
-                        .addComponent(addNewRequestButton, 100, 200, 300)
+                        //.addComponent(insomniaButton, 100, 200, 300)
+                        //.addComponent(addNewRequestButton, 100, 200, 300)
                         .addGroup(parallel));
         sequential = requestsPanelLayout.createSequentialGroup();
         requestsPanelLayout.setVerticalGroup(
                 requestsPanelLayout.createSequentialGroup()
-                        .addComponent(insomniaButton)
-                        .addComponent(addNewRequestButton)
+                        //.addComponent(insomniaButton)
+                        //.addComponent(addNewRequestButton)
                         .addGroup(sequential));
 
-        addNewRequestButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addRequest("My request", "Get");
-            }
-        });
+        addNewRequestButton.addActionListener(new handler());
     }
 
     private void addRequest(String name, String method) {
@@ -62,6 +80,39 @@ public class RequestsPanel {
                 addComponent(label).addComponent(requestButton));
         requestsPanel.updateUI();
         requestsButton.add(requestButton);
+    }
+    class handler implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == addNewRequestButton){
+                JDialog newRequestDialog =new JDialog();
+                newRequestDialog.setVisible(true);
+                JTextField nameFiled = new JTextField("My Request");
+                nameFiled.setBorder(new TitledBorder("Name"));
+                String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
+                JComboBox cb =new JComboBox(methodsName);
+                cb.setSelectedIndex(0);
+
+                JButton createRequestButton = new JButton("Creat");
+                createRequestButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        addRequest(nameFiled.getText(),(String) cb.getSelectedItem());
+                        newRequestDialog.setVisible(false);
+                        newRequestDialog.dispose();
+                    }
+                });
+
+                newRequestDialog.setLayout(new BorderLayout());
+                newRequestDialog.add(nameFiled,BorderLayout.CENTER);
+                newRequestDialog.add(cb,BorderLayout.EAST);
+                newRequestDialog.add(createRequestButton,BorderLayout.SOUTH);
+                newRequestDialog.setTitle("New Request");
+                newRequestDialog.setBounds(300, 200, 500, 125);
+
+                newRequestDialog.setVisible(true);
+            }
+        }
     }
 
     public JPanel getRequestsPanel() {
@@ -88,5 +139,4 @@ public class RequestsPanel {
         formPanel.add(removeForm);
         return formPanel;
     }
-
 }

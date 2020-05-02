@@ -1,13 +1,15 @@
 package GUI;
 
+
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.Reader;
 
 import static GUI.Display.FRAME_WIDTH;
-
 public class MiddlePanel {
     JPanel middlePanel;
     JPanel northMiddlePanel;
@@ -128,10 +130,9 @@ public class MiddlePanel {
                 }
             }
         });
-
+        JsonViewerPanel jsonViewerPanel = new JsonViewerPanel();
         JPanel JSONPanel = new JPanel(new BorderLayout());
-        JTextArea JSONEditor = new JTextArea("");
-        JScrollPane sp = new JScrollPane(JSONEditor);
+        JScrollPane sp = new JScrollPane(jsonViewerPanel);
         JSONPanel.add(sp, BorderLayout.CENTER);
 
         JPanel formPanel = new JPanel();
@@ -193,16 +194,16 @@ public class MiddlePanel {
         JPanel formPanel = new JPanel();
 
         JTextField nameField = new JTextField("Name");
-        nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 20));
-        nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 20));
-        nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 20));
+        nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 25));
+        nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 25));
+        nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 25));
         JTextField valueField = new JTextField("Value");
-        valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 20));
-        valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 20));
-        valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 20));
+        valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 25));
+        valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 25));
+        valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 25));
         JCheckBox isActive = new JCheckBox();
         JButton removeForm = new JButton("x");
-        removeForm.setPreferredSize(new Dimension(15, 15));
+        removeForm.setPreferredSize(new Dimension(20, 20));
 
         formPanel.add(nameField);
         formPanel.add(valueField);
@@ -210,9 +211,16 @@ public class MiddlePanel {
         formPanel.add(removeForm);
         return formPanel;
     }
+    private class handler implements ActionListener{
 
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            //TODO: needs a list of forms maybe
+        }
+    }
     public JPanel getMiddlePanel() {
         return middlePanel;
     }
+
 }
 

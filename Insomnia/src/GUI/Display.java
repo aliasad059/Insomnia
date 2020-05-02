@@ -25,7 +25,7 @@ public class Display {
 
     public Display() {
 
-
+        LafManager.install(new DarculaTheme());
         frame = new JFrame("Insomnia");
         frame.validate();
         requestsPanelObj = new RequestsPanel();
@@ -65,6 +65,6 @@ public class Display {
     }
 
     public JSplitPane getLeftAndRightPanels() {
-        return leftAndRightPanels;
+        return leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, rightPanels);
     }
 }

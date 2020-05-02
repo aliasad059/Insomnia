@@ -120,6 +120,29 @@ public class MenuBar {
         optionDialog.setTitle("Option");
         optionDialog.setBounds(300, 200, 350, 200);
         optionDialog.setVisible(true);
+        saveSetting.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (darculaTheme.isSelected()) {
+                    LafManager.install(new DarculaTheme());
+                } else if (highContrastLightTheme.isSelected()) {
+                    LafManager.install(new HighContrastLightTheme());
+                } else if (solatizedLightTheme.isSelected()) {
+                    LafManager.install(new SolarizedLightTheme());
+                } else if (solarizedDarkTheme.isSelected()) {
+                    LafManager.install(new SolarizedDarkTheme());
+                } else if (highContrastDarkTheme.isSelected()) {
+                    LafManager.install(new HighContrastDarkTheme());
+                } else if (intelliJTheme.isSelected()) {
+                    LafManager.install(new IntelliJTheme());
+                }
+                frame.revalidate();
+                frame.repaint();
+                //TODO:add follow redirect action listener
+                //TODO:add exit on close action listener
+                optionDialog.dispose();
+            }
+        });
 
     }
 
@@ -135,20 +158,26 @@ public class MenuBar {
                 frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             } else if (e.getSource() == toggleSidebarItem) {
                 if (isSlideToggledActive) {
-                    frame.getContentPane().remove(display.getRightPanels());
+                    frame.getContentPane().remove(0);
                     frame.getContentPane().add(display.getLeftAndRightPanels());
-                    isSlideToggledActive=false;
-                 }
-                else {
-                    frame.getContentPane().remove(display.getLeftAndRightPanels());
+                    isSlideToggledActive = false;
+                } else {
+                    frame.getContentPane().remove(0);
                     frame.getContentPane().add(display.getRightPanels());
                     isSlideToggledActive = true;
                 }
                 frame.revalidate();
                 frame.repaint();
             } else if (e.getSource() == helpItem) {
+                JOptionPane.showMessageDialog(frame, "Help"
+                        , "Help", JOptionPane.INFORMATION_MESSAGE);
 
             } else if (e.getSource() == aboutItem) {
+                JOptionPane.showMessageDialog(frame, "Hi it's Ali, this is my midterm project in AP" +
+                                "\nEmail: Aliasad059@gmail.com" +
+                                "\nAUT mail:Aliasad059@aut.ac.ir" +
+                                "\nStudent Number : 9831004"
+                        , "About", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }
