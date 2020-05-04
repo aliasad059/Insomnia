@@ -64,8 +64,7 @@ public class MiddlePanel {
         JLabel urlPreviewLabel = new JLabel("URL Preview");
         JTextField urlPreviewField = new JTextField();
         urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
-        JButton copyURLButton = new JButton();
-
+        JButton copyURLButton = new JButton("Copy URL");
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
         queryPanel.add(copyURLButton);
@@ -200,13 +199,13 @@ public class MiddlePanel {
         public Form(JPanel owner) {
             this.owner = owner;
             nameField = new JTextField("Name");
-            nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
-            nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8, 25));
-            nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
+            //nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
+            nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8+50, 25));
+            nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
             valueField = new JTextField("Value");
-            valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
-            valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8, 25));
-            valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
+            //valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
+            valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8+50, 25));
+            valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
             isActive = new JCheckBox();
             isActive.doClick();
             removeForm = new JButton("x");
