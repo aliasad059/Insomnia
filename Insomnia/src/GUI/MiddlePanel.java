@@ -1,29 +1,35 @@
 package GUI;
 
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.File;
-import java.io.Reader;
+
+import com.github.jutil.json.gui.*;
 
 import static GUI.Display.FRAME_WIDTH;
+
 public class MiddlePanel {
     JPanel middlePanel;
     JPanel northMiddlePanel;
-    JTabbedPane tabs ;
-    JPanel bodyPanel ;
-    JPanel authPanel ;
-    JPanel queryPanel ;
-    JPanel headerPanel ;
+    JTabbedPane tabs;
+    JPanel bodyPanel;
+    JPanel bodyFormPanel;
+    JPanel authPanel;
+    JPanel queryPanel;
+    JPanel headerPanel;
+
+    JTextField urlPreviewField;
 
     public MiddlePanel() {
         middlePanel = new JPanel();
         middlePanel.setLayout(new BorderLayout());
         middlePanel.setBackground(Color.GRAY);
-        northMiddlePanel =new JPanel();
+        northMiddlePanel = new JPanel();
         northMiddlePanel.setLayout(new GridLayout(1, 3));
         String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
         northMiddlePanel.add(new JComboBox(methodsName));
@@ -32,12 +38,12 @@ public class MiddlePanel {
 
         middlePanel.add(northMiddlePanel, BorderLayout.NORTH);
 
-         tabs = new JTabbedPane();
-         bodyPanel = new JPanel();
+        tabs = new JTabbedPane();
+        bodyPanel = new JPanel();
         bodyPanel.setLayout(new BorderLayout());
-         authPanel = new JPanel();
-         queryPanel = new JPanel();
-         headerPanel = new JPanel();
+        authPanel = new JPanel();
+        queryPanel = new JPanel();
+        headerPanel = new JPanel();
 
         tabs.addTab("Body", bodyPanel);
         tabs.addTab("Auth", authPanel);
@@ -52,9 +58,10 @@ public class MiddlePanel {
         middlePanel.add(tabs, BorderLayout.CENTER);
 
     }
-    private void makeQueryPanel(){
+
+    private void makeQueryPanel() {
         ////////////////////making query panel
-        JLabel urlPreviewLabel = new JLabel("URL preview");
+        JLabel urlPreviewLabel = new JLabel("URL Preview");
         JTextField urlPreviewField = new JTextField();
         urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
         JButton copyURLButton = new JButton();
@@ -62,19 +69,12 @@ public class MiddlePanel {
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
         queryPanel.add(copyURLButton);
-        JButton addQueryButton = new JButton("Add new query");
-        addQueryButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                queryPanel.add(formMaker());
-                queryPanel.updateUI();
-            }
-        });
-        queryPanel.add(addQueryButton);
+        queryPanel.add(new Form(queryPanel));
 
         //////////////////////////////////////////////////////
     }
-    private void makeAuthPanel(){
+
+    private void makeAuthPanel() {
         //////////////////////making Auth panel
 
         JLabel tokenLabel = new JLabel("TOKEN");
@@ -102,7 +102,8 @@ public class MiddlePanel {
         authPanel.add(thirdLine);
         //////////////////////////////////////////////////////
     }
-    private void makeBodyPanel(){
+
+    private void makeBodyPanel() {
         ////////////////////////////// making body panel
 
 
@@ -127,6 +128,7 @@ public class MiddlePanel {
                     JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
                     filePath[0] = new JTextField(filepath);
                     middlePanel.updateUI();
+                    //TODO: change the text
                 }
             }
         });
@@ -135,19 +137,11 @@ public class MiddlePanel {
         JScrollPane sp = new JScrollPane(jsonViewerPanel);
         JSONPanel.add(sp, BorderLayout.CENTER);
 
-        JPanel formPanel = new JPanel();
+        bodyFormPanel = new JPanel();
         //JScrollPane formScroller = new JScrollPane();
         //formPanel.setLayout(new BoxLayout(formPanel,BoxLayout.PAGE_AXIS));
-        JButton addFormButton = new JButton("Add new form");
 
-        addFormButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                formPanel.add(formMaker());
-                formPanel.updateUI();
-            }
-        });
-        formPanel.add(addFormButton);
+        bodyFormPanel.add(new Form(bodyFormPanel));
 
         JPanel noBodyPanel = new JPanel();
 
@@ -159,7 +153,7 @@ public class MiddlePanel {
                 JComboBox cb = (JComboBox) e.getSource();
                 if (cb.getSelectedIndex() == 1) {
                     bodyPanel.remove(1);
-                    bodyPanel.add(formPanel, BorderLayout.CENTER);
+                    bodyPanel.add(bodyFormPanel, BorderLayout.CENTER);
                 } else if (cb.getSelectedIndex() == 2) {
                     bodyPanel.remove(1);
                     bodyPanel.add(JSONPanel, BorderLayout.CENTER);
@@ -175,52 +169,94 @@ public class MiddlePanel {
         });
         //////////////////////////////////////////
     }
-    private void makeHeaderPanel(){
-        /////////////////////making header panel
-        JButton addHeaderButton = new JButton("Add new header");
 
-        addHeaderButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                headerPanel.add(formMaker());
-                headerPanel.updateUI();
-            }
-        });
-        headerPanel.add(addHeaderButton);
+    private void makeHeaderPanel() {
+        /////////////////////making header panel
+
+        headerPanel.add(new Form(headerPanel));
         /////////////////////////////////////////////////////
     }
 
-    private JPanel formMaker() {
-        JPanel formPanel = new JPanel();
 
-        JTextField nameField = new JTextField("Name");
-        nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 25));
-        nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 25));
-        nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 25));
-        JTextField valueField = new JTextField("Value");
-        valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 80, 25));
-        valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 - 30, 25));
-        valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 20, 25));
-        JCheckBox isActive = new JCheckBox();
-        JButton removeForm = new JButton("x");
-        removeForm.setPreferredSize(new Dimension(20, 20));
-
-        formPanel.add(nameField);
-        formPanel.add(valueField);
-        formPanel.add(isActive);
-        formPanel.add(removeForm);
-        return formPanel;
+    public JPanel getMiddlePanel() {
+        return middlePanel;
     }
-    private class handler implements ActionListener{
+
+    private class handler implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             //TODO: needs a list of forms maybe
         }
     }
-    public JPanel getMiddlePanel() {
-        return middlePanel;
+
+    class Form extends JPanel {
+        JPanel owner;
+        JTextField nameField, valueField;
+        JCheckBox isActive;
+        JButton removeForm;
+        Form form;
+
+        public Form(JPanel owner) {
+            this.owner = owner;
+            nameField = new JTextField("Name");
+            nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
+            nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8, 25));
+            nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
+            valueField = new JTextField("Value");
+            valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
+            valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8, 25));
+            valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
+            isActive = new JCheckBox();
+            isActive.doClick();
+            removeForm = new JButton("x");
+            removeForm.setPreferredSize(new Dimension(20, 20));
+            this.add(nameField);
+            this.add(valueField);
+            this.add(isActive);
+            this.add(removeForm);
+
+            isActive.addActionListener(new handler());
+            removeForm.addActionListener(new handler());
+            nameField.addFocusListener(new handler());
+            valueField.addFocusListener(new handler());
+
+            form = this;
+        }
+
+        class handler implements FocusListener, ActionListener {
+
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (e.getSource() == nameField || e.getSource() == valueField) {
+
+                    owner.add(new Form(owner));
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                System.out.println("Focus lost");
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == isActive) {
+                    if (isActive.isSelected()) {
+                        form.setBorder(BorderFactory.createRaisedBevelBorder());
+                    } else {
+                        form.setBorder(BorderFactory.createLoweredBevelBorder());
+                    }
+                } else if (e.getSource() == removeForm) {
+                    int a = JOptionPane.showConfirmDialog(form, "Are you sure?");
+                    if (a == JOptionPane.YES_OPTION) {
+                        owner.remove(form);
+                    }
+                }
+            }
+        }
     }
+
 
 }
 

@@ -1,6 +1,6 @@
 package GUI;
 
-import javafx.scene.control.ComboBox;
+import com.github.jutil.json.gui.JsonViewerPanel;
 
 import javax.swing.*;
 import java.awt.*;
