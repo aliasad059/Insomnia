@@ -2,6 +2,8 @@ package GUI;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +11,7 @@ import java.awt.event.KeyEvent;
 
 import com.github.weisj.darklaf.*;
 import com.github.weisj.darklaf.theme.*;
+import com.sun.xml.internal.bind.v2.TODO;
 
 public class MenuBar {
     private JMenuBar menuBar;
@@ -16,9 +19,10 @@ public class MenuBar {
     private JMenuItem optionsItem, exitItem, toggleFullScreenItem, toggleSidebarItem, aboutItem, helpItem;
     private JFrame frame;
     private Display display;
+    private static boolean isSystemTrayEnabled = true;
     InsomniaSystemTray systemTray;
     JDialog optionDialog;
-    JCheckBox followRedirectCheckBox, ExitOnClose;
+     JCheckBox followRedirectCheckBox, ExitOnClose;
     ButtonGroup themeType;
     JRadioButton darculaTheme, solatizedLightTheme, intelliJTheme, solarizedDarkTheme, highContrastDarkTheme, highContrastLightTheme;
     JButton saveSetting;
@@ -61,6 +65,7 @@ public class MenuBar {
 
         followRedirectCheckBox = new JCheckBox("Follow Redirect");
         ExitOnClose = new JCheckBox("Exit On Close");
+        ExitOnClose.addChangeListener(new handler());
         themeType = new ButtonGroup();
         darculaTheme = new JRadioButton("Darcula");
         solatizedLightTheme = new JRadioButton("Solatized ght");
@@ -87,6 +92,7 @@ public class MenuBar {
         toggleFullScreenItem.setMnemonic('F');
         optionsItem.setMnemonic('O');
         exitItem.setMnemonic('E');
+
 
 
     }
@@ -146,7 +152,11 @@ public class MenuBar {
 
     }
 
-    private class handler implements ActionListener {
+    public static boolean isIsSystemTrayEnabled() {
+        return isSystemTrayEnabled ;
+    }
+
+    private class handler implements ActionListener , ChangeListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitItem) {
@@ -178,6 +188,21 @@ public class MenuBar {
                                 "\nAUT mail:Aliasad059@aut.ac.ir" +
                                 "\nStudent Number : 9831004"
                         , "About", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+
+        /**
+         * Invoked when the target of the listener has changed its state.
+         *
+         * @param e a ChangeEvent object
+         */
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            if (e.getSource() == ExitOnClose){
+                isSystemTrayEnabled = !isSystemTrayEnabled;
+            }
+            else if (e.getSource() == followRedirectCheckBox){
+                //TODO: impalement it
             }
         }
     }

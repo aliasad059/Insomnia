@@ -26,7 +26,7 @@ public class Display {
     public Display() {
 
         LafManager.install(new DarculaTheme());
-        frame = new JFrame("Insomnia");
+        frame = new InsomniaFrame("Insomnia");
         frame.validate();
         requestsPanelObj = new RequestsPanel();
         requestsPanel = requestsPanelObj.getRequestsPanel();

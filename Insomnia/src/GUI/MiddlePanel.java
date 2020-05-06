@@ -8,9 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
-
 import com.github.jutil.json.gui.*;
-
 import static GUI.Display.FRAME_WIDTH;
 
 public class MiddlePanel {
