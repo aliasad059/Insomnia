@@ -3,68 +3,70 @@ package GUI;
 
 import com.github.weisj.darklaf.DarkLaf;
 import com.github.weisj.darklaf.LafManager;
-import com.github.weisj.darklaf.theme.DarculaTheme;
+import com.github.weisj.darklaf.theme.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 
 
 public class Display {
-    JFrame frame;
-    static final int FRAME_WIDTH = 1500, FRAME_HEIGHT = 800;
-    JPanel requestsPanel, middlePanel, responsePanel;
-    RequestsPanel requestsPanelObj;
-    MiddlePanel middlePanelObj;
-    ResponsePanel responsePanelObj;
-    MenuBar menuBarObj;
-    JMenuBar menuBar;
-    JSplitPane rightPanels, leftAndRightPanels;
+
+    private static ArrayList<JFrame> workSpaces;
+    private static JFrame showingFrame;
 
     public Display() {
-
-        LafManager.install(new DarculaTheme());
-        frame = new InsomniaFrame("Insomnia");
-        frame.validate();
-        requestsPanelObj = new RequestsPanel();
-        requestsPanel = requestsPanelObj.getRequestsPanel();
-
-        middlePanelObj = new MiddlePanel();
-        middlePanel = middlePanelObj.getMiddlePanel();
-
-        responsePanelObj = new ResponsePanel();
-        responsePanel = responsePanelObj.getResponsePanel();
-
-        menuBarObj = new MenuBar(this);
-        menuBar = menuBarObj.getMenuBar();
-
-        frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        //frame.setLayout(new GridLayout(1, 3));
-        frame.setJMenuBar(menuBar);
-        rightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, middlePanel, responsePanel);
-        rightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
-        leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, rightPanels);
-        leftAndRightPanels.setDividerLocation(FRAME_WIDTH / 6);
-
-        frame.getContentPane().add(leftAndRightPanels);
-
-        frame.setVisible(true);
-
-
+        workSpaces = new ArrayList<>();
+        makeWorkSpace("Insomnia");
+        showingFrame = workSpaces.get(0);
+        showingFrame.setVisible(true);
     }
 
-    public JFrame getFrame() {
-        return frame;
+    private static void makeWorkSpace(String name) {
+        JFrame frame = new InsomniaFrame(name);
+        workSpaces.add(frame);
     }
 
-    public JSplitPane getRightPanels() {
-        return rightPanels;
+    public static void addWordSpace() {
+        String name = JOptionPane.showInputDialog("Enter WorkSpace Name");
+        makeWorkSpace(name);
     }
 
-    public JSplitPane getLeftAndRightPanels() {
-        return leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, rightPanels);
+    public static void changeWorkSpace() {
+        JDialog dialog = new JDialog();
+        ButtonGroup buttonGroup = new ButtonGroup();
+        ArrayList<JRadioButton> radioButtons = new ArrayList<>();
+        for (int i = 0; i < workSpaces.size(); i++) {
+            JRadioButton jrb = new JRadioButton(workSpaces.get(i).getName());
+            buttonGroup.add(jrb);
+            radioButtons.add(jrb);
+            dialog.add(jrb);
+        }
+        JButton OKButton = new JButton("OK");
+        OKButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (int i = 0; i < radioButtons.size(); i++) {
+                    if (radioButtons.get(i).isSelected()){
+                        showingFrame.setVisible(false);
+                        showingFrame = workSpaces.get(i);
+                        showingFrame.setVisible(true);
+                        break;
+                    }
+                }
+                dialog.dispose();
+            }
+        });
+        dialog.add(OKButton);
+        dialog.setSize(new Dimension(500, 100));
+        dialog.setVisible(true);
     }
+
+    public static JFrame getFrame() {
+        return showingFrame;
+    }
+
 }

@@ -13,11 +13,10 @@ import com.github.weisj.darklaf.*;
 import com.github.weisj.darklaf.theme.*;
 import com.sun.xml.internal.bind.v2.TODO;
 
-public class MenuBar {
-    private JMenuBar menuBar;
+public class InsomniaMenuBar extends JMenuBar{
     private JMenu applicationMenu, viewMenu, helpMenu;
     private JMenuItem optionsItem, exitItem, toggleFullScreenItem, toggleSidebarItem, aboutItem, helpItem;
-    private JFrame frame;
+    private InsomniaFrame frame;
     private Display display;
     private static boolean isSystemTrayEnabled = true;
     InsomniaSystemTray systemTray;
@@ -29,10 +28,8 @@ public class MenuBar {
     private boolean isSlideToggledActive = false;
     JPanel requestsPanel;
 
-    public MenuBar(Display display) {
-        this.display = display;
-        frame = display.getFrame();
-        menuBar = new JMenuBar();
+    public InsomniaMenuBar(InsomniaFrame frame) {
+        this.frame = frame;
         applicationMenu = new JMenu("Application");
         viewMenu = new JMenu("View");
         helpMenu = new JMenu("Help");
@@ -43,9 +40,9 @@ public class MenuBar {
         aboutItem = new JMenuItem("About");
         helpItem = new JMenuItem("Help");
 
-        menuBar.add(applicationMenu);
-        menuBar.add(viewMenu);
-        menuBar.add(helpMenu);
+        this.add(applicationMenu);
+        this.add(viewMenu);
+        this.add(helpMenu);
 
         applicationMenu.add(optionsItem);
         applicationMenu.add(exitItem);
@@ -68,7 +65,7 @@ public class MenuBar {
         ExitOnClose.addChangeListener(new handler());
         themeType = new ButtonGroup();
         darculaTheme = new JRadioButton("Darcula");
-        solatizedLightTheme = new JRadioButton("Solatized ght");
+        solatizedLightTheme = new JRadioButton("Solarized Light");
         intelliJTheme = new JRadioButton("IntelliJ");
         solarizedDarkTheme = new JRadioButton("Solarized Dark");
         highContrastDarkTheme = new JRadioButton("High Contrast Dark");
@@ -95,10 +92,6 @@ public class MenuBar {
 
 
 
-    }
-
-    public JMenuBar getMenuBar() {
-        return menuBar;
     }
 
     private void makeOptionDialog() {
@@ -145,7 +138,6 @@ public class MenuBar {
                 frame.revalidate();
                 frame.repaint();
                 //TODO:add follow redirect action listener
-                //TODO:add exit on close action listener
                 optionDialog.dispose();
             }
         });
@@ -165,15 +157,16 @@ public class MenuBar {
             } else if (e.getSource() == optionsItem) {
                 makeOptionDialog();
             } else if (e.getSource() == toggleFullScreenItem) {
+                //TODO: change if toggled for the second time
                 frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             } else if (e.getSource() == toggleSidebarItem) {
                 if (isSlideToggledActive) {
                     frame.getContentPane().remove(0);
-                    frame.getContentPane().add(display.getLeftAndRightPanels());
+                    frame.getContentPane().add(frame.getLeftAndRightPanels());
                     isSlideToggledActive = false;
                 } else {
                     frame.getContentPane().remove(0);
-                    frame.getContentPane().add(display.getRightPanels());
+                    frame.getContentPane().add(frame.getRightPanels());
                     isSlideToggledActive = true;
                 }
                 frame.revalidate();

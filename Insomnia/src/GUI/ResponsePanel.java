@@ -3,16 +3,17 @@ package GUI;
 import com.github.jutil.json.gui.JsonViewerPanel;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static GUI.Display.FRAME_WIDTH;
+import static GUI.InsomniaFrame.FRAME_WIDTH;
 
-public class ResponsePanel {
-    JPanel responsePanel, northResponsePanel,
+public class ResponsePanel extends JPanel{
+    JPanel northResponsePanel,
             messageBodyTab, headerTab,
             rowPanel, JSONPanel;
     JLabel statusLabel, timeLabel, sizeLabel;
@@ -28,8 +29,7 @@ public class ResponsePanel {
 
     public ResponsePanel() {
 
-        responsePanel = new JPanel();
-        responsePanel.setLayout(new BorderLayout());
+        setLayout(new BorderLayout());
 
         northResponsePanel = new JPanel(new FlowLayout());
 
@@ -46,14 +46,14 @@ public class ResponsePanel {
         northResponsePanel.add(sizeLabel);
         //northResponsePanel.add(copyCB);
 
-        responsePanel.add(northResponsePanel, BorderLayout.NORTH);
+        add(northResponsePanel, BorderLayout.NORTH);
 
         tabs = new JTabbedPane();
         messageBodyTab = new JPanel(new BorderLayout());
         headerTab = new JPanel(new BorderLayout());
         tabs.addTab("Message Body", messageBodyTab);
         tabs.addTab("Header", headerTab);
-        responsePanel.add(tabs);
+        add(tabs);
 
         rowPanel = new JPanel(new BorderLayout());
         rowTextPane = new JTextPane();
@@ -74,11 +74,11 @@ public class ResponsePanel {
                 if (comboBox.getSelectedIndex() == 0) {
                     messageBodyTab.remove(1);
                     messageBodyTab.add(rowPanel, BorderLayout.CENTER);
-                    responsePanel.updateUI();
+                    updateUI();
                 } else {
                     messageBodyTab.remove(1);
                     messageBodyTab.add(JSONPanel, BorderLayout.CENTER);
-                    responsePanel.updateUI();
+                    updateUI();
                 }
             }
         });
@@ -92,10 +92,6 @@ public class ResponsePanel {
 
         copyCB.addActionListener(new handler());
 
-    }
-
-    public JPanel getResponsePanel() {
-        return responsePanel;
     }
 
     class handler implements ActionListener {

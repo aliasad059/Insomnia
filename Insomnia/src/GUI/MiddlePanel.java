@@ -8,11 +8,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
-import com.github.jutil.json.gui.*;
-import static GUI.Display.FRAME_WIDTH;
 
-public class MiddlePanel {
-    JPanel middlePanel;
+import com.github.jutil.json.gui.*;
+
+import static GUI.InsomniaFrame.FRAME_WIDTH;
+
+
+public class MiddlePanel extends JPanel{
     JPanel northMiddlePanel;
     JTabbedPane tabs;
     JPanel bodyPanel;
@@ -20,13 +22,16 @@ public class MiddlePanel {
     JPanel authPanel;
     JPanel queryPanel;
     JPanel headerPanel;
-
+    JComboBox bodyTabStatus;
+    JPanel binaryPanel;
+    JButton fileChooserButton;
+    JTextField filePath;
+    JPanel JSONPanel;
+    JPanel noBodyPanel;
     JTextField urlPreviewField;
 
     public MiddlePanel() {
-        middlePanel = new JPanel();
-        middlePanel.setLayout(new BorderLayout());
-        middlePanel.setBackground(Color.GRAY);
+        setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
         northMiddlePanel.setLayout(new GridLayout(1, 3));
         String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
@@ -34,7 +39,7 @@ public class MiddlePanel {
         northMiddlePanel.add(new JTextField());
         northMiddlePanel.add(new JButton("Send"));
 
-        middlePanel.add(northMiddlePanel, BorderLayout.NORTH);
+        add(northMiddlePanel, BorderLayout.NORTH);
 
         tabs = new JTabbedPane();
         bodyPanel = new JPanel();
@@ -53,7 +58,7 @@ public class MiddlePanel {
         makeHeaderPanel();
         makeQueryPanel();
 
-        middlePanel.add(tabs, BorderLayout.CENTER);
+        add(tabs, BorderLayout.CENTER);
 
     }
 
@@ -105,32 +110,20 @@ public class MiddlePanel {
 
 
         String[] bodyTab = {"No Body", "Form", "JASON", "Binary"};
-        JComboBox bodyTabStatus = new JComboBox(bodyTab);
+        bodyTabStatus = new JComboBox(bodyTab);
         bodyPanel.add(bodyTabStatus, BorderLayout.NORTH);
 
-        JPanel binaryPanel = new JPanel();
-        binaryPanel.setLayout(new BorderLayout());
-        JButton fileChooserButton = new JButton("Choose file");
-        binaryPanel.add(fileChooserButton, BorderLayout.NORTH);
-        final JTextField[] filePath = new JTextField[1];
+        binaryPanel = new JPanel();
+        binaryPanel.setLayout(new FlowLayout());
+        fileChooserButton = new JButton("Choose file");
+        filePath = new JTextField("         Path of chosen file          ");
+        binaryPanel.add(fileChooserButton);
+        binaryPanel.add(filePath);
 
-        fileChooserButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = new JFileChooser();
-                int i = fc.showOpenDialog(null);
-                if (i == JFileChooser.APPROVE_OPTION) {
-                    File f = fc.getSelectedFile();
-                    String filepath = f.getPath();
-                    JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
-                    filePath[0] = new JTextField(filepath);
-                    middlePanel.updateUI();
-                    //TODO: change the text
-                }
-            }
-        });
+        fileChooserButton.addActionListener(new handler());
+
         JsonViewerPanel jsonViewerPanel = new JsonViewerPanel();
-        JPanel JSONPanel = new JPanel(new BorderLayout());
+        JSONPanel = new JPanel(new BorderLayout());
         JScrollPane sp = new JScrollPane(jsonViewerPanel);
         JSONPanel.add(sp, BorderLayout.CENTER);
 
@@ -140,13 +133,38 @@ public class MiddlePanel {
 
         bodyFormPanel.add(new Form(bodyFormPanel));
 
-        JPanel noBodyPanel = new JPanel();
+        noBodyPanel = new JPanel();
 
         bodyPanel.add(noBodyPanel);
 
-        bodyTabStatus.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        bodyTabStatus.addActionListener(new handler());
+        //////////////////////////////////////////
+    }
+
+    private void makeHeaderPanel() {
+        /////////////////////making header panel
+
+        headerPanel.add(new Form(headerPanel));
+        /////////////////////////////////////////////////////
+    }
+    private class handler implements ActionListener {
+
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == fileChooserButton) {
+                JFileChooser fc = new JFileChooser();
+                int i = fc.showOpenDialog(null);
+                if (i == JFileChooser.APPROVE_OPTION) {
+                    File f = fc.getSelectedFile();
+                    String filepath = f.getPath();
+                    JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
+                    filePath.setText(filepath);
+                    updateUI();
+                    //TODO: change the text
+                }
+            }
+            if (e.getSource() == bodyTabStatus) {
                 JComboBox cb = (JComboBox) e.getSource();
                 if (cb.getSelectedIndex() == 1) {
                     bodyPanel.remove(1);
@@ -161,29 +179,8 @@ public class MiddlePanel {
                     bodyPanel.remove(1);
                     bodyPanel.add(noBodyPanel, BorderLayout.CENTER);
                 }
-                middlePanel.updateUI();
+                updateUI();
             }
-        });
-        //////////////////////////////////////////
-    }
-
-    private void makeHeaderPanel() {
-        /////////////////////making header panel
-
-        headerPanel.add(new Form(headerPanel));
-        /////////////////////////////////////////////////////
-    }
-
-
-    public JPanel getMiddlePanel() {
-        return middlePanel;
-    }
-
-    private class handler implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            //TODO: needs a list of forms maybe
         }
     }
 
@@ -195,14 +192,15 @@ public class MiddlePanel {
         Form form;
 
         public Form(JPanel owner) {
+            this.setBorder(BorderFactory.createRaisedBevelBorder());
             this.owner = owner;
             nameField = new JTextField("Name");
             //nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
-            nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8+50, 25));
+            nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
             nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
             valueField = new JTextField("Value");
             //valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
-            valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8+50, 25));
+            valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
             valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
             isActive = new JCheckBox();
             isActive.doClick();
@@ -233,7 +231,7 @@ public class MiddlePanel {
 
             @Override
             public void focusLost(FocusEvent e) {
-                System.out.println("Focus lost");
+
             }
 
             @Override
