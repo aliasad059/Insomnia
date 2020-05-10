@@ -9,12 +9,14 @@ import javax.swing.text.IconView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
 
-public class RequestsPanel extends JPanel{
+public class RequestsPanel extends JPanel {
     private GroupLayout requestsPanelLayout;
     private JButton addNewRequestButton, insomniaButton;
     private GroupLayout.ParallelGroup parallel;
@@ -39,6 +41,7 @@ public class RequestsPanel extends JPanel{
 
         insomniaButton = new JButton("Insomnia");
         insomniaButton.setPreferredSize(new Dimension(200, 30));
+        insomniaButton.addActionListener(new handler());
         addNewRequestButton = new JButton("+");
         addNewRequestButton.setPreferredSize(new Dimension(50, 25));
         filterField = new JTextField("");
@@ -136,9 +139,9 @@ public class RequestsPanel extends JPanel{
                 newRequestDialog.setBounds(300, 200, 500, 125);
 
                 newRequestDialog.setVisible(true);
-            }
-            else if (e.getSource() == insomniaButton){
+            } else if (e.getSource() == insomniaButton) {
                 JPopupMenu popupMenu = new JPopupMenu("Insomnia");
+                popupMenu.setVisible(true);
                 JMenuItem creatWorkSpace = new JMenuItem("Creat Workspace");
                 creatWorkSpace.addActionListener(new ActionListener() {
                     @Override
@@ -155,9 +158,8 @@ public class RequestsPanel extends JPanel{
                 });
                 popupMenu.add(changeWorkSpace);
                 popupMenu.add(creatWorkSpace);
-                popupMenu.show();
-                popupMenu.setVisible(true);
-
+                popupMenu.show(insomniaButton, insomniaButton.getBounds().x, (int) (insomniaButton.getBounds().getY()
+                        + insomniaButton.getBounds().height));
             }
         }
     }

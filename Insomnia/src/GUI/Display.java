@@ -21,13 +21,17 @@ public class Display {
     public Display() {
         workSpaces = new ArrayList<>();
         makeWorkSpace("Insomnia");
-        showingFrame = workSpaces.get(0);
         showingFrame.setVisible(true);
     }
 
     private static void makeWorkSpace(String name) {
         JFrame frame = new InsomniaFrame(name);
         workSpaces.add(frame);
+        if (showingFrame != null) {
+            showingFrame.setVisible(false);
+        }
+        showingFrame = frame;
+        showingFrame.setVisible(true);
     }
 
     public static void addWordSpace() {
@@ -37,13 +41,15 @@ public class Display {
 
     public static void changeWorkSpace() {
         JDialog dialog = new JDialog();
+        dialog.setLayout(new BorderLayout());
+        JPanel rbPanel = new JPanel(new GridLayout(5,1));
         ButtonGroup buttonGroup = new ButtonGroup();
         ArrayList<JRadioButton> radioButtons = new ArrayList<>();
         for (int i = 0; i < workSpaces.size(); i++) {
-            JRadioButton jrb = new JRadioButton(workSpaces.get(i).getName());
+            JRadioButton jrb = new JRadioButton(workSpaces.get(i).getTitle());
             buttonGroup.add(jrb);
             radioButtons.add(jrb);
-            dialog.add(jrb);
+            rbPanel.add(jrb);
         }
         JButton OKButton = new JButton("OK");
         OKButton.addActionListener(new ActionListener() {
@@ -60,8 +66,9 @@ public class Display {
                 dialog.dispose();
             }
         });
-        dialog.add(OKButton);
-        dialog.setSize(new Dimension(500, 100));
+        dialog.add(rbPanel,BorderLayout.CENTER);
+        dialog.add(OKButton,BorderLayout.SOUTH);
+        dialog.setSize(new Dimension(400, 300));
         dialog.setVisible(true);
     }
 
