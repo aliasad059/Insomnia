@@ -1,6 +1,7 @@
 package GUI;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.*;
@@ -41,13 +42,13 @@ public class RequestsPanel extends JPanel {
         centerCenterRequestPanel = new JPanel();
         centerCenterRequestPanel.setLayout(new BoxLayout(centerCenterRequestPanel, BoxLayout.PAGE_AXIS));
 
-        insomniaButton = new JButton("Insomnia "+'\u23F7');
+        insomniaButton = new JButton("\uD83C\uDF19  "+"Insomnia "+'\u23F7');
         insomniaButton.setPreferredSize(new Dimension(200, 30));
         insomniaButton.addActionListener(new handler());
         addFolderORRequest = new JButton("+");
         addFolderORRequest.setPreferredSize(new Dimension(50, 25));
 
-        filterField = new JTextField("Filter");
+        filterField = new JTextField("🔍"+"Filter");
         filterField.setPreferredSize(new Dimension(125, 25));
 
         northRequestPanel.add(insomniaButton);
@@ -83,7 +84,6 @@ public class RequestsPanel extends JPanel {
      */
     private JPanel makeRequest(String name, String method) {
         JPanel panel = new JPanel();
-//        panel.setLayout(new BoxLayout(panel,BoxLayout.LINE_AXIS));
         JLabel label = new JLabel(method);
         if (method.substring(0, 3).equals("GET")) {
             label.setForeground(Color.MAGENTA);
@@ -108,11 +108,11 @@ public class RequestsPanel extends JPanel {
         }
 
         JButton requestButton = new JButton(name);
-
         label.setLabelFor(requestButton);
         panel.add(label);
         panel.add(requestButton);
         panel.setVisible(true);
+        panel.setAlignmentX(0);
         updateUI();
         requestsButton.add(requestButton);
         return panel;
@@ -125,11 +125,12 @@ public class RequestsPanel extends JPanel {
     private void addFolder(String name) {
         JButton newFolder = new JButton(name);
         JPanel panel = new JPanel();
-
+        panel.setBorder(new LineBorder(Color.GRAY));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.add(newFolder);
         panel.setMaximumSize(new Dimension(this.getSize().width, 40));
         panel.setSize(new Dimension(this.getSize().width, 40));
+        panel.setAlignmentX(0);
 
 
         centerCenterRequestPanel.add(panel);
@@ -192,8 +193,15 @@ public class RequestsPanel extends JPanel {
         open.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
+                /**
+                 * changing the status of folder icon
+                 */
+                String string = ((JButton) folderPanelToAddComponent.getComponent(0)).getText();
+                string = string.substring(2);
+                string = "\uD83D\uDCC2"+string;
+                ((JButton) folderPanelToAddComponent.getComponent(0)).setText(string);
 
+                for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
                     folderPanelToAddComponent.getComponent(i).setVisible(true);
                     folderPanelToAddComponent.setMaximumSize(new Dimension(
                             folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight
@@ -212,6 +220,13 @@ public class RequestsPanel extends JPanel {
         close.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                /**
+                 * changing the status of folder icon
+                 */
+                String string = ((JButton) folderPanelToAddComponent.getComponent(0)).getText();
+                string = string.substring(2);
+                string = "\uD83D\uDCC1"+string;
+                ((JButton) folderPanelToAddComponent.getComponent(0)).setText(string);
 
                 for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
                     folderPanelToAddComponent.getComponent(i).setVisible(false);
@@ -318,7 +333,7 @@ public class RequestsPanel extends JPanel {
                         creatFolderButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                addFolder('\u269B'+"      "+nameFiled.getText()+"      "+'\u269B');
+                                addFolder("\uD83D\uDCC2" +"      "+nameFiled.getText()+"       ");
                                 newFolderDialog.setVisible(false);
                                 newFolderDialog.dispose();
                             }

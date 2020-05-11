@@ -3,6 +3,7 @@ package GUI;
 import com.github.jutil.json.gui.JsonViewerPanel;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -23,7 +24,7 @@ public class ResponsePanel extends JPanel {
     JTextPane rowTextPane, JSONTextPane;
     String[] cmStrings = {"Row", "JSON"};
     String[] tableColumnsString = {"NAME", "VALUE"};
-    String[][] table_NAME_VALUE = {{"dkdk", "djdjd"}, {"dkdk", "djdjd"}};
+    String[][] table_NAME_VALUE = {{"Value1", "djdjd"}, {"dkdk", "Value2"}};
     //ArrayList<ArrayList<String>> tableNameValue = new ArrayList<ArrayList<String>>();
     JComboBox cb;
     JTable headerTable;
@@ -33,16 +34,20 @@ public class ResponsePanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        northResponsePanel = new JPanel(new FlowLayout());
+        northResponsePanel = new JPanel(new GridLayout(1,3));
 
         statusLabel = new JLabel("ERROR", JLabel.CENTER);
-        statusLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 10));
+        statusLabel.setAlignmentX(0);
+        statusLabel.setBorder(new LineBorder(Color.GRAY));
+        statusLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 20));
         timeLabel = new JLabel("0 ms", JLabel.CENTER);
-        timeLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 10));
+        timeLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 20));
+        timeLabel.setBorder(new LineBorder(Color.GRAY));
         sizeLabel = new JLabel("0 kB", JLabel.CENTER);
-        sizeLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 10));
+        sizeLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 20));
+        sizeLabel.setBorder(new LineBorder(Color.GRAY));
 
-        copyCB = new JButton("Copy TO Clipboard");
+        copyCB = new JButton("Copy To Clipboard");
         northResponsePanel.add(statusLabel);
         northResponsePanel.add(timeLabel);
         northResponsePanel.add(sizeLabel);
