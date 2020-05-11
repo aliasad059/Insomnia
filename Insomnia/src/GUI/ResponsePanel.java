@@ -3,7 +3,6 @@ package GUI;
 import com.github.jutil.json.gui.JsonViewerPanel;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -12,7 +11,10 @@ import java.awt.event.ActionListener;
 
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
-public class ResponsePanel extends JPanel{
+/**
+ * the right panel of the insomnia panel
+ */
+public class ResponsePanel extends JPanel {
     JPanel northResponsePanel,
             messageBodyTab, headerTab,
             rowPanel, JSONPanel;
@@ -44,7 +46,6 @@ public class ResponsePanel extends JPanel{
         northResponsePanel.add(statusLabel);
         northResponsePanel.add(timeLabel);
         northResponsePanel.add(sizeLabel);
-        //northResponsePanel.add(copyCB);
 
         add(northResponsePanel, BorderLayout.NORTH);
 
@@ -67,9 +68,28 @@ public class ResponsePanel extends JPanel{
         messageBodyTab.add(cb, BorderLayout.NORTH);
         messageBodyTab.add(rowPanel, BorderLayout.CENTER);
 
-        cb.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        cb.addActionListener(new handler());
+
+        headerTable = new JTable(table_NAME_VALUE, tableColumnsString);
+        headerTable.setDefaultEditor(Object.class, null);
+        JScrollPane sp = new JScrollPane(headerTable);
+        headerTab.add(sp, BorderLayout.CENTER);
+        headerTab.add(copyCB, BorderLayout.NORTH);
+
+        copyCB.addActionListener(new handler());
+    }
+
+    /**
+     * handling the main events of the response panel
+     */
+    class handler implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            /**
+             * changing the status as user changes the combobox selected item
+             */
+            if (e.getSource() == cb) {
                 JComboBox comboBox = (JComboBox) e.getSource();
                 if (comboBox.getSelectedIndex() == 0) {
                     messageBodyTab.remove(1);
@@ -81,36 +101,22 @@ public class ResponsePanel extends JPanel{
                     updateUI();
                 }
             }
-        });
-
-
-        headerTable = new JTable(table_NAME_VALUE, tableColumnsString);
-        headerTable.setDefaultEditor(Object.class, null);
-        JScrollPane sp = new JScrollPane(headerTable);
-        headerTab.add(sp, BorderLayout.CENTER);
-        headerTab.add(copyCB, BorderLayout.NORTH);
-
-        copyCB.addActionListener(new handler());
-
-    }
-
-    class handler implements ActionListener {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
+            /**
+             * coping the table to the clipboard
+             */
             if (e.getSource() == copyCB) {
                 String string = "";
                 for (int i = 0; i < tableColumnsString.length; i++) {
                     string += tableColumnsString[i];
-                    string+= '\t';
+                    string += '\t';
                 }
-                string+= '\n';
+                string += '\n';
                 for (int i = 0; i < table_NAME_VALUE.length; i++) {
                     for (int j = 0; j < table_NAME_VALUE[i].length; j++) {
-                        string+=table_NAME_VALUE[i][j];
-                        string+= '\t';
+                        string += table_NAME_VALUE[i][j];
+                        string += '\t';
                     }
-                    string+= '\n';
+                    string += '\n';
                 }
                 StringSelection stringSelection = new StringSelection(string);
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

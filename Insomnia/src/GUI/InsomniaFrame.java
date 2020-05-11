@@ -2,23 +2,21 @@ package GUI;
 
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.theme.DarculaTheme;
-import com.sun.xml.internal.bind.v2.TODO;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+/**
+ * the main frame of the insomnia that components are laid out here
+ * as we can see the selected theme is got from a github repo (darklaf)
+ */
 public class InsomniaFrame extends JFrame {
     TrayIcon trayIcon;
     SystemTray tray;
     MenuItem exitItem, openItem;
     JSplitPane rightPanels, leftAndRightPanels;
-    static final int FRAME_WIDTH = 1500, FRAME_HEIGHT = 800;
+    static final int FRAME_WIDTH = 1250, FRAME_HEIGHT = 600;
     JPanel requestsPanel, middlePanel, responsePanel;
-    RequestsPanel requestsPanelObj;
-    MiddlePanel middlePanelObj;
-    ResponsePanel responsePanelObj;
-    MenuBar menuBarObj;
     JMenuBar menuBar;
 
     InsomniaFrame(String title) {
@@ -34,7 +32,7 @@ public class InsomniaFrame extends JFrame {
             popup.add(openItem);
             popup.add(exitItem);
 
-            Image image = Toolkit.getDefaultToolkit().getImage("");
+            Image image = Toolkit.getDefaultToolkit().getImage(".\\Icons\\Insomnia.png");
 
             tray = SystemTray.getSystemTray();
             trayIcon = new TrayIcon(image, "Insomnia", popup);
@@ -47,7 +45,9 @@ public class InsomniaFrame extends JFrame {
         makePanels();
     }
 
-
+    /**
+     * makes the 3 panels of the insomnia app and relate them with a split pane
+     */
     private void makePanels(){
         LafManager.install(new DarculaTheme());
         this.validate();
@@ -69,13 +69,17 @@ public class InsomniaFrame extends JFrame {
         this.setVisible(false);
     }
 
-
+    /**
+     * handling the main events of frame
+     */
     class handler extends WindowAdapter implements ActionListener {
 
         /**
          * Invoked when a window is in the process of being closed.
          * The close operation can be overridden at this point.
          *
+         * if the window is closing and the user chose exit on close, the program will be terminated
+         * else it will be in system tray
          * @param e
          */
         @Override
@@ -123,10 +127,19 @@ public class InsomniaFrame extends JFrame {
             }
         }
     }
+
+    /**
+     * get right panels
+     * @return right panels
+     */
     public JSplitPane getRightPanels() {
         return rightPanels;
     }
 
+    /**
+     * get left and right panels means whole of the frame
+     * @return left and right panels
+     */
     public JSplitPane getLeftAndRightPanels() {
         return leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, rightPanels);
     }

@@ -1,18 +1,14 @@
 package GUI;
-
-
-import com.github.weisj.darklaf.DarkLaf;
-import com.github.weisj.darklaf.LafManager;
-import com.github.weisj.darklaf.theme.*;
-
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.ArrayList;
 
-
+/**
+ * this class relate other GUI class to each other
+ */
 public class Display {
 
     private static ArrayList<JFrame> workSpaces;
@@ -24,6 +20,10 @@ public class Display {
         showingFrame.setVisible(true);
     }
 
+    /**
+     * makes a new work space
+     * @param name
+     */
     private static void makeWorkSpace(String name) {
         JFrame frame = new InsomniaFrame(name);
         workSpaces.add(frame);
@@ -34,15 +34,27 @@ public class Display {
         showingFrame.setVisible(true);
     }
 
-    public static void addWordSpace() {
+    /**
+     * calls make workspace if the entered name is correct
+     */
+    public static void addWorkSpace() {
         String name = JOptionPane.showInputDialog("Enter WorkSpace Name");
-        makeWorkSpace(name);
+        try {
+            if (!name.equals(""))
+                makeWorkSpace(name);
+        } catch (NullPointerException e) {
+        }
     }
 
+    /**
+     * change current workspace to another
+     * means makes current frame invisible and makes another visible
+     */
     public static void changeWorkSpace() {
         JDialog dialog = new JDialog();
         dialog.setLayout(new BorderLayout());
-        JPanel rbPanel = new JPanel(new GridLayout(5,1));
+        JPanel rbPanel = new JPanel(new GridLayout(5, 1));
+        rbPanel.setBorder(new TitledBorder("Workspaces"));
         ButtonGroup buttonGroup = new ButtonGroup();
         ArrayList<JRadioButton> radioButtons = new ArrayList<>();
         for (int i = 0; i < workSpaces.size(); i++) {
@@ -56,7 +68,7 @@ public class Display {
             @Override
             public void actionPerformed(ActionEvent e) {
                 for (int i = 0; i < radioButtons.size(); i++) {
-                    if (radioButtons.get(i).isSelected()){
+                    if (radioButtons.get(i).isSelected()) {
                         showingFrame.setVisible(false);
                         showingFrame = workSpaces.get(i);
                         showingFrame.setVisible(true);
@@ -66,14 +78,9 @@ public class Display {
                 dialog.dispose();
             }
         });
-        dialog.add(rbPanel,BorderLayout.CENTER);
-        dialog.add(OKButton,BorderLayout.SOUTH);
+        dialog.add(rbPanel, BorderLayout.CENTER);
+        dialog.add(OKButton, BorderLayout.SOUTH);
         dialog.setSize(new Dimension(400, 300));
         dialog.setVisible(true);
     }
-
-    public static JFrame getFrame() {
-        return showingFrame;
-    }
-
 }

@@ -7,13 +7,14 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 
 import com.github.weisj.darklaf.*;
 import com.github.weisj.darklaf.theme.*;
-import com.sun.xml.internal.bind.v2.TODO;
 
-public class InsomniaMenuBar extends JMenuBar{
+/**
+ * menu bar of the insomnia frame
+ */
+public class InsomniaMenuBar extends JMenuBar {
     private JMenu applicationMenu, viewMenu, helpMenu;
     private JMenuItem optionsItem, exitItem, toggleFullScreenItem, toggleSidebarItem, aboutItem, helpItem;
     private InsomniaFrame frame;
@@ -21,9 +22,9 @@ public class InsomniaMenuBar extends JMenuBar{
     private static boolean isSystemTrayEnabled = true;
     InsomniaSystemTray systemTray;
     JDialog optionDialog;
-     JCheckBox followRedirectCheckBox, ExitOnClose;
+    JCheckBox followRedirectCheckBox, ExitOnClose;
     ButtonGroup themeType;
-    JRadioButton darculaTheme, solatizedLightTheme, intelliJTheme, solarizedDarkTheme, highContrastDarkTheme, highContrastLightTheme;
+    JRadioButton darculaTheme, solarizedLightTheme, intelliJTheme, solarizedDarkTheme, highContrastDarkTheme, highContrastLightTheme;
     JButton saveSetting;
     private boolean isSlideToggledActive = false;
     JPanel requestsPanel;
@@ -65,7 +66,7 @@ public class InsomniaMenuBar extends JMenuBar{
         ExitOnClose.addChangeListener(new handler());
         themeType = new ButtonGroup();
         darculaTheme = new JRadioButton("Darcula");
-        solatizedLightTheme = new JRadioButton("Solarized Light");
+        solarizedLightTheme = new JRadioButton("Solarized Light");
         intelliJTheme = new JRadioButton("IntelliJ");
         solarizedDarkTheme = new JRadioButton("Solarized Dark");
         highContrastDarkTheme = new JRadioButton("High Contrast Dark");
@@ -74,7 +75,7 @@ public class InsomniaMenuBar extends JMenuBar{
         themeType.add(darculaTheme);
         themeType.add(intelliJTheme);
         themeType.add(highContrastLightTheme);
-        themeType.add(solatizedLightTheme);
+        themeType.add(solarizedLightTheme);
         themeType.add(highContrastDarkTheme);
         themeType.add(solarizedDarkTheme);
         darculaTheme.setSelected(true);
@@ -91,9 +92,11 @@ public class InsomniaMenuBar extends JMenuBar{
         exitItem.setMnemonic('E');
 
 
-
     }
 
+    /**
+     * makes the dialog of option item
+     */
     private void makeOptionDialog() {
         optionDialog = new JDialog();
         //optionDialog.validate();
@@ -103,7 +106,7 @@ public class InsomniaMenuBar extends JMenuBar{
         themePanel.add(darculaTheme);
         themePanel.add(intelliJTheme);
         themePanel.add(solarizedDarkTheme);
-        themePanel.add(solatizedLightTheme);
+        themePanel.add(solarizedLightTheme);
         themePanel.add(highContrastDarkTheme);
         themePanel.add(highContrastLightTheme);
         themePanel.setBorder(new TitledBorder("Themes"));
@@ -121,12 +124,15 @@ public class InsomniaMenuBar extends JMenuBar{
         optionDialog.setVisible(true);
         saveSetting.addActionListener(new ActionListener() {
             @Override
+            /**
+             * changing the status of program as the user choose
+             */
             public void actionPerformed(ActionEvent e) {
                 if (darculaTheme.isSelected()) {
                     LafManager.install(new DarculaTheme());
                 } else if (highContrastLightTheme.isSelected()) {
                     LafManager.install(new HighContrastLightTheme());
-                } else if (solatizedLightTheme.isSelected()) {
+                } else if (solarizedLightTheme.isSelected()) {
                     LafManager.install(new SolarizedLightTheme());
                 } else if (solarizedDarkTheme.isSelected()) {
                     LafManager.install(new SolarizedDarkTheme());
@@ -144,11 +150,19 @@ public class InsomniaMenuBar extends JMenuBar{
 
     }
 
+    /**
+     * return the isSystemTrayEnabled value
+     *
+     * @return
+     */
     public static boolean isIsSystemTrayEnabled() {
-        return isSystemTrayEnabled ;
+        return isSystemTrayEnabled;
     }
 
-    private class handler implements ActionListener , ChangeListener {
+    /**
+     * handles the main events of the menubar
+     */
+    private class handler implements ActionListener, ChangeListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitItem) {
@@ -158,7 +172,11 @@ public class InsomniaMenuBar extends JMenuBar{
                 makeOptionDialog();
             } else if (e.getSource() == toggleFullScreenItem) {
                 //TODO: change if toggled for the second time
-                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                if (frame.getExtendedState() == JFrame.NORMAL) {
+                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                } else {
+                    frame.setExtendedState(JFrame.NORMAL);
+                }
             } else if (e.getSource() == toggleSidebarItem) {
                 if (isSlideToggledActive) {
                     frame.getContentPane().remove(0);
@@ -191,10 +209,9 @@ public class InsomniaMenuBar extends JMenuBar{
          */
         @Override
         public void stateChanged(ChangeEvent e) {
-            if (e.getSource() == ExitOnClose){
+            if (e.getSource() == ExitOnClose) {
                 isSystemTrayEnabled = !isSystemTrayEnabled;
-            }
-            else if (e.getSource() == followRedirectCheckBox){
+            } else if (e.getSource() == followRedirectCheckBox) {
                 //TODO: impalement it
             }
         }

@@ -8,12 +8,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
-
 import com.github.jutil.json.gui.*;
-
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
-
+/**
+ * the middle panel in insomnia
+ */
 public class MiddlePanel extends JPanel{
     JPanel northMiddlePanel;
     JTabbedPane tabs;
@@ -30,6 +30,11 @@ public class MiddlePanel extends JPanel{
     JPanel noBodyPanel;
     JTextField urlPreviewField;
 
+    /**
+     * this panel is divided by border layout into north and center
+     * in north the are controlling buttons
+     * center panel holds a tabbed pane with different items
+     */
     public MiddlePanel() {
         setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
@@ -37,8 +42,7 @@ public class MiddlePanel extends JPanel{
         String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
         northMiddlePanel.add(new JComboBox(methodsName));
         northMiddlePanel.add(new JTextField());
-        northMiddlePanel.add(new JButton("Send"));
-
+        northMiddlePanel.add(new JButton("Send"+'\u21E8'));
         add(northMiddlePanel, BorderLayout.NORTH);
 
         tabs = new JTabbedPane();
@@ -62,6 +66,9 @@ public class MiddlePanel extends JPanel{
 
     }
 
+    /**
+     * makes query panel
+     */
     private void makeQueryPanel() {
         ////////////////////making query panel
         JLabel urlPreviewLabel = new JLabel("URL Preview");
@@ -76,6 +83,9 @@ public class MiddlePanel extends JPanel{
         //////////////////////////////////////////////////////
     }
 
+    /**
+     * makes auth panel
+     */
     private void makeAuthPanel() {
         //////////////////////making Auth panel
 
@@ -105,10 +115,10 @@ public class MiddlePanel extends JPanel{
         //////////////////////////////////////////////////////
     }
 
+    /**
+     * makes body panel and its subcomponents
+     */
     private void makeBodyPanel() {
-        ////////////////////////////// making body panel
-
-
         String[] bodyTab = {"No Body", "Form", "JASON", "Binary"};
         bodyTabStatus = new JComboBox(bodyTab);
         bodyPanel.add(bodyTabStatus, BorderLayout.NORTH);
@@ -128,8 +138,6 @@ public class MiddlePanel extends JPanel{
         JSONPanel.add(sp, BorderLayout.CENTER);
 
         bodyFormPanel = new JPanel();
-        //JScrollPane formScroller = new JScrollPane();
-        //formPanel.setLayout(new BoxLayout(formPanel,BoxLayout.PAGE_AXIS));
 
         bodyFormPanel.add(new Form(bodyFormPanel));
 
@@ -138,32 +146,26 @@ public class MiddlePanel extends JPanel{
         bodyPanel.add(noBodyPanel);
 
         bodyTabStatus.addActionListener(new handler());
-        //////////////////////////////////////////
     }
 
+    /**
+     * makes a header panel
+     */
     private void makeHeaderPanel() {
-        /////////////////////making header panel
-
         headerPanel.add(new Form(headerPanel));
-        /////////////////////////////////////////////////////
     }
+
+    /**
+     * handling main events of middle panel
+     */
     private class handler implements ActionListener {
-
-
+        /**
+         * choosing the format of the body panel as selected in combobox
+         * @param e
+         */
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == fileChooserButton) {
-                JFileChooser fc = new JFileChooser();
-                int i = fc.showOpenDialog(null);
-                if (i == JFileChooser.APPROVE_OPTION) {
-                    File f = fc.getSelectedFile();
-                    String filepath = f.getPath();
-                    JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
-                    filePath.setText(filepath);
-                    updateUI();
-                    //TODO: change the text
-                }
-            }
+
             if (e.getSource() == bodyTabStatus) {
                 JComboBox cb = (JComboBox) e.getSource();
                 if (cb.getSelectedIndex() == 1) {
@@ -181,9 +183,28 @@ public class MiddlePanel extends JPanel{
                 }
                 updateUI();
             }
+            /**
+             * if user chooses to open binary file
+             */
+            if (e.getSource() == fileChooserButton) {
+                JFileChooser fc = new JFileChooser();
+                int i = fc.showOpenDialog(null);
+                if (i == JFileChooser.APPROVE_OPTION) {
+                    File f = fc.getSelectedFile();
+                    String filepath = f.getPath();
+                    JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
+                    filePath.setText(filepath);
+                    updateUI();
+                    //TODO: change the text
+                }
+            }
         }
     }
 
+    /**
+     * this class makes us form
+     * a form has name ,value ,status and remove items
+     */
     class Form extends JPanel {
         JPanel owner;
         JTextField nameField, valueField;
@@ -219,21 +240,33 @@ public class MiddlePanel extends JPanel{
             form = this;
         }
 
+        /**
+         * handling form class events
+         */
         class handler implements FocusListener, ActionListener {
-
+            /**
+             * if the user focused on the fields , make a new form
+             * @param e
+             */
             @Override
             public void focusGained(FocusEvent e) {
                 if (e.getSource() == nameField || e.getSource() == valueField) {
-
                     owner.add(new Form(owner));
                 }
             }
 
+            /**
+             * if the focus lost
+             * @param e
+             */
             @Override
             public void focusLost(FocusEvent e) {
-
             }
 
+            /**
+             * if the form should be enabled/disabled or be removed
+             * @param e
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == isActive) {
