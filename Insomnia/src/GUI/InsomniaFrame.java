@@ -32,7 +32,7 @@ public class InsomniaFrame extends JFrame {
             popup.add(openItem);
             popup.add(exitItem);
 
-            Image image = Toolkit.getDefaultToolkit().getImage(".\\Icons\\Insomnia.png");
+            Image image = Toolkit.getDefaultToolkit().getImage(".\\src\\Icons\\Insomnia.png");
 
             tray = SystemTray.getSystemTray();
             trayIcon = new TrayIcon(image, "Insomnia", popup);

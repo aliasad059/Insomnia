@@ -18,9 +18,12 @@ import java.util.HashMap;
 
 public class RequestsPanel extends JPanel {
     private JButton insomniaButton;
-    private ArrayList<JButton> requestsButton;
+    private ArrayList<JPanel> requestsButton;
+    private JButton searchButton;
     private JTextField filterField;
     private JButton addFolderORRequest;
+    private boolean isFilterEnabled = true;
+    private ArrayList<JPanel> filteredRequests;
 
     //to see what panel is for folder button
     private HashMap<JButton, JPanel> foldersPanel;
@@ -35,6 +38,7 @@ public class RequestsPanel extends JPanel {
     public RequestsPanel() {
         requestsButton = new ArrayList<>();
         foldersPanel = new HashMap<>();
+        filteredRequests = new ArrayList<>();
         setLayout(new BorderLayout());
         JPanel northRequestPanel = new JPanel();
         JPanel centerRequestPanel = new JPanel(new BorderLayout());
@@ -42,16 +46,21 @@ public class RequestsPanel extends JPanel {
         centerCenterRequestPanel = new JPanel();
         centerCenterRequestPanel.setLayout(new BoxLayout(centerCenterRequestPanel, BoxLayout.PAGE_AXIS));
 
-        insomniaButton = new JButton("\uD83C\uDF19  "+"Insomnia "+'\u23F7');
+        insomniaButton = new JButton("\uD83C\uDF19  " + "Insomnia " + '\u23F7');
         insomniaButton.setPreferredSize(new Dimension(200, 30));
         insomniaButton.addActionListener(new handler());
         addFolderORRequest = new JButton("+");
-        addFolderORRequest.setPreferredSize(new Dimension(50, 25));
+        addFolderORRequest.setPreferredSize(new Dimension(25, 25));
 
-        filterField = new JTextField("🔍"+"Filter");
-        filterField.setPreferredSize(new Dimension(125, 25));
+        searchButton = new JButton("🔍");
+        searchButton.setPreferredSize(new Dimension(25, 25));
+        filterField = new JTextField("");
+        filterField.setPreferredSize(new Dimension(140, 25));
 
         northRequestPanel.add(insomniaButton);
+
+        northCenterRequestPanel.add(searchButton);
+        searchButton.addActionListener(new handler());
         northCenterRequestPanel.add(filterField);
         northCenterRequestPanel.add(addFolderORRequest);
 
@@ -65,6 +74,7 @@ public class RequestsPanel extends JPanel {
 
     /**
      * get a request and add it to the main panel
+     *
      * @param panel request to add
      */
     private void addRequest(JPanel panel) {
@@ -78,7 +88,8 @@ public class RequestsPanel extends JPanel {
 
     /**
      * makes a request
-     * @param name name of request
+     *
+     * @param name   name of request
      * @param method method of request
      * @return the made request
      */
@@ -114,12 +125,13 @@ public class RequestsPanel extends JPanel {
         panel.setVisible(true);
         panel.setAlignmentX(0);
         updateUI();
-        requestsButton.add(requestButton);
+        requestsButton.add(panel);
         return panel;
     }
 
     /**
      * make a folder
+     *
      * @param name folder's name
      */
     private void addFolder(String name) {
@@ -198,7 +210,7 @@ public class RequestsPanel extends JPanel {
                  */
                 String string = ((JButton) folderPanelToAddComponent.getComponent(0)).getText();
                 string = string.substring(2);
-                string = "\uD83D\uDCC2"+string;
+                string = "\uD83D\uDCC2" + string;
                 ((JButton) folderPanelToAddComponent.getComponent(0)).setText(string);
 
                 for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
@@ -225,7 +237,7 @@ public class RequestsPanel extends JPanel {
                  */
                 String string = ((JButton) folderPanelToAddComponent.getComponent(0)).getText();
                 string = string.substring(2);
-                string = "\uD83D\uDCC1"+string;
+                string = "\uD83D\uDCC1" + string;
                 ((JButton) folderPanelToAddComponent.getComponent(0)).setText(string);
 
                 for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
@@ -333,7 +345,7 @@ public class RequestsPanel extends JPanel {
                         creatFolderButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                addFolder("\uD83D\uDCC2" +"      "+nameFiled.getText()+"       ");
+                                addFolder("\uD83D\uDCC2" + "      " + nameFiled.getText() + "       ");
                                 newFolderDialog.setVisible(false);
                                 newFolderDialog.dispose();
                             }
@@ -378,6 +390,40 @@ public class RequestsPanel extends JPanel {
                 popupMenu.add(creatWorkSpace);
                 popupMenu.show(insomniaButton, insomniaButton.getBounds().x, (insomniaButton.getBounds().y
                         + insomniaButton.getBounds().height));
+            } else if (e.getSource() == searchButton) {
+
+                if (isFilterEnabled) {
+                    searchButton.setOpaque(true);
+                    searchButton.setBackground(Color.BLUE);
+                    /**
+                     * filtering requests
+                     */
+                    for (int i = 0; i < requestsButton.size(); i++) {
+                        if (!((JButton) requestsButton.get(i).getComponent(1)).getText().contains(filterField.getText())) {
+                            requestsButton.get(i).setVisible(false);
+                            filteredRequests.add(requestsButton.get(i));
+                        }
+                    }
+                    /**
+                     * filtering folders
+                     */
+                    ArrayList filteredFolders = new ArrayList(foldersPanel.values());
+                    for (int i = 0; i < filteredFolders.size(); i++) {
+                        if (!((JButton) ((JPanel) filteredFolders.get(i)).getComponent(0)).getText().contains(filterField.getText())) {
+                            ((JPanel) filteredFolders.get(i)).setVisible(false);
+                            filteredRequests.add(((JPanel) filteredFolders.get(i)));
+                        }
+                    }
+                    updateUI();
+                    isFilterEnabled = false;
+                } else {
+                    searchButton.setOpaque(false);
+                    for (int i = 0; i < filteredRequests.size(); i++) {
+                        filteredRequests.get(i).setVisible(true);
+                    }
+                    updateUI();
+                    isFilterEnabled = true;
+                }
             }
         }
     }
