@@ -139,7 +139,13 @@ public class Request {
             return false;
         }
     }
+    public void runRequest(){
 
+    }
+
+    public void printRequest(){
+        System.out.println("request");
+    }
 
 
     private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
