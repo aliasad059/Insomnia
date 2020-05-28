@@ -1,14 +1,21 @@
 package HttpClient;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Request {
     private HttpRequest request;
     private LinkedList<String> args;
-    private final boolean canBeSent ;
+    private final boolean completed;
     // java Main -url uli -M (GET,Post,... ) -H "headers" -i -h -f -O(    empty->(make a auto name) OR
     // name of file to save the response body   ) -S -d "Message body in Form Data shape" -j " Message body in Json shape"
     // -u "" ?
@@ -19,7 +26,9 @@ public class Request {
 
     public Request(String[] args) {
         this.args = new LinkedList<>(Arrays.asList(args));
-        canBeSent = interpreter();
+        completed = interpreter();
+        if (completed)
+            makeRequest();
     }
 
     /**
@@ -106,8 +115,10 @@ public class Request {
 
             //upload
             if (args.contains("-u")) {
-                //TODO: complete this one
-                System.out.println("");
+                int index = args.indexOf("-u");
+                args.remove(index);
+                upload = args.get(index);
+                args.remove(index);
             }
 
             //show response headers
@@ -139,26 +150,110 @@ public class Request {
             return false;
         }
     }
-    public void runRequest(){
 
+    private HttpRequest makeRequest() {
+        if (method.equals("GET") || method.equals("DELETE")) {
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .uri(URI.create(uri));
+            if (method.equals("GET"))
+                builder.GET();
+            else builder.DELETE();
+            if (headers != null) {
+                String[] pairs = headers.split(";");
+                for (int i = 0; i < pairs.length; i++) {
+                    String[] splitPairs = pairs[i].split(":");
+                    builder.header(splitPairs[0], splitPairs[1]);
+                }
+            }
+            request = builder.build();
+        } else if (method.equals("POST") || method.equals("PUT")) {
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .uri(URI.create(uri));
+            if (json != null) {
+                if (method.equals("POST"))
+                    builder.POST(HttpRequest.BodyPublishers.ofString(json));
+                else
+                    builder.PUT(HttpRequest.BodyPublishers.ofString(json));
+
+            } else if (data != null) {
+                String[] forms = data.split("&");
+                HashMap<Object, Object> data = new HashMap<>();
+                for (int i = 0; i < forms.length; i++) {
+                    String[] splitForms = forms[i].split("=");
+                    data.put(splitForms[0], splitForms[1]);
+                }
+                try {
+                    if (method.equals("POST"))
+                        builder.POST(ofMimeMultipartData(data, "" + (new Date()).getTime()));
+                    else
+                        builder.PUT(ofMimeMultipartData(data, "" + (new Date()).getTime()));
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (upload != null) {
+                try {
+                    if (method.equals("POST"))
+                        builder.POST(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
+                    else
+                        builder.PUT(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
+                } catch (FileNotFoundException e) {
+                    System.out.println("File Not Found");
+                }
+            } else {
+                if (method.equals("POST"))
+                    builder.POST(HttpRequest.BodyPublishers.noBody());
+                else
+                    builder.PUT(HttpRequest.BodyPublishers.noBody());
+            }
+            if (headers != null) {
+                String[] pairs = headers.split(";");
+                for (int i = 0; i < pairs.length; i++) {
+                    String[] splitPairs = pairs[i].split(":");
+                    builder.header(splitPairs[0], splitPairs[1]);
+                }
+            }
+            request = builder.build();
+        } else if (method.equals("PATCH")) {
+            System.out.println("Not currently supported");
+        } else System.out.println("Undefined method type:" + method);
+
+        return request;
     }
 
-    public void printRequest(){
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void printRequest() {
         System.out.println("request");
     }
 
-
-    private static HttpRequest.BodyPublisher buildFormDataFromMap(Map<Object, Object> data) {
-        var builder = new StringBuilder();
+    public HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data,
+                                                         String boundary) throws IOException {
+        var byteArrays = new ArrayList<byte[]>();
+        byte[] separator = ("--" + boundary + "\r\nContent-Disposition: form-data; name=")
+                .getBytes(StandardCharsets.UTF_8);
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
-            if (builder.length() > 0) {
-                builder.append("&");
+            byteArrays.add(separator);
+
+            if (entry.getValue() instanceof String) {
+                var path = (Path) entry.getValue();
+                String mimeType = Files.probeContentType(path);
+                byteArrays.add(("\"" + entry.getKey() + "\"; filename=\"" + path.getFileName()
+                        + "\"\r\nContent-Type: " + mimeType + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+                byteArrays.add(Files.readAllBytes(path));
+                byteArrays.add("\r\n".getBytes(StandardCharsets.UTF_8));
+            } else {
+                byteArrays.add(("\"" + entry.getKey() + "\"\r\n\r\n" + entry.getValue() + "\r\n")
+                        .getBytes(StandardCharsets.UTF_8));
             }
-            builder.append(URLEncoder.encode(entry.getKey().toString(), StandardCharsets.UTF_8));
-            builder.append("=");
-            builder.append(URLEncoder.encode(entry.getValue().toString(), StandardCharsets.UTF_8));
         }
-        System.out.println(builder.toString());
-        return HttpRequest.BodyPublishers.ofString(builder.toString());
+        byteArrays.add(("--" + boundary + "--").getBytes(StandardCharsets.UTF_8));
+        return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
+    }
+
+    public HttpRequest getHttpsRequest() {
+        return request;
     }
 }
