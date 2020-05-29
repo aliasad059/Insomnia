@@ -1,69 +1,159 @@
 package HttpClient;
 
+import java.io.*;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 
 public class Client {
-    private String [] args;
-    private  ArrayList<Request> requests = new ArrayList<>();
+    private String[] args;
+    private ArrayList<Request> requests = new ArrayList<>();
+    private static ArrayList<ReqList> reqLists = new ArrayList<>();
+    private static int requestCounter = 0;
 
     public Client(String[] args) {
         this.args = args;
     }
 
     public void start() {
-        loadRequests();
-        if (args[0].equals("-url") || args[0].equals("-uri")){
+        load();
+        if (args[0].equals("-url") || args[0].equals("-uri")) {
             Request request = new Request(args);
-            if (request.isCompleted()){
+            if (request.isCompleted()) {
                 requests.add(request);
-                runRequest(request.getHttpsRequest());
+                runRequest(request);
+            } else {
+                System.out.println("Incorrect pattern.");
+                System.out.println("Use -h or --help to get help");
             }
-        }
-        else if (args[0].equals("list")) {
+        } else if (args[0].equals("list")) {
             if (args.length == 1) {
-                printAllRequests();
-            } else{
-                printListRequests(args[1]);
+                printRequests();
+            } else {
+                printRequestsIn(args[1]);
             }
         } else if (args[0].equals("fire")) {
             for (int i = 1; i < args.length; i++) {
                 int requestNumber = Integer.parseInt(args[i]);
-                runRequest(requests.get(requestNumber).getHttpsRequest());
+                runRequest(requests.get(requestNumber));
             }
-        } else if (args[0].equals("-h") ||args[0].equals("--help")) {
+        } else if (args[0].equals("-h") || args[0].equals("--help")) {
             help();
-        }
-        else if (args[0].equals("creat")){
-            List list = new List();
-        }
-        else {
+        } else if (args[0].equals("creat")) {
+            File theDir = new File("./save/requests/" + args[1]);
+
+            // if the directory does not exist, create it
+            if (!theDir.exists()) {
+
+                try {
+                    theDir.mkdir();
+                } catch (SecurityException se) {
+                    System.out.println("Security Exception");
+                }
+            } else System.out.println(args[1] + " folder already exist.");
+
+        } else {
             System.out.println("Incorrect pattern.");
             System.out.println("Use -h or --help to get help");
         }
     }
-    private void runRequest(HttpRequest request){
-        if (request == null){
+
+    private void runRequest(Request request) {
+        HttpRequest httpRequest = request.getHttpsRequest();
+        if (httpRequest == null) {
             System.out.println("Incorrect pattern.");
             System.out.println("Use -h or --help to get help");
+        } else {
+            HttpClient client;
+            HttpClient.Builder builder = HttpClient.newBuilder();
+            if (request.getFollowRedirect())
+                builder.followRedirects(HttpClient.Redirect.ALWAYS);
+            builder.version(HttpClient.Version.HTTP_1_1);
+            client = builder.build();
+            try {
+
+
+                long startTime = System.nanoTime();
+                HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+                long elapsedTime = System.nanoTime() - startTime;
+                request.setLastResponse(response);
+                System.out.println("URI: " + response.uri());
+                System.out.println("Response Time: " + elapsedTime + " ns");
+                System.out.println("Content Length: " + response.headers().allValues("Content-Length"));
+                System.out.println("Version: " + response.version().toString() + "  |  Status code: " + response.statusCode());
+                System.out.println(response.body());
+                if (request.GetShowResponseHeaders()) {
+                    HttpHeaders headers = response.headers();
+                    headers.map().forEach((k, v) -> System.out.println(k + ":" + v));
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        else {
-            HttpClient.newHttpClient()
-            HttpClient client ;
+    }
 
+    private void printRequests() {
+        for (int i = 0; i < requests.size(); i++) {
+            System.out.print((i + 1) + ". ");
+            requests.get(0).printRequest();
         }
     }
-    private  void printAllRequests(){
+
+    private void printRequestsIn(String listToPrint) {
+        ReqList list = getList(listToPrint);
+        if (list != null) {
+            list.printList();
+        } else System.out.println(listToPrint + " does not exist.");
+    }
+
+
+    private void load() {
+
+
+        try (FileInputStream finRequests = new FileInputStream("./save/requests.txt");
+             ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
+        ) {
+            while (true) {
+                Request request = (Request) requestsReader.readObject();
+                requests.add(request);
+            }
+        } catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+        try (FileInputStream finLists = new FileInputStream("./save/lists.txt");
+             ObjectInputStream listsReader = new ObjectInputStream(finLists)
+        ) {
+            while (true) {
+                ReqList reqList = (ReqList) listsReader.readObject();
+                reqLists.add(reqList);
+            }
+        } catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
-    private  void printListRequests(String listToPrint){
 
-    }
-    private  void loadRequests(){
-
-    }
-    private  void help() {
+    private void help() {
         System.out.print("\n\n\n\nhelp:\n\n\n\n");
+    }
+
+    public static int requestsNumber() {
+        return ++requestCounter;
+    }
+
+    public static ReqList getList(String listName) {
+        for (int i = 0; i < reqLists.size(); i++) {
+            if (reqLists.get(i).getListName().equals(listName)) {
+                return reqLists.get(i);
+            }
+        }
+        return null;
     }
 }

@@ -1,35 +1,52 @@
 package HttpClient;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class Request {
+public class Request implements Serializable {
     private HttpRequest request;
+    private String[] firstArgs;
     private LinkedList<String> args;
     private final boolean completed;
+    private HttpResponse<String> lastResponse;
+    private final String reqName;
+    private String folderName = "Does not belong to any folder";
     // java Main -url uli -M (GET,Post,... ) -H "headers" -i -h -f -O(    empty->(make a auto name) OR
     // name of file to save the response body   ) -S -d "Message body in Form Data shape" -j " Message body in Json shape"
-    // -u "" ?
+    // -u "path"
     // java Main list  (empty (all saved request) OR listName(all listName's saved requests)) : just show the requests and will not wait for an input
     // java Main fire "requests (1 2 ...) OR (listName 1 2 )"
     private String uri, method, headers, output, data, json, upload, creatList, fire, saveToList;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
     public Request(String[] args) {
+        this.firstArgs = args;
         this.args = new LinkedList<>(Arrays.asList(args));
         completed = interpreter();
         if (completed)
             makeRequest();
+        else {
+            System.out.println("Incorrect pattern.");
+            System.out.println("Use -h or --help to get help");
+        }
+        reqName = "" + Client.requestsNumber();
     }
+
+    public boolean getFollowRedirect() {
+        return followRedirect;
+    }
+
+    public boolean GetShowResponseHeaders() {
+        return showResponseHeaders;
+    }
+
 
     /**
      * interpret args array
@@ -136,10 +153,23 @@ public class Request {
             }
 
             //save
-            if (args.contains("-s")) {
-                int index = args.indexOf("-s");
+            if (args.contains("-S")) {
+                int index = args.indexOf("-S");
                 args.remove(index);
                 saveRequest = true;
+                if (!args.get(index).contains("-")) {
+                    ReqList reqList = Client.getList(args.get(index));
+                    if (reqList == null){
+                        System.out.println(args.get(index)+" folder does not exist.");
+                        return false;
+                    }
+                    else {
+                        reqList.addReq(this);
+                        reqList.saveList();
+                        folderName= reqList.getListName();
+                    }
+                }
+                else saveRequest();
             }
 
         }
@@ -154,6 +184,7 @@ public class Request {
     private HttpRequest makeRequest() {
         if (method.equals("GET") || method.equals("DELETE")) {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .setHeader("User-Agent", "Insomnia")
                     .uri(URI.create(uri));
             if (method.equals("GET"))
                 builder.GET();
@@ -166,14 +197,18 @@ public class Request {
                 }
             }
             request = builder.build();
-        } else if (method.equals("POST") || method.equals("PUT")) {
+        } else if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .setHeader("User-Agent", "Insomnia")
                     .uri(URI.create(uri));
             if (json != null) {
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.ofString(json));
-                else
+                else if (method.equals("PUT"))
                     builder.PUT(HttpRequest.BodyPublishers.ofString(json));
+                else
+                    builder.method("PATCH", HttpRequest.BodyPublishers.ofString(json));
+
 
             } else if (data != null) {
                 String[] forms = data.split("&");
@@ -185,6 +220,8 @@ public class Request {
                 try {
                     if (method.equals("POST"))
                         builder.POST(ofMimeMultipartData(data, "" + (new Date()).getTime()));
+                    else if (method.equals("PATCH"))
+                        builder.method("PATCH", ofMimeMultipartData(data, "" + (new Date()).getTime()));
                     else
                         builder.PUT(ofMimeMultipartData(data, "" + (new Date()).getTime()));
 
@@ -195,6 +232,8 @@ public class Request {
                 try {
                     if (method.equals("POST"))
                         builder.POST(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
+                    else if (method.equals("PATCH"))
+                        builder.method("PATCH", HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
                     else
                         builder.PUT(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
                 } catch (FileNotFoundException e) {
@@ -203,6 +242,8 @@ public class Request {
             } else {
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.noBody());
+                else if (method.equals("PATCH"))
+                    builder.method("PATCH", HttpRequest.BodyPublishers.noBody());
                 else
                     builder.PUT(HttpRequest.BodyPublishers.noBody());
             }
@@ -214,8 +255,6 @@ public class Request {
                 }
             }
             request = builder.build();
-        } else if (method.equals("PATCH")) {
-            System.out.println("Not currently supported");
         } else System.out.println("Undefined method type:" + method);
 
         return request;
@@ -226,7 +265,7 @@ public class Request {
     }
 
     public void printRequest() {
-        System.out.println("request");
+        System.out.println("URL: " + uri + " | Method: " + method + " | Headers: " + headers);
     }
 
     public HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data,
@@ -256,4 +295,19 @@ public class Request {
     public HttpRequest getHttpsRequest() {
         return request;
     }
+
+    public void setLastResponse(HttpResponse<String> lastResponse) {
+        this.lastResponse = lastResponse;
+    }
+
+    private void saveRequest() {
+        try (FileOutputStream fout = new FileOutputStream("./save/requests.txt",true);
+             ObjectOutputStream objWriter = new ObjectOutputStream(fout)) {
+            objWriter.writeObject(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
