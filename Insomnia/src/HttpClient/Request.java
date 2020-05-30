@@ -152,25 +152,46 @@ public class Request implements Serializable {
                 followRedirect = true;
             }
 
-            //save
+//            //save
             if (args.contains("-S")) {
                 int index = args.indexOf("-S");
                 args.remove(index);
                 saveRequest = true;
-                if (!args.get(index).contains("-")) {
+                if (args.size()>index && !args.get(index).contains("-")) {
                     ReqList reqList = Client.getList(args.get(index));
-                    if (reqList == null){
-                        System.out.println(args.get(index)+" folder does not exist.");
+                    if (reqList == null) {
+                        System.out.println(args.get(index) + " folder does not exist.");
                         return false;
-                    }
-                    else {
+                    } else {
                         reqList.addReq(this);
-                        reqList.saveList();
-                        folderName= reqList.getListName();
+                        folderName = reqList.getListName();
                     }
+                } else {
+                    saveRequest();
                 }
-                else saveRequest();
             }
+
+//            if (args.contains("-S")) {
+//                int index = args.indexOf("-S");
+//                args.remove(index);
+//                saveRequest = true;
+//                try {
+//                    if (!args.get(index).contains("-")) {
+//                        ReqList reqList = Client.getList(args.get(index));
+//                        if (reqList == null) {
+//                            System.out.println(args.get(index) + " folder does not exist.");
+//                            return false;
+//                        } else {
+//                            reqList.addReq(this);
+//                            reqList.saveList();
+//                            folderName = reqList.getListName();
+//                        }
+//                    }
+//                }
+//                catch (IndexOutOfBoundsException e){
+//                    saveRequest();
+//                }
+//            }
 
         }
 
@@ -181,7 +202,7 @@ public class Request implements Serializable {
         }
     }
 
-    private HttpRequest makeRequest() {
+    public HttpRequest makeRequest() {
         if (method.equals("GET") || method.equals("DELETE")) {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .setHeader("User-Agent", "Insomnia")
@@ -301,9 +322,31 @@ public class Request implements Serializable {
     }
 
     private void saveRequest() {
-        try (FileOutputStream fout = new FileOutputStream("./save/requests.txt",true);
+        ArrayList<Request>requests = new ArrayList<>();
+        File file = new File("./../save/requests.txt");
+        try (FileInputStream finRequests = new FileInputStream(file);
+             ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
+        ) {
+            while (true) {
+                Request request = (Request) requestsReader.readObject();
+                requests.add(request);
+            }
+        } catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        file.delete();
+
+
+        try (
+             FileOutputStream fout = new FileOutputStream("./../save/requests.txt", true);
              ObjectOutputStream objWriter = new ObjectOutputStream(fout)) {
+            for (int i = 0; i < requests.size(); i++) {
+                objWriter.writeObject(requests.get(i));
+            }
             objWriter.writeObject(this);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

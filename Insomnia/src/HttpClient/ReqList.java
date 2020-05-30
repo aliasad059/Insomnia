@@ -16,19 +16,19 @@ public class ReqList implements Serializable {
         saveList();
     }
     public void saveList(){
-        try (FileOutputStream fout=new FileOutputStream("./save/lists.txt",true);
+        try (FileOutputStream fout=new FileOutputStream("./../save/lists/"+listName+".txt");
              ObjectOutputStream objWriter=new ObjectOutputStream(fout)){
             objWriter.writeObject(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
     public String getListName(){
         return listName;
     }
     public void addReq(Request requestToAdd){
         requests.add(requestToAdd);
+        saveList();
     }
     public void printList(){
         for (int i = 0; i < requests.size(); i++) {

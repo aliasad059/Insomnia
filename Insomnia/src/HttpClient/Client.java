@@ -18,7 +18,6 @@ public class Client {
     }
 
     public void start() {
-        load();
         if (args[0].equals("-url") || args[0].equals("-uri")) {
             Request request = new Request(args);
             if (request.isCompleted()) {
@@ -29,31 +28,26 @@ public class Client {
                 System.out.println("Use -h or --help to get help");
             }
         } else if (args[0].equals("list")) {
+            load();
+
             if (args.length == 1) {
                 printRequests();
             } else {
                 printRequestsIn(args[1]);
             }
         } else if (args[0].equals("fire")) {
+            load();
+
             for (int i = 1; i < args.length; i++) {
                 int requestNumber = Integer.parseInt(args[i]);
-                runRequest(requests.get(requestNumber));
+                System.out.println(requestNumber);
+                runRequest(requests.get(requestNumber-1));
             }
         } else if (args[0].equals("-h") || args[0].equals("--help")) {
             help();
         } else if (args[0].equals("creat")) {
-            File theDir = new File("./save/requests/" + args[1]);
-
-            // if the directory does not exist, create it
-            if (!theDir.exists()) {
-
-                try {
-                    theDir.mkdir();
-                } catch (SecurityException se) {
-                    System.out.println("Security Exception");
-                }
-            } else System.out.println(args[1] + " folder already exist.");
-
+            ReqList reqList = new ReqList(args[1]);
+            reqLists.add(reqList);
         } else {
             System.out.println("Incorrect pattern.");
             System.out.println("Use -h or --help to get help");
@@ -61,7 +55,7 @@ public class Client {
     }
 
     private void runRequest(Request request) {
-        HttpRequest httpRequest = request.getHttpsRequest();
+        HttpRequest httpRequest = request.makeRequest();
         if (httpRequest == null) {
             System.out.println("Incorrect pattern.");
             System.out.println("Use -h or --help to get help");
@@ -111,8 +105,7 @@ public class Client {
 
     private void load() {
 
-
-        try (FileInputStream finRequests = new FileInputStream("./save/requests.txt");
+        try (FileInputStream finRequests = new FileInputStream("./../save/requests.txt");
              ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
         ) {
             while (true) {
@@ -120,22 +113,26 @@ public class Client {
                 requests.add(request);
             }
         } catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
+        File [] lists = new File("./../save/lists").listFiles();
+        for (int i = 0; i < lists.length; i++) {
 
-        try (FileInputStream finLists = new FileInputStream("./save/lists.txt");
-             ObjectInputStream listsReader = new ObjectInputStream(finLists)
-        ) {
-            while (true) {
-                ReqList reqList = (ReqList) listsReader.readObject();
-                reqLists.add(reqList);
+            try (FileInputStream finLists = new FileInputStream(lists[i]);
+                 ObjectInputStream listsReader = new ObjectInputStream(finLists)
+            ) {
+                while (true) {
+                    ReqList reqList = (ReqList) listsReader.readObject();
+                    reqLists.add(reqList);
+                }
+            } catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException | EOFException | ClassNotFoundException e) {
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
     }
@@ -154,6 +151,7 @@ public class Client {
                 return reqLists.get(i);
             }
         }
+        System.out.println("not found");
         return null;
     }
 }
