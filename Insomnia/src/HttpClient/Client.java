@@ -36,11 +36,39 @@ public class Client {
                 printRequestsIn(args[1]);
             }
         } else if (args[0].equals("fire")) {
+            try {
+                int requestNumber = Integer.parseInt(args[1]);
+                
+                try {
+                    for (int i = 1; i < args.length; i++) {
+                        requestNumber = Integer.parseInt(args[i]);
+                        runRequest(requests.get(requestNumber - 1));
+                    }
+                }
+                catch (NumberFormatException e){
+                    System.out.println("Incorrect pattern.");
+                    System.out.println("Use -h or --help to get help");
+                }
 
-            for (int i = 1; i < args.length; i++) {
-                int requestNumber = Integer.parseInt(args[i]);
-                System.out.println(requestNumber);
-                runRequest(requests.get(requestNumber-1));
+            }
+            catch (NumberFormatException e){
+                try {
+                    ReqList reqList = getList(args[1]);
+                    if (reqList != null) {
+                        for (int i = 2; i < args.length; i++) {
+                            int requestNumber = Integer.parseInt(args[i]);
+                            runRequest(reqList.getRequest(requestNumber-1));
+                        }
+                    }
+                    else {
+                        System.out.println(args[1]+" folder not found.");
+                    }
+                }
+                catch (NumberFormatException e1){
+                    System.out.println("Incorrect pattern.");
+                    System.out.println("Use -h or --help to get help");
+                    return;
+                }
             }
         } else if (args[0].equals("-h") || args[0].equals("--help")) {
             help();

@@ -36,4 +36,8 @@ public class ReqList implements Serializable {
             requests.get(i).printRequest();
         }
     }
+
+    public Request getRequest(int index) {
+        return requests.get(index);
+    }
 }
