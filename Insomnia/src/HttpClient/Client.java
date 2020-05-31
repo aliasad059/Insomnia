@@ -11,15 +11,17 @@ public class Client {
     private String[] args;
     private ArrayList<Request> requests = new ArrayList<>();
     private static ArrayList<ReqList> reqLists = new ArrayList<>();
-    private static int requestCounter = 0;
 
     public Client(String[] args) {
         this.args = args;
     }
 
+    /**
+     * start the client
+     */
     public void start() {
         load();
-        if (args[0].equals("-url") || args[0].equals("-uri")) {
+        if (args[0].equals("url") || args[0].equals("uri")) {
             Request request = new Request(args);
             if (request.isCompleted()) {
                 requests.add(request);
@@ -81,6 +83,10 @@ public class Client {
         }
     }
 
+    /**
+     * run request
+     * @param request request to run
+     */
     private void runRequest(Request request) {
         HttpRequest httpRequest = request.makeRequest();
         if (httpRequest == null) {
@@ -96,12 +102,24 @@ public class Client {
             try {
 
 
-                long startTime = System.nanoTime();
+                double startTime = System.nanoTime();
                 HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-                long elapsedTime = System.nanoTime() - startTime;
+                double elapsedTime = System.nanoTime() - startTime;
                 request.setLastResponse(response);
+
+                String timeSize = "nS";
+                if (elapsedTime > 1000000000){
+                    timeSize= " S";
+                    elapsedTime/=1000000000;
+                }else if(elapsedTime>1000000){
+                    timeSize= " mS";
+                    elapsedTime/=1000000;
+                }else if(elapsedTime>1000){
+                    timeSize= " μS";
+                    elapsedTime/=1000;
+                }
                 System.out.println("URI: " + response.uri());
-                System.out.println("Response Time: " + elapsedTime + " ns");
+                System.out.println("Response Time: " + elapsedTime + timeSize);
                 System.out.println("Content Length: " + response.headers().allValues("Content-Length"));
                 System.out.println("Version: " + response.version().toString() + "  |  Status code: " + response.statusCode());
                 System.out.println(response.body());
@@ -115,6 +133,9 @@ public class Client {
         }
     }
 
+    /**
+     * print all requests
+     */
     private void printRequests() {
         for (int i = 0; i < requests.size(); i++) {
             System.out.print((i + 1) + ". ");
@@ -122,6 +143,10 @@ public class Client {
         }
     }
 
+    /**
+     * print request in the list
+     * @param listToPrint list to print its requests
+     */
     private void printRequestsIn(String listToPrint) {
         ReqList list = getList(listToPrint);
         if (list != null) {
@@ -129,10 +154,12 @@ public class Client {
         } else System.out.println(listToPrint + " does not exist.");
     }
 
-
+    /**
+     * load saved info
+     */
     private void load() {
 
-        try (FileInputStream finRequests = new FileInputStream("./../save/requests.txt");
+        try (FileInputStream finRequests = new FileInputStream("./../save/requests.insomnia");
              ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
         ) {
             while (true) {
@@ -164,14 +191,31 @@ public class Client {
 
     }
 
+    /**
+     * print help when using -h or --help commands
+     */
     private void help() {
-        System.out.print("\n\n\n\nhelp:\n\n\n\n");
+        System.out.println("url/uri\t[Input url]\tSetting url to send request");
+        System.out.println("url/uri options:");
+        System.out.println("-M\t[METHOD]\tMethod to send request");
+        System.out.println("-H\t[\"headers\"]\t Sending headers");
+        System.out.println("-i\tShow response headers");
+        System.out.println("-f\tFollow redirect");
+        System.out.println("-O\t[Output name *optional]\tSave response body to a text file");
+        System.out.println("-S\t[list name OR empty(just save it)]\tSave the request in a file");
+        System.out.println("-d\t[Message body]\tSend body in multiForm Data shape");
+        System.out.println("-j\t[Message body]\tSend body in json shape");
+        System.out.println("-u\t[File path]\tSend body in binary shape");
+        System.out.println("list\t[empty (all saved request) OR listName(all listName's saved requests)]\tprint requests info");
+        System.out.println("creat\t[New list name]\tCreat new list");
+        System.out.println("fire\t[requests (1 2 ...) OR (listName 1 2 )]\tRun saved requests");
     }
 
-    public static int requestsNumber() {
-        return ++requestCounter;
-    }
-
+    /**
+     * get list as its name
+     * @param listName list name
+     * @return list if found and null if not
+     */
     public static ReqList getList(String listName) {
 
         for (int i = 0; i < reqLists.size(); i++) {

@@ -10,19 +10,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * request
+ */
 public class Request implements Serializable {
     private HttpRequest request;
     private String[] firstArgs;
     private LinkedList<String> args;
     private final boolean completed;
     private HttpResponse<String> lastResponse;
-    private final String reqName;
     private String folderName = "Does not belong to any folder";
-    // java Main -url uli -M (GET,Post,... ) -H "headers" -i -h -f -O(    empty->(make a auto name) OR
-    // name of file to save the response body   ) -S -d "Message body in Form Data shape" -j " Message body in Json shape"
-    // -u "path"
-    // java Main list  (empty (all saved request) OR listName(all listName's saved requests)) : just show the requests and will not wait for an input
-    // java Main fire "requests (1 2 ...) OR (listName 1 2 )"
     private String uri, method, headers, output, data, json, upload, creatList, fire, saveToList;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
@@ -36,26 +33,38 @@ public class Request implements Serializable {
             System.out.println("Incorrect pattern.");
             System.out.println("Use -h or --help to get help");
         }
-        reqName = "" + Client.requestsNumber();
     }
 
+    /**
+     * get follow redirect
+     * @return follow redirect value
+     */
     public boolean getFollowRedirect() {
         return followRedirect;
     }
 
+    /**
+     * get show response headers
+     * @return show response headers value
+     */
     public boolean GetShowResponseHeaders() {
         return showResponseHeaders;
     }
 
 
     /**
-     * interpret args array
+     * interpret args array as follows
+     * java Main url uli -M (GET,Post,... ) -H "headers" -i -h -f -O(    empty->(make a auto name) OR
+     * name of file to save the response body   ) -S -d "Message body in multiForm Data shape" -j " Message body in Json shape"
+     * -u "path"
+     * java Main list  (empty (all saved request) OR listName(all listName's saved requests)) : just show the requests and will not wait for an input
+     * java Main fire "requests (1 2 ...) OR (listName 1 2 )"
      *
      * @return return true if the entered pattern is ok and vice versa
      */
     private boolean interpreter() {
 
-        if (args.get(0).equals("-url") || args.get(0).equals("-uri")) {
+        if (args.get(0).equals("url") || args.get(0).equals("uri")) {
             args.remove(0);
 
             //uri
@@ -81,7 +90,7 @@ public class Request implements Serializable {
                 method = "GET";
             }
 
-            //output name
+            //output
             if (args.contains("-O")) {
                 int index = args.indexOf("-O");
                 args.remove(index);
@@ -89,12 +98,11 @@ public class Request implements Serializable {
                     output = "output_" + (new java.sql.Date(System.currentTimeMillis())).toString();
                 } else {
                     output = args.get(index);
-                    args.remove(index);
                 }
-
+                args.remove(index);
             }
 
-            //form date
+            //form data
             if (args.contains("-d")) {
                 int index = args.indexOf("-d");
                 args.remove(index);
@@ -171,31 +179,7 @@ public class Request implements Serializable {
                     saveRequest();
                 }
             }
-
-//            if (args.contains("-S")) {
-//                int index = args.indexOf("-S");
-//                args.remove(index);
-//                saveRequest = true;
-//                try {
-//                    if (!args.get(index).contains("-")) {
-//                        ReqList reqList = Client.getList(args.get(index));
-//                        if (reqList == null) {
-//                            System.out.println(args.get(index) + " folder does not exist.");
-//                            return false;
-//                        } else {
-//                            reqList.addReq(this);
-//                            reqList.saveList();
-//                            folderName = reqList.getListName();
-//                        }
-//                    }
-//                }
-//                catch (IndexOutOfBoundsException e){
-//                    saveRequest();
-//                }
-//            }
-
         }
-
         if (args.size() == 0) {
             return true;
         } else {
@@ -203,7 +187,12 @@ public class Request implements Serializable {
         }
     }
 
+    /**
+     * makes an HTTP REQUEST as entered interpreted args
+     * @return https request
+     */
     public HttpRequest makeRequest() {
+        //get and delete methods are made in a same form
         if (method.equals("GET") || method.equals("DELETE")) {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .setHeader("User-Agent", "Insomnia")
@@ -219,11 +208,14 @@ public class Request implements Serializable {
                 }
             }
             request = builder.build();
-        } else if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
+        }
+        //post put and patch method are made in a same form
+        else if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .setHeader("User-Agent", "Insomnia")
                     .uri(URI.create(uri));
             if (json != null) {
+                builder.setHeader("content-type","JSON");
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.ofString(json));
                 else if (method.equals("PUT"))
@@ -240,6 +232,7 @@ public class Request implements Serializable {
                     data.put(splitForms[0], splitForms[1]);
                 }
                 try {
+                    builder.setHeader("content-type","FORM DATA");
                     if (method.equals("POST"))
                         builder.POST(ofMimeMultipartData(data, "" + (new Date()).getTime()));
                     else if (method.equals("PATCH"))
@@ -252,6 +245,7 @@ public class Request implements Serializable {
                 }
             } else if (upload != null) {
                 try {
+                    builder.setHeader("content-type","BINARY");
                     if (method.equals("POST"))
                         builder.POST(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
                     else if (method.equals("PATCH"))
@@ -262,6 +256,7 @@ public class Request implements Serializable {
                     System.out.println("File Not Found");
                 }
             } else {
+                builder.setHeader("content-type","NO BODY");
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.noBody());
                 else if (method.equals("PATCH"))
@@ -282,14 +277,39 @@ public class Request implements Serializable {
         return request;
     }
 
+    /**
+     * return if the request has enough info to be send in other word if it is completed
+     * @return true if the request is completed and vice versa
+     */
     public boolean isCompleted() {
         return completed;
     }
 
+    /**
+     * print the request as its info
+     */
     public void printRequest() {
         System.out.println("URL: " + uri + " | Method: " + method + " | Headers: " + headers);
+        System.out.println("Request folder name: "+folderName);
+        if (json!=null){
+            System.out.println("Json: "+json);;
+        }else if (data != null){
+            System.out.println("Multi FormData: "+data);;
+        }else if (upload != null){
+            System.out.println("Binary Path: "+upload);;
+        }
     }
 
+    /**
+     * makes a HttpRequest.BodyPublisher
+     *
+     * THIS METHOD IS COPIED FROM https://golb.hplar.ch/2019/01/java-11-http-client.html LINK
+     *
+     * @param data spilt data
+     * @param boundary boundary
+     * @return HttpRequest.BodyPublisher
+     * @throws IOException
+     */
     public HttpRequest.BodyPublisher ofMimeMultipartData(Map<Object, Object> data,
                                                          String boundary) throws IOException {
         var byteArrays = new ArrayList<byte[]>();
@@ -298,7 +318,7 @@ public class Request implements Serializable {
         for (Map.Entry<Object, Object> entry : data.entrySet()) {
             byteArrays.add(separator);
 
-            if (entry.getValue() instanceof String) {
+            if (entry.getValue() instanceof Path) {
                 var path = (Path) entry.getValue();
                 String mimeType = Files.probeContentType(path);
                 byteArrays.add(("\"" + entry.getKey() + "\"; filename=\"" + path.getFileName()
@@ -314,17 +334,23 @@ public class Request implements Serializable {
         return HttpRequest.BodyPublishers.ofByteArrays(byteArrays);
     }
 
-    public HttpRequest getHttpsRequest() {
-        return request;
-    }
-
+    /**
+     * set last response
+     * @param lastResponse last response
+     */
     public void setLastResponse(HttpResponse<String> lastResponse) {
         this.lastResponse = lastResponse;
+        if (output!=null){
+            saveOutput(output);
+        }
     }
 
+    /**
+     * save request
+     */
     private void saveRequest() {
         ArrayList<Request>requests = new ArrayList<>();
-        File file = new File("./../save/requests.txt");
+        File file = new File("./../save/requests.insomnia");
         try (FileInputStream finRequests = new FileInputStream(file);
              ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
         ) {
@@ -341,7 +367,7 @@ public class Request implements Serializable {
 
 
         try (
-             FileOutputStream fout = new FileOutputStream("./../save/requests.txt", true);
+             FileOutputStream fout = new FileOutputStream("./../save/requests.insomnia", true);
              ObjectOutputStream objWriter = new ObjectOutputStream(fout)) {
             for (int i = 0; i < requests.size(); i++) {
                 objWriter.writeObject(requests.get(i));
@@ -352,6 +378,21 @@ public class Request implements Serializable {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * save output
+     * @param outputName
+     */
+    private void saveOutput(String outputName){
+        try {
+            File file = new File("./../save/outputs/"+outputName+".txt");
+            FileOutputStream fis = new FileOutputStream(file);
+            PrintWriter printWriter = new PrintWriter(fis);
+            printWriter.write(lastResponse.body());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 }
