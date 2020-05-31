@@ -18,6 +18,7 @@ public class Client {
     }
 
     public void start() {
+        load();
         if (args[0].equals("-url") || args[0].equals("-uri")) {
             Request request = new Request(args);
             if (request.isCompleted()) {
@@ -28,7 +29,6 @@ public class Client {
                 System.out.println("Use -h or --help to get help");
             }
         } else if (args[0].equals("list")) {
-            load();
 
             if (args.length == 1) {
                 printRequests();
@@ -36,7 +36,6 @@ public class Client {
                 printRequestsIn(args[1]);
             }
         } else if (args[0].equals("fire")) {
-            load();
 
             for (int i = 1; i < args.length; i++) {
                 int requestNumber = Integer.parseInt(args[i]);
@@ -146,12 +145,12 @@ public class Client {
     }
 
     public static ReqList getList(String listName) {
+
         for (int i = 0; i < reqLists.size(); i++) {
-            if (reqLists.get(i).getListName().equals(listName)) {
+            if (reqLists.get(i).getListName().toLowerCase().equals(listName.toLowerCase())) {
                 return reqLists.get(i);
             }
         }
-        System.out.println("not found");
         return null;
     }
 }

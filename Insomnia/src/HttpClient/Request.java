@@ -157,7 +157,7 @@ public class Request implements Serializable {
                 int index = args.indexOf("-S");
                 args.remove(index);
                 saveRequest = true;
-                if (args.size()>index && !args.get(index).contains("-")) {
+                if (args.size()>index && args.get(index).charAt(0) != '-') {
                     ReqList reqList = Client.getList(args.get(index));
                     if (reqList == null) {
                         System.out.println(args.get(index) + " folder does not exist.");
@@ -165,6 +165,7 @@ public class Request implements Serializable {
                     } else {
                         reqList.addReq(this);
                         folderName = reqList.getListName();
+                        args.remove(index);
                     }
                 } else {
                     saveRequest();
