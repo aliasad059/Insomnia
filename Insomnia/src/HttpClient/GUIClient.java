@@ -13,6 +13,6 @@ public class GUIClient{
     public static void addRequestTo(){
     }
     public static void runRequest(Request requestToRun){
-
+        //TODO: run the request in background and then set the response panel when it is done
     }
 }

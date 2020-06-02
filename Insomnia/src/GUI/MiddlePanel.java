@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 import HttpClient.GUIClient;
 import HttpClient.Request;
@@ -18,7 +20,7 @@ import static GUI.InsomniaFrame.FRAME_WIDTH;
 /**
  * the middle panel in insomnia
  */
-public class MiddlePanel extends JPanel{
+public class MiddlePanel extends JPanel {
     JPanel northMiddlePanel;
     JTabbedPane tabs;
     JPanel bodyPanel;
@@ -28,12 +30,15 @@ public class MiddlePanel extends JPanel{
     JPanel headerPanel;
     JComboBox bodyTabStatus, requestMethodType;
     JPanel binaryPanel;
-    JButton fileChooserButton,sendRequest;
-    JTextField filePath;
+    JButton fileChooserButton, sendRequest;
+    JTextField url, filePath;
     JPanel JSONPanel;
     JPanel noBodyPanel;
+    JsonViewerPanel jsonViewerPanel;
     JTextField urlPreviewField;
     Request owner;
+    ArrayList<Form> formData, queries, headers;
+
 
     /**
      * this panel is divided by border layout into north and center
@@ -48,11 +53,11 @@ public class MiddlePanel extends JPanel{
         requestMethodType = new JComboBox(methodsName);
         requestMethodType.addActionListener(new handler());
         northMiddlePanel.add(requestMethodType);
-        northMiddlePanel.add(new JTextField());
+        northMiddlePanel.add(url = new JTextField());
+        url.addFocusListener(new handler());
         northMiddlePanel.add(sendRequest = new JButton("Send" + '\u21E8'));
         sendRequest.addActionListener(new handler());
         add(northMiddlePanel, BorderLayout.NORTH);
-
         tabs = new JTabbedPane();
         bodyPanel = new JPanel();
         bodyPanel.setLayout(new BorderLayout());
@@ -80,8 +85,9 @@ public class MiddlePanel extends JPanel{
     private void makeQueryPanel() {
         ////////////////////making query panel
         JLabel urlPreviewLabel = new JLabel("URL Preview");
-        JTextField urlPreviewField = new JTextField();
+        urlPreviewField = new JTextField();
         urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
+        urlPreviewField.setEnabled(false);
         JButton copyURLButton = new JButton("Copy URL");
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
@@ -140,7 +146,8 @@ public class MiddlePanel extends JPanel{
 
         fileChooserButton.addActionListener(new handler());
 
-        JsonViewerPanel jsonViewerPanel = new JsonViewerPanel();
+        jsonViewerPanel = new JsonViewerPanel();
+
         JSONPanel = new JPanel(new BorderLayout());
         JScrollPane sp = new JScrollPane(jsonViewerPanel);
         JSONPanel.add(sp, BorderLayout.CENTER);
@@ -166,7 +173,7 @@ public class MiddlePanel extends JPanel{
     /**
      * handling main events of middle panel
      */
-    private class handler implements ActionListener {
+    private class handler implements ActionListener, FocusListener {
         /**
          * choosing the format of the body panel as selected in combobox
          *
@@ -174,7 +181,7 @@ public class MiddlePanel extends JPanel{
          */
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == sendRequest){
+            if (e.getSource() == sendRequest) {
                 initializeRequest();
                 GUIClient.runRequest(owner);
             }
@@ -226,8 +233,86 @@ public class MiddlePanel extends JPanel{
                 }
             }
         }
+
+        /**
+         * Invoked when a component gains the keyboard focus.
+         *
+         * @param e the event to be processed
+         */
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() == url) {
+                urlPreviewField.setText(url.getText());
+            }
+        }
+
+        /**
+         * Invoked when a component loses the keyboard focus.
+         *
+         * @param e the event to be processed
+         */
+        @Override
+        public void focusLost(FocusEvent e) {
+
+        }
     }
-    private void initializeRequest(){
+
+    private void initializeRequest() {
+        owner.setMethod((String) requestMethodType.getSelectedItem());
+
+        owner.setUri(urlPreviewField.getText());
+        if (!urlPreviewField.getText().equals("")){
+            owner.setCompleted(true);
+        }
+        //no body
+        if (bodyTabStatus.getSelectedIndex() == 1) {
+            owner.setUpload(null);
+            owner.setData(null);
+            owner.setJson(null);
+        }
+        //form data
+        else if (bodyTabStatus.getSelectedIndex() == 2) {
+            String formDataString = "";
+            for (int i = 0; i < formData.size(); i++) {
+                if (formData.get(i).IsActive()) {
+                    formDataString += formData.get(i).getNameField().getText();
+                    formDataString += '=';
+                    formDataString += formData.get(i).getValueField().getText();
+                    formDataString += '&';
+                }
+            }
+            //removing the last & of the string
+            formDataString = formDataString.substring(0, formDataString.length() - 1);
+            owner.setData(formDataString);
+            owner.setJson(null);
+            owner.setUpload(null);
+        }
+        //json
+        else if (bodyTabStatus.getSelectedIndex() != 3) {
+            owner.setJson(jsonViewerPanel.getText());
+            owner.setData(null);
+            owner.setUpload(null);
+        }
+        //binary file
+        else {
+            owner.setUpload(filePath.getText());
+            owner.setData(null);
+            owner.setJson(null);
+        }
+        owner.setSaveRequest(true);
+        String headerString = "";
+        for (int i = 0; i < headers.size(); i++) {
+            if (headers.get(i).IsActive()) {
+                headerString += headers.get(i).getNameField().getText();
+                headerString += ":";
+                headerString +=headers.get(i).getValueField().getText();
+                headerString +=";";
+            }
+        }
+        if (!headerString.equals("")){
+            headerString = headerString.substring(0,headerString.length()-1);
+        }
+        owner.setHeaders(headerString);
     }
 
     /**
@@ -235,11 +320,11 @@ public class MiddlePanel extends JPanel{
      * a form has name ,value ,status and remove items
      */
     class Form extends JPanel {
-        JPanel owner;
-        JTextField nameField, valueField;
-        JCheckBox isActive;
-        JButton removeForm;
-        Form form;
+        private JPanel owner;
+        private JTextField nameField, valueField;
+        private JCheckBox isActive;
+        private JButton removeForm;
+        private Form form;
 
         public Form(JPanel owner) {
             this.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -265,8 +350,26 @@ public class MiddlePanel extends JPanel{
             removeForm.addActionListener(new handler());
             nameField.addFocusListener(new handler());
             valueField.addFocusListener(new handler());
-
+            if (owner == queryPanel) {
+                queries.add(this);
+            } else if (owner == headerPanel) {
+                headers.add(this);
+            } else if (owner == bodyFormPanel) {
+                formData.add(this);
+            }
             form = this;
+        }
+
+        public boolean IsActive() {
+            return isActive.isSelected();
+        }
+
+        public JTextField getNameField() {
+            return nameField;
+        }
+
+        public JTextField getValueField() {
+            return valueField;
         }
 
         /**
@@ -304,13 +407,48 @@ public class MiddlePanel extends JPanel{
                 if (e.getSource() == isActive) {
                     if (isActive.isSelected()) {
                         form.setBorder(BorderFactory.createRaisedBevelBorder());
+                        if (owner == queryPanel) {
+                            String urlPreview = url.getText();
+                            urlPreview += '?';
+                            for (int i = 0; i < queries.size(); i++) {
+                                if (queries.get(i).IsActive()) {
+                                    urlPreview += Form.this.getNameField().getText();
+                                    urlPreview += '=';
+                                    urlPreview += Form.this.getValueField().getText();
+                                    urlPreview += '&';
+                                }
+                            }
+                            urlPreview = urlPreview.substring(0, urlPreview.length() - 1);
+                            urlPreviewField.setText(urlPreview);
+                        }
                     } else {
                         form.setBorder(BorderFactory.createLoweredBevelBorder());
+                        if (owner == queryPanel) {
+                            String urlPreview = url.getText();
+                            urlPreview += '?';
+                            for (int i = 0; i < queries.size(); i++) {
+                                if (queries.get(i).IsActive() && queries.get(i) != Form.this) {
+                                    urlPreview += Form.this.getNameField().getText();
+                                    urlPreview += '=';
+                                    urlPreview += Form.this.getValueField().getText();
+                                    urlPreview += '&';
+                                }
+                            }
+                            urlPreview = urlPreview.substring(0, urlPreview.length() - 1);
+                            urlPreviewField.setText(urlPreview);
+                        }
                     }
                 } else if (e.getSource() == removeForm) {
-                    int a = JOptionPane.showConfirmDialog(form, "Are you sure?");
+                    int a = JOptionPane.showConfirmDialog(form, "Are You Sure?");
                     if (a == JOptionPane.YES_OPTION) {
                         owner.remove(form);
+                        if (owner == queryPanel) {
+                            queries.remove(form);
+                        } else if (owner == headerPanel) {
+                            headers.remove(form);
+                        } else if (owner == bodyFormPanel) {
+                            formData.remove(form);
+                        }
                     }
                 }
             }
