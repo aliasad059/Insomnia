@@ -1,4 +1,5 @@
 import GUI.Display;
+import HttpClient.GUIClient;
 
 /**
  * just to test the GUI
@@ -6,5 +7,6 @@ import GUI.Display;
 public class RunGUIClient{
     public static void main(String[] args) {
         Display display = new Display();
+        GUIClient client = new GUIClient();
     }
 }

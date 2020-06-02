@@ -14,9 +14,9 @@ public class InsomniaFrame extends JFrame {
     TrayIcon trayIcon;
     SystemTray tray;
     MenuItem exitItem, openItem;
-    JSplitPane rightPanels, leftAndRightPanels;
+    JSplitPane currentRightPanels, leftAndRightPanels;
     static final int FRAME_WIDTH = 1250, FRAME_HEIGHT = 600;
-    JPanel requestsPanel, middlePanel, responsePanel;
+    JPanel requestsPanel, currentMiddlePanel, currentResponsePanel;
     JMenuBar menuBar;
 
     InsomniaFrame(String title) {
@@ -32,7 +32,7 @@ public class InsomniaFrame extends JFrame {
             popup.add(openItem);
             popup.add(exitItem);
 
-            Image image = Toolkit.getDefaultToolkit().getImage(".\\src\\Icons\\Insomnia.png");
+            Image image = Toolkit.getDefaultToolkit().getImage("./../src/Icons/Insomnia.png");
 
             tray = SystemTray.getSystemTray();
             trayIcon = new TrayIcon(image, "Insomnia", popup);
@@ -51,18 +51,18 @@ public class InsomniaFrame extends JFrame {
     private void makePanels(){
         LafManager.install(new DarculaTheme());
         this.validate();
-        requestsPanel = new RequestsPanel();
-        middlePanel =new MiddlePanel();
-        responsePanel = new ResponsePanel();
+        requestsPanel = new RequestsPanel(this);
+        currentMiddlePanel =new MiddlePanel();
+        currentResponsePanel = new ResponsePanel();
         menuBar = new InsomniaMenuBar(this);
 
         this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
         //frame.setLayout(new GridLayout(1, 3));
         this.setJMenuBar(menuBar);
-        rightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, middlePanel, responsePanel);
-        rightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
-        leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, rightPanels);
+        currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
+        currentRightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
+        leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels);
         leftAndRightPanels.setDividerLocation(FRAME_WIDTH / 6);
 
         this.getContentPane().add(leftAndRightPanels);
@@ -133,7 +133,7 @@ public class InsomniaFrame extends JFrame {
      * @return right panels
      */
     public JSplitPane getRightPanels() {
-        return rightPanels;
+        return currentRightPanels;
     }
 
     /**
@@ -141,7 +141,28 @@ public class InsomniaFrame extends JFrame {
      * @return left and right panels
      */
     public JSplitPane getLeftAndRightPanels() {
-        return leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, rightPanels);
+        return leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels);
     }
 
+    public void setRightPanels() {
+        currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
+    }
+
+    public void setLeftAndRightPanels( ) {
+        setRightPanels();
+        this.getContentPane().remove(0);
+        this.getContentPane().add(leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels));
+        currentRightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
+        leftAndRightPanels.setDividerLocation(FRAME_WIDTH / 6);
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void setCurrentResponsePanel(JPanel currentResponsePanel) {
+        this.currentResponsePanel = currentResponsePanel;
+    }
+
+    public void setCurrentMiddlePanel(JPanel currentMiddlePanel) {
+        this.currentMiddlePanel = currentMiddlePanel;
+    }
 }

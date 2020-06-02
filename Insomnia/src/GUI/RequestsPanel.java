@@ -1,5 +1,8 @@
 package GUI;
 
+import HttpClient.GUIClient;
+import HttpClient.Request;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
@@ -17,6 +20,7 @@ import java.util.HashMap;
  */
 
 public class RequestsPanel extends JPanel {
+    InsomniaFrame frame;
     private JButton insomniaButton;
     private ArrayList<JPanel> requestsButton;
     private JButton searchButton;
@@ -25,7 +29,7 @@ public class RequestsPanel extends JPanel {
     private boolean isFilterEnabled = true;
     private ArrayList<JPanel> filteredRequests;
 
-    //to see what panel is for folder button
+    //to see which panel is for folder button
     private HashMap<JButton, JPanel> foldersPanel;
     JPanel centerCenterRequestPanel;
 
@@ -35,7 +39,8 @@ public class RequestsPanel extends JPanel {
     private int folderPanelToAddComponentHeight = 40;
 
 
-    public RequestsPanel() {
+    public RequestsPanel(InsomniaFrame frame) {
+        this.frame = frame;
         requestsButton = new ArrayList<>();
         foldersPanel = new HashMap<>();
         filteredRequests = new ArrayList<>();
@@ -94,6 +99,9 @@ public class RequestsPanel extends JPanel {
      * @return the made request
      */
     private JPanel makeRequest(String name, String method) {
+        Request request = new Request();
+        GUIClient.addRequest(request);
+
         JPanel panel = new JPanel();
         JLabel label = new JLabel(method);
         if (method.substring(0, 3).equals("GET")) {
@@ -119,6 +127,17 @@ public class RequestsPanel extends JPanel {
         }
 
         JButton requestButton = new JButton(name);
+
+        requestButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setCurrentMiddlePanel(request.getMiddlePanel());
+                frame.setCurrentResponsePanel(request.getResponsePanel());
+                frame.setLeftAndRightPanels();
+            }
+        });
+        request.setMethodLabel(label);
+
         label.setLabelFor(requestButton);
         panel.add(label);
         panel.add(requestButton);
@@ -308,7 +327,7 @@ public class RequestsPanel extends JPanel {
                         newRequestDialog.setVisible(true);
                         JTextField nameFiled = new JTextField("My Request");
                         nameFiled.setBorder(new TitledBorder("Name"));
-                        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
+                        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
                         JComboBox cb = new JComboBox(methodsName);
                         cb.setSelectedIndex(0);
 

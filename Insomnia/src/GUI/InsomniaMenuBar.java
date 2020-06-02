@@ -171,7 +171,7 @@ public class InsomniaMenuBar extends JMenuBar {
             } else if (e.getSource() == optionsItem) {
                 makeOptionDialog();
             } else if (e.getSource() == toggleFullScreenItem) {
-                //TODO: change if toggled for the second time
+
                 if (frame.getExtendedState() == JFrame.NORMAL) {
                     frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 } else {

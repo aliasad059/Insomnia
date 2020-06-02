@@ -27,7 +27,7 @@ public class ConsoleClient {
             Request request = new Request();
             request.setCompleted(interpreter(request));
             if (request.isCompleted()) {
-                request.makeRequest();
+                request.setRequest(request.makeRequest());
                 requests.add(request);
                 runRequest(request);
             } else {

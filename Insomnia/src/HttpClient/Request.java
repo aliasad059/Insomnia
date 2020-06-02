@@ -1,5 +1,10 @@
 package HttpClient;
 
+import GUI.InsomniaFrame;
+import GUI.MiddlePanel;
+import GUI.ResponsePanel;
+
+import javax.swing.*;
 import java.io.*;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -14,6 +19,10 @@ import java.util.*;
  * request
  */
 public class Request implements Serializable {
+    private MiddlePanel middlePanel;
+    private ResponsePanel responsePanel;
+    private JLabel methodLabel;
+    private JButton requestButton;
     private HttpRequest request;
     private boolean completed;
     private HttpResponse<String> lastResponse;
@@ -21,13 +30,15 @@ public class Request implements Serializable {
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
     public Request() {
-        if (completed)
-            request =  makeRequest();
+        middlePanel = new MiddlePanel();
+        responsePanel = new ResponsePanel();
+        middlePanel.setOwner(this);
     }
 
 
     /**
      * get follow redirect
+     *
      * @return follow redirect value
      */
     public boolean getFollowRedirect() {
@@ -36,6 +47,7 @@ public class Request implements Serializable {
 
     /**
      * get show response headers
+     *
      * @return show response headers value
      */
     public boolean GetShowResponseHeaders() {
@@ -45,6 +57,7 @@ public class Request implements Serializable {
 
     /**
      * makes an HTTP REQUEST as entered interpreted args
+     *
      * @return https request
      */
     public HttpRequest makeRequest() {
@@ -71,7 +84,7 @@ public class Request implements Serializable {
                     .setHeader("User-Agent", "Insomnia")
                     .uri(URI.create(uri));
             if (json != null) {
-                builder.setHeader("content-type","JSON");
+                builder.setHeader("content-type", "JSON");
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.ofString(json));
                 else if (method.equals("PUT"))
@@ -88,7 +101,7 @@ public class Request implements Serializable {
                     data.put(splitForms[0], splitForms[1]);
                 }
                 try {
-                    builder.setHeader("content-type","FORM DATA");
+                    builder.setHeader("content-type", "FORM DATA");
                     if (method.equals("POST"))
                         builder.POST(ofMimeMultipartData(data, "" + (new Date()).getTime()));
                     else if (method.equals("PATCH"))
@@ -101,7 +114,7 @@ public class Request implements Serializable {
                 }
             } else if (upload != null) {
                 try {
-                    builder.setHeader("content-type","BINARY");
+                    builder.setHeader("content-type", "BINARY");
                     if (method.equals("POST"))
                         builder.POST(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
                     else if (method.equals("PATCH"))
@@ -112,7 +125,7 @@ public class Request implements Serializable {
                     System.out.println("File Not Found");
                 }
             } else {
-                builder.setHeader("content-type","NO BODY");
+                builder.setHeader("content-type", "NO BODY");
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.noBody());
                 else if (method.equals("PATCH"))
@@ -135,6 +148,7 @@ public class Request implements Serializable {
 
     /**
      * return if the request has enough info to be send in other word if it is completed
+     *
      * @return true if the request is completed and vice versa
      */
     public boolean isCompleted() {
@@ -146,21 +160,21 @@ public class Request implements Serializable {
      */
     public void printRequest() {
         System.out.println("URL: " + uri + " | Method: " + method + " | Headers: " + headers);
-        if (json!=null){
-            System.out.println("Json: "+json);;
-        }else if (data != null){
-            System.out.println("Multi FormData: "+data);;
-        }else if (upload != null){
-            System.out.println("Binary Path: "+upload);;
+        if (json != null) {
+            System.out.println("Json: " + json);
+        } else if (data != null) {
+            System.out.println("Multi FormData: " + data);
+        } else if (upload != null) {
+            System.out.println("Binary Path: " + upload);
         }
     }
 
     /**
      * makes a HttpRequest.BodyPublisher
-     *
+     * <p>
      * THIS METHOD IS COPIED FROM https://golb.hplar.ch/2019/01/java-11-http-client.html LINK
      *
-     * @param data spilt data
+     * @param data     spilt data
      * @param boundary boundary
      * @return HttpRequest.BodyPublisher
      * @throws IOException
@@ -191,11 +205,12 @@ public class Request implements Serializable {
 
     /**
      * set last response
+     *
      * @param lastResponse last response
      */
     public void setLastResponse(HttpResponse<String> lastResponse) {
         this.lastResponse = lastResponse;
-        if (output!=null){
+        if (output != null) {
             saveOutput(output);
         }
     }
@@ -204,7 +219,7 @@ public class Request implements Serializable {
      * save request
      */
     public void saveRequest() {
-        ArrayList<Request>requests = new ArrayList<>();
+        ArrayList<Request> requests = new ArrayList<>();
         File file = new File("./../save/requests.insomnia");
         try (FileInputStream finRequests = new FileInputStream(file);
              ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
@@ -222,8 +237,8 @@ public class Request implements Serializable {
 
 
         try (
-             FileOutputStream fout = new FileOutputStream("./../save/requests.insomnia", true);
-             ObjectOutputStream objWriter = new ObjectOutputStream(fout)) {
+                FileOutputStream fout = new FileOutputStream("./../save/requests.insomnia", true);
+                ObjectOutputStream objWriter = new ObjectOutputStream(fout)) {
             for (int i = 0; i < requests.size(); i++) {
                 objWriter.writeObject(requests.get(i));
             }
@@ -237,11 +252,12 @@ public class Request implements Serializable {
 
     /**
      * save output
+     *
      * @param outputName
      */
-    public void saveOutput(String outputName){
+    public void saveOutput(String outputName) {
         try {
-            File file = new File("./../save/outputs/"+outputName+".txt");
+            File file = new File("./../save/outputs/" + outputName + ".txt");
             FileOutputStream fis = new FileOutputStream(file);
             PrintWriter printWriter = new PrintWriter(fis);
             printWriter.write(lastResponse.body());
@@ -264,6 +280,7 @@ public class Request implements Serializable {
     public void setRequest(HttpRequest request) {
         this.request = request;
     }
+
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
@@ -271,6 +288,7 @@ public class Request implements Serializable {
     public HttpResponse<String> getLastResponse() {
         return lastResponse;
     }
+
     public String getUri() {
         return uri;
     }
@@ -284,6 +302,7 @@ public class Request implements Serializable {
     }
 
     public void setMethod(String method) {
+        //TODO: change the JLabel in gui mode
         this.method = method;
     }
 
@@ -349,5 +368,17 @@ public class Request implements Serializable {
 
     public void setSaveRequest(boolean saveRequest) {
         this.saveRequest = saveRequest;
+    }
+
+    public void setMethodLabel(JLabel methodLabel) {
+        this.methodLabel = methodLabel;
+    }
+
+    public MiddlePanel getMiddlePanel() {
+        return middlePanel;
+    }
+
+    public ResponsePanel getResponsePanel() {
+        return responsePanel;
     }
 }

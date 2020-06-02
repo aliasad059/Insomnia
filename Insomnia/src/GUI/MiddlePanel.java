@@ -8,7 +8,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
+
+import HttpClient.GUIClient;
+import HttpClient.Request;
 import com.github.jutil.json.gui.*;
+
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
 /**
@@ -22,13 +26,14 @@ public class MiddlePanel extends JPanel{
     JPanel authPanel;
     JPanel queryPanel;
     JPanel headerPanel;
-    JComboBox bodyTabStatus;
+    JComboBox bodyTabStatus, requestMethodType;
     JPanel binaryPanel;
-    JButton fileChooserButton;
+    JButton fileChooserButton,sendRequest;
     JTextField filePath;
     JPanel JSONPanel;
     JPanel noBodyPanel;
     JTextField urlPreviewField;
+    Request owner;
 
     /**
      * this panel is divided by border layout into north and center
@@ -39,10 +44,13 @@ public class MiddlePanel extends JPanel{
         setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
         northMiddlePanel.setLayout(new GridLayout(1, 3));
-        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
-        northMiddlePanel.add(new JComboBox(methodsName));
+        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
+        requestMethodType = new JComboBox(methodsName);
+        requestMethodType.addActionListener(new handler());
+        northMiddlePanel.add(requestMethodType);
         northMiddlePanel.add(new JTextField());
-        northMiddlePanel.add(new JButton("Send"+'\u21E8'));
+        northMiddlePanel.add(sendRequest = new JButton("Send" + '\u21E8'));
+        sendRequest.addActionListener(new handler());
         add(northMiddlePanel, BorderLayout.NORTH);
 
         tabs = new JTabbedPane();
@@ -161,11 +169,15 @@ public class MiddlePanel extends JPanel{
     private class handler implements ActionListener {
         /**
          * choosing the format of the body panel as selected in combobox
+         *
          * @param e
          */
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            if (e.getSource() == sendRequest){
+                initializeRequest();
+                GUIClient.runRequest(owner);
+            }
             if (e.getSource() == bodyTabStatus) {
                 JComboBox cb = (JComboBox) e.getSource();
                 if (cb.getSelectedIndex() == 1) {
@@ -183,6 +195,22 @@ public class MiddlePanel extends JPanel{
                 }
                 updateUI();
             }
+            if (e.getSource() == requestMethodType) {
+                JComboBox cb = (JComboBox) e.getSource();
+                if (cb.getSelectedIndex() == 1) {
+                    owner.setMethod("GET");
+                } else if (cb.getSelectedIndex() == 2) {
+                    owner.setMethod("POST");
+                } else if (cb.getSelectedIndex() == 3) {
+                    owner.setMethod("PUT");
+                } else if (cb.getSelectedIndex() == 4) {
+                    owner.setMethod("PATCH");
+                } else {
+                    owner.setMethod("DELETE");
+                }
+                updateUI();
+
+            }
             /**
              * if user chooses to open binary file
              */
@@ -195,10 +223,11 @@ public class MiddlePanel extends JPanel{
                     JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
                     filePath.setText(filepath);
                     updateUI();
-                    //TODO: change the text
                 }
             }
         }
+    }
+    private void initializeRequest(){
     }
 
     /**
@@ -213,7 +242,7 @@ public class MiddlePanel extends JPanel{
         Form form;
 
         public Form(JPanel owner) {
-            this.setBorder(BorderFactory.createRaisedBevelBorder());
+            this.setBorder(BorderFactory.createLoweredBevelBorder());
             this.owner = owner;
             nameField = new JTextField("Name");
             //nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
@@ -224,7 +253,7 @@ public class MiddlePanel extends JPanel{
             valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
             valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
             isActive = new JCheckBox();
-            isActive.doClick();
+
             removeForm = new JButton("x");
             removeForm.setPreferredSize(new Dimension(20, 20));
             this.add(nameField);
@@ -246,6 +275,7 @@ public class MiddlePanel extends JPanel{
         class handler implements FocusListener, ActionListener {
             /**
              * if the user focused on the fields , make a new form
+             *
              * @param e
              */
             @Override
@@ -257,6 +287,7 @@ public class MiddlePanel extends JPanel{
 
             /**
              * if the focus lost
+             *
              * @param e
              */
             @Override
@@ -265,6 +296,7 @@ public class MiddlePanel extends JPanel{
 
             /**
              * if the form should be enabled/disabled or be removed
+             *
              * @param e
              */
             @Override
@@ -285,6 +317,8 @@ public class MiddlePanel extends JPanel{
         }
     }
 
-
+    public void setOwner(Request owner) {
+        this.owner = owner;
+    }
 }
 
