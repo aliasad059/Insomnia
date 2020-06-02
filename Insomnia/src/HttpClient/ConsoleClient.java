@@ -6,13 +6,15 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 
-public class Client {
+public class ConsoleClient {
     private String[] args;
     private ArrayList<Request> requests = new ArrayList<>();
     private static ArrayList<ReqList> reqLists = new ArrayList<>();
 
-    public Client(String[] args) {
+    public ConsoleClient(String[] args) {
         this.args = args;
     }
 
@@ -22,8 +24,10 @@ public class Client {
     public void start() {
         load();
         if (args[0].equals("url") || args[0].equals("uri")) {
-            Request request = new Request(args);
+            Request request = new Request();
+            request.setCompleted(interpreter(request));
             if (request.isCompleted()) {
+                request.makeRequest();
                 requests.add(request);
                 runRequest(request);
             } else {
@@ -88,7 +92,7 @@ public class Client {
      * @param request request to run
      */
     private void runRequest(Request request) {
-        HttpRequest httpRequest = request.makeRequest();
+        HttpRequest httpRequest = request.getHttpRequest();
         if (httpRequest == null) {
             System.out.println("Incorrect pattern.");
             System.out.println("Use -h or --help to get help");
@@ -137,9 +141,16 @@ public class Client {
      * print all requests
      */
     private void printRequests() {
+        System.out.println("Requests:");
+        System.out.println("--------------------------------------------");
         for (int i = 0; i < requests.size(); i++) {
             System.out.print((i + 1) + ". ");
             requests.get(0).printRequest();
+        }
+        System.out.println("Lists:");
+        System.out.println("--------------------------------------------");
+        for (int i = requests.size(); i <reqLists.size() ; i++) {
+            System.out.println((i + 1)+". "+reqLists.get(i).getListName());
         }
     }
 
@@ -224,5 +235,138 @@ public class Client {
             }
         }
         return null;
+    }
+    /**
+     * interpret args array as follows
+     * java Main url uli -M (GET,Post,... ) -H "headers" -i -h -f -O(    empty->(make a auto name) OR
+     * name of file to save the response body   ) -S -d "Message body in multiForm Data shape" -j " Message body in Json shape"
+     * -u "path"
+     * java Main list  (empty (all saved request) OR listName(all listName's saved requests)) : just show the requests and will not wait for an input
+     * java Main fire "requests (1 2 ...) OR (listName 1 2 )"
+     *
+     * @return return true if the entered pattern is ok and vice versa
+     */
+    private boolean interpreter(Request requestToInterpret) {
+        LinkedList<String> args = new LinkedList<>(Arrays.asList(this.args));
+        if (args.get(0).equals("url") || args.get(0).equals("uri")) {
+            args.remove(0);
+
+            //uri
+            if (args.get(0).charAt(0) == '-') {
+                //when the user forget to enter the uri
+                return false;
+            } else {
+                requestToInterpret.setUri(args.get(0));
+                args.remove(0);
+            }
+
+            //method
+            if (args.contains("-M")) {
+                int index = args.indexOf("-M");
+                args.remove(index);
+                if (args.get(index).charAt(0) == '-') {
+                    return false;
+                } else {
+                    requestToInterpret.setMethod(args.get(index));
+                    args.remove(index);
+                }
+            } else {
+                requestToInterpret.setMethod("GET");
+            }
+
+            //output
+            if (args.contains("-O")) {
+                int index = args.indexOf("-O");
+                args.remove(index);
+                if (args.get(index).charAt(0) == '-') {
+                    requestToInterpret.setOutput("output_" + (new java.sql.Date(System.currentTimeMillis())).toString());
+                } else {
+                    requestToInterpret.setOutput(args.get(index));
+                }
+                args.remove(index);
+            }
+
+            //form data
+            if (args.contains("-d")) {
+                int index = args.indexOf("-d");
+                args.remove(index);
+                if (args.get(index).charAt(0) == '-') {
+                    return false;
+                } else {
+                    requestToInterpret.setData( args.get(index));
+                    args.remove(index);
+                }
+            }
+
+            //header
+            if (args.contains("-H")) {
+                int index = args.indexOf("-H");
+                args.remove(index);
+                if (args.get(index).charAt(0) == '-') {
+                    return false;
+                } else {
+                    requestToInterpret.setHeaders(args.get(index));
+                    args.remove(index);
+                }
+            }
+
+            //json
+            if (args.contains("-j")) {
+                int index = args.indexOf("-j");
+                args.remove(index);
+                if (args.get(index).charAt(0) == '-') {
+                    return false;
+                } else {
+                    requestToInterpret.setJson(  args.get(index));
+                    args.remove(index);
+                }
+            }
+
+            //upload
+            if (args.contains("-u")) {
+                int index = args.indexOf("-u");
+                args.remove(index);
+                requestToInterpret.setUpload(args.get(index));
+                args.remove(index);
+            }
+
+            //show response headers
+            if (args.contains("-i")) {
+                int index = args.indexOf("-i");
+                args.remove(index);
+                requestToInterpret.setShowResponseHeaders(true);
+            }
+
+            //follow redirect
+            if (args.contains("-f")) {
+                int index = args.indexOf("-f");
+                args.remove(index);
+                requestToInterpret.setFollowRedirect(true);
+            }
+
+//            //save
+            if (args.contains("-S")) {
+                int index = args.indexOf("-S");
+                args.remove(index);
+                requestToInterpret.setSaveRequest(true);
+                if (args.size()>index && args.get(index).charAt(0) != '-') {
+                    ReqList reqList = getList(args.get(index));
+                    if (reqList == null) {
+                        System.out.println(args.get(index) + " folder does not exist.");
+                        return false;
+                    } else {
+                        reqList.addReq(requestToInterpret);
+                        args.remove(index);
+                    }
+                } else {
+                    requestToInterpret.saveRequest();
+                }
+            }
+        }
+        if (args.size() == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

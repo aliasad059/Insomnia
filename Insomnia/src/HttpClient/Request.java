@@ -15,25 +15,16 @@ import java.util.*;
  */
 public class Request implements Serializable {
     private HttpRequest request;
-    private String[] firstArgs;
-    private LinkedList<String> args;
-    private final boolean completed;
+    private boolean completed;
     private HttpResponse<String> lastResponse;
-    private String folderName = "Does not belong to any folder";
-    private String uri, method, headers, output, data, json, upload, creatList, fire, saveToList;
+    private String uri, method, headers, output, data, json, upload;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
-    public Request(String[] args) {
-        this.firstArgs = args;
-        this.args = new LinkedList<>(Arrays.asList(args));
-        completed = interpreter();
+    public Request() {
         if (completed)
-            makeRequest();
-        else {
-            System.out.println("Incorrect pattern.");
-            System.out.println("Use -h or --help to get help");
-        }
+            request =  makeRequest();
     }
+
 
     /**
      * get follow redirect
@@ -51,141 +42,6 @@ public class Request implements Serializable {
         return showResponseHeaders;
     }
 
-
-    /**
-     * interpret args array as follows
-     * java Main url uli -M (GET,Post,... ) -H "headers" -i -h -f -O(    empty->(make a auto name) OR
-     * name of file to save the response body   ) -S -d "Message body in multiForm Data shape" -j " Message body in Json shape"
-     * -u "path"
-     * java Main list  (empty (all saved request) OR listName(all listName's saved requests)) : just show the requests and will not wait for an input
-     * java Main fire "requests (1 2 ...) OR (listName 1 2 )"
-     *
-     * @return return true if the entered pattern is ok and vice versa
-     */
-    private boolean interpreter() {
-
-        if (args.get(0).equals("url") || args.get(0).equals("uri")) {
-            args.remove(0);
-
-            //uri
-            if (args.get(0).charAt(0) == '-') {
-                //when the user forget to enter the uri
-                return false;
-            } else {
-                uri = args.get(0);
-                args.remove(0);
-            }
-
-            //method
-            if (args.contains("-M")) {
-                int index = args.indexOf("-M");
-                args.remove(index);
-                if (args.get(index).charAt(0) == '-') {
-                    return false;
-                } else {
-                    method = args.get(index);
-                    args.remove(index);
-                }
-            } else {
-                method = "GET";
-            }
-
-            //output
-            if (args.contains("-O")) {
-                int index = args.indexOf("-O");
-                args.remove(index);
-                if (args.get(index).charAt(0) == '-') {
-                    output = "output_" + (new java.sql.Date(System.currentTimeMillis())).toString();
-                } else {
-                    output = args.get(index);
-                }
-                args.remove(index);
-            }
-
-            //form data
-            if (args.contains("-d")) {
-                int index = args.indexOf("-d");
-                args.remove(index);
-                if (args.get(index).charAt(0) == '-') {
-                    return false;
-                } else {
-                    data = args.get(index);
-                    args.remove(index);
-                }
-            }
-
-            //header
-            if (args.contains("-H")) {
-                int index = args.indexOf("-H");
-                args.remove(index);
-                if (args.get(index).charAt(0) == '-') {
-                    return false;
-                } else {
-                    headers = args.get(index);
-                    args.remove(index);
-                }
-            }
-
-            //json
-            if (args.contains("-j")) {
-                int index = args.indexOf("-j");
-                args.remove(index);
-                if (args.get(index).charAt(0) == '-') {
-                    return false;
-                } else {
-                    json = args.get(index);
-                    args.remove(index);
-                }
-            }
-
-            //upload
-            if (args.contains("-u")) {
-                int index = args.indexOf("-u");
-                args.remove(index);
-                upload = args.get(index);
-                args.remove(index);
-            }
-
-            //show response headers
-            if (args.contains("-i")) {
-                int index = args.indexOf("-i");
-                args.remove(index);
-                showResponseHeaders = true;
-            }
-
-            //follow redirect
-            if (args.contains("-f")) {
-                int index = args.indexOf("-f");
-                args.remove(index);
-                followRedirect = true;
-            }
-
-//            //save
-            if (args.contains("-S")) {
-                int index = args.indexOf("-S");
-                args.remove(index);
-                saveRequest = true;
-                if (args.size()>index && args.get(index).charAt(0) != '-') {
-                    ReqList reqList = Client.getList(args.get(index));
-                    if (reqList == null) {
-                        System.out.println(args.get(index) + " folder does not exist.");
-                        return false;
-                    } else {
-                        reqList.addReq(this);
-                        folderName = reqList.getListName();
-                        args.remove(index);
-                    }
-                } else {
-                    saveRequest();
-                }
-            }
-        }
-        if (args.size() == 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     /**
      * makes an HTTP REQUEST as entered interpreted args
@@ -290,7 +146,6 @@ public class Request implements Serializable {
      */
     public void printRequest() {
         System.out.println("URL: " + uri + " | Method: " + method + " | Headers: " + headers);
-        System.out.println("Request folder name: "+folderName);
         if (json!=null){
             System.out.println("Json: "+json);;
         }else if (data != null){
@@ -348,7 +203,7 @@ public class Request implements Serializable {
     /**
      * save request
      */
-    private void saveRequest() {
+    public void saveRequest() {
         ArrayList<Request>requests = new ArrayList<>();
         File file = new File("./../save/requests.insomnia");
         try (FileInputStream finRequests = new FileInputStream(file);
@@ -384,7 +239,7 @@ public class Request implements Serializable {
      * save output
      * @param outputName
      */
-    private void saveOutput(String outputName){
+    public void saveOutput(String outputName){
         try {
             File file = new File("./../save/outputs/"+outputName+".txt");
             FileOutputStream fis = new FileOutputStream(file);
@@ -395,4 +250,104 @@ public class Request implements Serializable {
         }
     }
 
+    /**
+     * get https request
+     */
+    public HttpRequest getHttpRequest() {
+        return request;
+    }
+
+    public HttpRequest getRequest() {
+        return request;
+    }
+
+    public void setRequest(HttpRequest request) {
+        this.request = request;
+    }
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    public HttpResponse<String> getLastResponse() {
+        return lastResponse;
+    }
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(String headers) {
+        this.headers = headers;
+    }
+
+    public String getOutput() {
+        return output;
+    }
+
+    public void setOutput(String output) {
+        this.output = output;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public String getJson() {
+        return json;
+    }
+
+    public void setJson(String json) {
+        this.json = json;
+    }
+
+    public String getUpload() {
+        return upload;
+    }
+
+    public void setUpload(String upload) {
+        this.upload = upload;
+    }
+
+    public boolean isShowResponseHeaders() {
+        return showResponseHeaders;
+    }
+
+    public void setShowResponseHeaders(boolean showResponseHeaders) {
+        this.showResponseHeaders = showResponseHeaders;
+    }
+
+    public boolean isFollowRedirect() {
+        return followRedirect;
+    }
+
+    public void setFollowRedirect(boolean followRedirect) {
+        this.followRedirect = followRedirect;
+    }
+
+    public boolean isSaveRequest() {
+        return saveRequest;
+    }
+
+    public void setSaveRequest(boolean saveRequest) {
+        this.saveRequest = saveRequest;
+    }
 }
