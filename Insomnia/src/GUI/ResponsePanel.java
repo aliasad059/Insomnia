@@ -4,11 +4,16 @@ import com.github.jutil.json.gui.JsonViewerPanel;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
@@ -24,7 +29,7 @@ public class ResponsePanel extends JPanel {
     JTextPane rowTextPane, JSONTextPane;
     String[] cmStrings = {"Row", "JSON"};
     String[] tableColumnsString = {"NAME", "VALUE"};
-    String[][] table_NAME_VALUE = {{"Value1", "djdjd"}, {"dkdk", "Value2"}};
+    String[][] table_NAME_VALUE = {{"", ""}};
     //ArrayList<ArrayList<String>> tableNameValue = new ArrayList<ArrayList<String>>();
     JComboBox cb;
     JTable headerTable;
@@ -34,7 +39,7 @@ public class ResponsePanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        northResponsePanel = new JPanel(new GridLayout(1,3));
+        northResponsePanel = new JPanel(new GridLayout(1, 3));
 
         statusLabel = new JLabel("ERROR", JLabel.CENTER);
         statusLabel.setAlignmentX(0);
@@ -128,5 +133,34 @@ public class ResponsePanel extends JPanel {
                 clipboard.setContents(stringSelection, null);
             }
         }
+    }
+
+    public void setSizeLabel(String size) {
+        this.sizeLabel.setText(size);
+    }
+
+    public void setStatusLabel(String status) {
+        this.statusLabel.setText(status);
+    }
+
+    public void setTimeLabel(String time) {
+        this.timeLabel.setText(time);
+    }
+
+    public void setHeaders(Map<String, List<String>> headers) {
+        DefaultTableModel model = new DefaultTableModel();
+        headerTable = new JTable(model);
+        model.addRow(tableColumnsString);
+        model.addColumn(headers.keySet());
+        model.addColumn(headers.values());
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void setJSONBodyText(String bodyText) {
+    }
+
+    public void setRowBodyText(String bodyText) {
+        rowTextPane.setText(bodyText);
     }
 }

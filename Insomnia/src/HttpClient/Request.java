@@ -69,7 +69,7 @@ public class Request implements Serializable {
             if (method.equals("GET"))
                 builder.GET();
             else builder.DELETE();
-            if (headers != null) {
+            if (!headers.equals("")) {
                 String[] pairs = headers.split(";");
                 for (int i = 0; i < pairs.length; i++) {
                     String[] splitPairs = pairs[i].split(":");

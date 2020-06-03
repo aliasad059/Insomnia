@@ -46,6 +46,10 @@ public class MiddlePanel extends JPanel {
      * center panel holds a tabbed pane with different items
      */
     public MiddlePanel() {
+        formData = new ArrayList<>();
+        queries = new ArrayList<>();
+        headers = new ArrayList<>();
+        
         setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
         northMiddlePanel.setLayout(new GridLayout(1, 3));

@@ -10,6 +10,7 @@ import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class GUIClient {
     public GUIClient() {
@@ -26,10 +27,12 @@ public class GUIClient {
 
     public static void runRequest(Request requestToRun) {
         //TODO: run the request in background and then set the response panel when it is done
+        System.out.println("Run request0");
         SendRequest sendRequest = new SendRequest(requestToRun);
         try {
-            sendRequest.doInBackground();
-            sendRequest.done();
+            System.out.println("Run request1");
+            sendRequest.execute();
+            System.out.println("Run request2");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,9 +41,11 @@ public class GUIClient {
 
     private static class SendRequest extends SwingWorker<HttpResponse<String>, String> {
         Request requestToRun;
+        double elapsedTime;
 
         public SendRequest(Request requestToRun) {
             this.requestToRun = requestToRun;
+            elapsedTime = 0;
         }
 
         /**
@@ -58,6 +63,7 @@ public class GUIClient {
         @Override
         protected HttpResponse<String> doInBackground() throws Exception {
             HttpRequest httpRequest = requestToRun.makeRequest();
+
             if (httpRequest == null) {
                 return null;
             } else {
@@ -75,7 +81,7 @@ public class GUIClient {
 
                 double startTime = System.nanoTime();
                 HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-                double elapsedTime = System.nanoTime() - startTime;
+                elapsedTime = System.nanoTime() - startTime;
                 requestToRun.setLastResponse(response);
                 return response;
             }
@@ -83,28 +89,29 @@ public class GUIClient {
 
         @Override
         protected void done() {
+            HttpResponse<String> response= null;
+            try {
+                response = get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
             ResponsePanel responsePanel = requestToRun.getResponsePanel();
-
-//            String timeSize = "nS";
-//            if (elapsedTime > 1000000000) {
-//                timeSize = " S";
-//                elapsedTime /= 1000000000;
-//            } else if (elapsedTime > 1000000) {
-//                timeSize = " mS";
-//                elapsedTime /= 1000000;
-//            } else if (elapsedTime > 1000) {
-//                timeSize = " μS";
-//                elapsedTime /= 1000;
-//            }
-//            System.out.println("URI: " + response.uri());
-//            System.out.println("Response Time: " + elapsedTime + timeSize);
-//            System.out.println("Content Length: " + response.headers().allValues("Content-Length"));
-//            System.out.println("Version: " + response.version().toString() + "  |  Status code: " + response.statusCode());
-//            System.out.println(response.body());
-//            if (request.GetShowResponseHeaders()) {
-//                HttpHeaders headers = response.headers();
-//                headers.map().forEach((k, v) -> System.out.println(k + ":" + v));
-//            }
+            String timeSize = "nS";
+            if (elapsedTime > 1000000000) {
+                timeSize = " S";
+                elapsedTime /= 1000000000;
+            } else if (elapsedTime > 1000000) {
+                timeSize = " mS";
+                elapsedTime /= 1000000;
+            } else if (elapsedTime > 1000) {
+                timeSize = " μS";
+                elapsedTime /= 1000;
+            }
+            responsePanel.setTimeLabel(elapsedTime + timeSize);
+            responsePanel.setSizeLabel(response.headers().allValues("Content-Length").get(0));
+            responsePanel.setJSONBodyText(response.body());
+            responsePanel.setRowBodyText(response.body());
+            responsePanel.setHeaders(response.headers().map());
         }
     }
 }
