@@ -20,7 +20,7 @@ public class InsomniaMenuBar extends JMenuBar {
     private InsomniaFrame frame;
     private Display display;
     private static boolean isSystemTrayEnabled = true;
-    private static boolean followRedirect;
+    private static boolean followRedirect = false;
     InsomniaSystemTray systemTray;
     JDialog optionDialog;
     JCheckBox followRedirectCheckBox, ExitOnClose;
@@ -63,6 +63,7 @@ public class InsomniaMenuBar extends JMenuBar {
         aboutItem.addActionListener(new handler());
 
         followRedirectCheckBox = new JCheckBox("Follow Redirect");
+        followRedirectCheckBox.addActionListener(new handler());
         ExitOnClose = new JCheckBox("Exit On Close");
         ExitOnClose.addChangeListener(new handler());
         themeType = new ButtonGroup();
@@ -204,6 +205,11 @@ public class InsomniaMenuBar extends JMenuBar {
                                 "\nStudent Number : 9831004"
                         , "About", JOptionPane.INFORMATION_MESSAGE);
             }
+            if (e.getSource() == ExitOnClose) {
+                isSystemTrayEnabled = !isSystemTrayEnabled;
+            } else if (e.getSource() == followRedirectCheckBox) {
+                followRedirect = !followRedirect;
+            }
         }
 
         /**
@@ -216,7 +222,7 @@ public class InsomniaMenuBar extends JMenuBar {
             if (e.getSource() == ExitOnClose) {
                 isSystemTrayEnabled = !isSystemTrayEnabled;
             } else if (e.getSource() == followRedirectCheckBox) {
-                followRedirect = followRedirectCheckBox.isSelected();
+                followRedirect = !followRedirect;
             }
         }
     }

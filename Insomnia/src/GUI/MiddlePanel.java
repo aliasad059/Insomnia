@@ -49,7 +49,7 @@ public class MiddlePanel extends JPanel {
         formData = new ArrayList<>();
         queries = new ArrayList<>();
         headers = new ArrayList<>();
-        
+
         setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
         northMiddlePanel.setLayout(new GridLayout(1, 3));
@@ -279,11 +279,11 @@ public class MiddlePanel extends JPanel {
         //form data
         else if (bodyTabStatus.getSelectedIndex() == 2) {
             String formDataString = "";
-            for (int i = 0; i < formData.size(); i++) {
-                if (formData.get(i).IsActive()) {
-                    formDataString += formData.get(i).getNameField().getText();
+            for (Form formDatum : formData) {
+                if (formDatum.IsActive()) {
+                    formDataString += formDatum.getNameField().getText();
                     formDataString += '=';
-                    formDataString += formData.get(i).getValueField().getText();
+                    formDataString += formDatum.getValueField().getText();
                     formDataString += '&';
                 }
             }

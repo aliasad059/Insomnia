@@ -25,11 +25,11 @@ public class ResponsePanel extends JPanel {
             messageBodyTab, headerTab,
             rowPanel, JSONPanel;
     JLabel statusLabel, timeLabel, sizeLabel;
+    DefaultTableModel tableModel;
     JTabbedPane tabs;
     JTextPane rowTextPane, JSONTextPane;
     String[] cmStrings = {"Row", "JSON"};
     String[] tableColumnsString = {"NAME", "VALUE"};
-    String[][] table_NAME_VALUE = {{"", ""}};
     //ArrayList<ArrayList<String>> tableNameValue = new ArrayList<ArrayList<String>>();
     JComboBox cb;
     JTable headerTable;
@@ -68,7 +68,8 @@ public class ResponsePanel extends JPanel {
 
         rowPanel = new JPanel(new BorderLayout());
         rowTextPane = new JTextPane();
-        rowPanel.add(rowTextPane, BorderLayout.CENTER);
+        rowTextPane.setEditable(false);
+        rowPanel.add(new JScrollPane(rowTextPane), BorderLayout.CENTER);
         JSONPanel = new JPanel(new BorderLayout());
         JsonViewerPanel jsonViewerPanel = new JsonViewerPanel();
         JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
@@ -80,7 +81,7 @@ public class ResponsePanel extends JPanel {
 
         cb.addActionListener(new handler());
 
-        headerTable = new JTable(table_NAME_VALUE, tableColumnsString);
+        headerTable = new JTable( tableModel = new DefaultTableModel());
         headerTable.setDefaultEditor(Object.class, null);
         JScrollPane sp = new JScrollPane(headerTable);
         headerTab.add(sp, BorderLayout.CENTER);
@@ -115,15 +116,11 @@ public class ResponsePanel extends JPanel {
              * coping the table to the clipboard
              */
             if (e.getSource() == copyCB) {
-                String string = "";
-                for (int i = 0; i < tableColumnsString.length; i++) {
-                    string += tableColumnsString[i];
-                    string += '\t';
-                }
+                String string = "KEYS\tVALUES";
                 string += '\n';
-                for (int i = 0; i < table_NAME_VALUE.length; i++) {
-                    for (int j = 0; j < table_NAME_VALUE[i].length; j++) {
-                        string += table_NAME_VALUE[i][j];
+                for (int i = 0; i < headerTable.getRowCount(); i++) {
+                    for (int j = 0; j < 2; j++) {
+                        string += headerTable.getValueAt(i,j);
                         string += '\t';
                     }
                     string += '\n';
@@ -148,13 +145,10 @@ public class ResponsePanel extends JPanel {
     }
 
     public void setHeaders(Map<String, List<String>> headers) {
-        DefaultTableModel model = new DefaultTableModel();
-        headerTable = new JTable(model);
-        model.addRow(tableColumnsString);
-        model.addColumn(headers.keySet());
-        model.addColumn(headers.values());
-        this.revalidate();
-        this.repaint();
+        headerTable.removeAll();
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"KEY","VALUE"},0);
+        headers.forEach((k, v) -> tableModel.addRow( new String[]{k, v.toString()}));
+        headerTable.setModel(tableModel);
     }
 
     public void setJSONBodyText(String bodyText) {

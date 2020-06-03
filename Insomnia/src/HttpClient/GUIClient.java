@@ -73,6 +73,7 @@ public class GUIClient {
                     requestToRun.setFollowRedirect(true);
                     builder.followRedirects(HttpClient.Redirect.ALWAYS);
                 } else {
+                    System.out.println("YESSSSSSSSSSSSSSSSSSSsss");
                     requestToRun.setFollowRedirect(false);
                     builder.followRedirects(HttpClient.Redirect.NEVER);
                 }
@@ -108,7 +109,7 @@ public class GUIClient {
                 elapsedTime /= 1000;
             }
             responsePanel.setTimeLabel(elapsedTime + timeSize);
-            responsePanel.setSizeLabel(response.headers().allValues("Content-Length").get(0));
+//            responsePanel.setSizeLabel(response.headers().allValues("Content-Length").get(0));
             responsePanel.setJSONBodyText(response.body());
             responsePanel.setRowBodyText(response.body());
             responsePanel.setHeaders(response.headers().map());
