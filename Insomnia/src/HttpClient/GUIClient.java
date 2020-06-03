@@ -4,12 +4,9 @@ import GUI.InsomniaMenuBar;
 import GUI.ResponsePanel;
 
 import javax.swing.*;
-import java.io.IOException;
 import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class GUIClient {
@@ -27,16 +24,12 @@ public class GUIClient {
 
     public static void runRequest(Request requestToRun) {
         //TODO: run the request in background and then set the response panel when it is done
-        System.out.println("Run request0");
         SendRequest sendRequest = new SendRequest(requestToRun);
         try {
-            System.out.println("Run request1");
             sendRequest.execute();
-            System.out.println("Run request2");
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     private static class SendRequest extends SwingWorker<HttpResponse<String>, String> {
@@ -81,9 +74,15 @@ public class GUIClient {
                 client = builder.build();
 
                 double startTime = System.nanoTime();
+                System.out.println("SENDING");
                 HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+                System.out.println("SENT");
+                if (response==null) {
+                    System.out.println("respone is null");
+                }
                 elapsedTime = System.nanoTime() - startTime;
-                requestToRun.setLastResponse(response);
+//                requestToRun.setLastResponse(response);
+                System.out.println("YES");
                 return response;
             }
         }
@@ -93,7 +92,12 @@ public class GUIClient {
             HttpResponse<String> response= null;
             try {
                 response = get();
-            } catch (InterruptedException | ExecutionException e) {
+                System.out.println("GET DONE");
+                if (response == null){
+                    System.out.println("GET RETURNS NULL");
+                }
+            } catch (InterruptedException  | ExecutionException e) {
+                System.out.println("EXEPTIONEXEPTIONEXEPTIONEXEPTIONEXEPTIONEXEPTION");
                 e.printStackTrace();
             }
             ResponsePanel responsePanel = requestToRun.getResponsePanel();
@@ -108,11 +112,14 @@ public class GUIClient {
                 timeSize = " μS";
                 elapsedTime /= 1000;
             }
+            if (responsePanel == null) System.out.println("response panel is null");
+            if (response == null) System.out.println("response is null");
             responsePanel.setTimeLabel(elapsedTime + timeSize);
 //            responsePanel.setSizeLabel(response.headers().allValues("Content-Length").get(0));
             responsePanel.setJSONBodyText(response.body());
             responsePanel.setRowBodyText(response.body());
             responsePanel.setHeaders(response.headers().map());
+//        }
         }
     }
 }
