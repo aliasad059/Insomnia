@@ -253,7 +253,9 @@ public class MiddlePanel extends JPanel {
          */
         @Override
         public void focusLost(FocusEvent e) {
-
+            if (e.getSource() == url) {
+                urlPreviewField.setText(url.getText());
+            }
         }
     }
 
@@ -261,7 +263,7 @@ public class MiddlePanel extends JPanel {
         owner.setMethod((String) requestMethodType.getSelectedItem());
 
         owner.setUri(urlPreviewField.getText());
-        if (!urlPreviewField.getText().equals("")){
+        if (!urlPreviewField.getText().equals("")) {
             owner.setCompleted(true);
         }
         //no body
@@ -305,12 +307,12 @@ public class MiddlePanel extends JPanel {
             if (headers.get(i).IsActive()) {
                 headerString += headers.get(i).getNameField().getText();
                 headerString += ":";
-                headerString +=headers.get(i).getValueField().getText();
-                headerString +=";";
+                headerString += headers.get(i).getValueField().getText();
+                headerString += ";";
             }
         }
-        if (!headerString.equals("")){
-            headerString = headerString.substring(0,headerString.length()-1);
+        if (!headerString.equals("")) {
+            headerString = headerString.substring(0, headerString.length() - 1);
         }
         owner.setHeaders(headerString);
     }

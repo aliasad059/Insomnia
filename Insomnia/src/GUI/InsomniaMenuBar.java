@@ -20,6 +20,7 @@ public class InsomniaMenuBar extends JMenuBar {
     private InsomniaFrame frame;
     private Display display;
     private static boolean isSystemTrayEnabled = true;
+    private static boolean followRedirect;
     InsomniaSystemTray systemTray;
     JDialog optionDialog;
     JCheckBox followRedirectCheckBox, ExitOnClose;
@@ -158,6 +159,9 @@ public class InsomniaMenuBar extends JMenuBar {
     public static boolean isIsSystemTrayEnabled() {
         return isSystemTrayEnabled;
     }
+    public static boolean isFollowRedirect(){
+        return followRedirect;
+    }
 
     /**
      * handles the main events of the menubar
@@ -212,7 +216,7 @@ public class InsomniaMenuBar extends JMenuBar {
             if (e.getSource() == ExitOnClose) {
                 isSystemTrayEnabled = !isSystemTrayEnabled;
             } else if (e.getSource() == followRedirectCheckBox) {
-                //TODO: impalement it
+                followRedirect = followRedirectCheckBox.isSelected();
             }
         }
     }
