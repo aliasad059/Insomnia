@@ -73,14 +73,14 @@ public class GUIClient {
                 HttpClient.Builder builder = HttpClient.newBuilder();
                 System.out.println("START DOINBACGROUND");
 
-//                if (InsomniaMenuBar.isFollowRedirect()) {
-//                    requestToRun.setFollowRedirect(true);
-//                    builder.followRedirects(HttpClient.Redirect.ALWAYS);
-//                } else {
-//                    requestToRun.setFollowRedirect(false);
-//                    builder.followRedirects(HttpClient.Redirect.NEVER);
-//                }
-//                builder.version(HttpClient.Version.HTTP_1_1);
+                if (InsomniaMenuBar.isFollowRedirect()) {
+                    requestToRun.setFollowRedirect(true);
+                    builder.followRedirects(HttpClient.Redirect.ALWAYS);
+                } else {
+                    requestToRun.setFollowRedirect(false);
+                    builder.followRedirects(HttpClient.Redirect.NEVER);
+                }
+                builder.version(HttpClient.Version.HTTP_1_1);
                 client = builder.build();
                 System.out.println("START DOINBACGROUND");
 

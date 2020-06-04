@@ -5,6 +5,7 @@ import GUI.MiddlePanel;
 import GUI.ResponsePanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -308,8 +309,24 @@ public class Request implements Serializable {
     }
 
     public void setMethod(String method) {
-        //TODO: change the JLabel in gui mode
         this.method = method;
+        methodLabel.setText(method.substring(0,3));
+        if (method.equals("GET")) {
+            methodLabel.setForeground(Color.MAGENTA);
+        }
+        else if (method.equals("POST")) {
+            methodLabel.setForeground(Color.GREEN);
+        }
+        else if (method.equals("PUT")) {
+            methodLabel.setForeground(Color.YELLOW);
+        }
+        else if (method.equals("PATCH")) {
+            methodLabel.setForeground(Color.ORANGE);
+        }
+        else if (method.equals("DELETE")) {
+            methodLabel.setForeground(Color.RED);
+        }
+        methodLabel.updateUI();
     }
 
     public String getHeaders() {

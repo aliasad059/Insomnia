@@ -3,6 +3,8 @@ package GUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -30,7 +32,7 @@ public class MiddlePanel extends JPanel {
     JPanel headerPanel;
     JComboBox bodyTabStatus, requestMethodType;
     JPanel binaryPanel;
-    JButton fileChooserButton, sendRequest;
+    JButton fileChooserButton, sendRequest , copyURLButton;
     JTextField url, filePath;
     JPanel JSONPanel;
     JPanel noBodyPanel;
@@ -92,7 +94,8 @@ public class MiddlePanel extends JPanel {
         urlPreviewField = new JTextField();
         urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
         urlPreviewField.setEnabled(false);
-        JButton copyURLButton = new JButton("Copy URL");
+         copyURLButton = new JButton("Copy URL");
+        copyURLButton.addActionListener(new handler());
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
         queryPanel.add(copyURLButton);
@@ -207,19 +210,13 @@ public class MiddlePanel extends JPanel {
             }
             if (e.getSource() == requestMethodType) {
                 JComboBox cb = (JComboBox) e.getSource();
-                if (cb.getSelectedIndex() == 1) {
-                    owner.setMethod("GET");
-                } else if (cb.getSelectedIndex() == 2) {
-                    owner.setMethod("POST");
-                } else if (cb.getSelectedIndex() == 3) {
-                    owner.setMethod("PUT");
-                } else if (cb.getSelectedIndex() == 4) {
-                    owner.setMethod("PATCH");
-                } else {
-                    owner.setMethod("DELETE");
-                }
+                owner.setMethod((String) cb.getSelectedItem());
                 updateUI();
-
+            }
+            if (e.getSource() == copyURLButton){
+                StringSelection stringSelection = new StringSelection(urlPreviewField.getText());
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(stringSelection, null);
             }
             /**
              * if user chooses to open binary file
