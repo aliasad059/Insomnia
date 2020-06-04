@@ -81,10 +81,10 @@ public class Request implements Serializable {
         //post put and patch method are made in a same form
         else if (method.equals("POST") || method.equals("PUT") || method.equals("PATCH")) {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
-                    .setHeader("User-Agent", "Insomnia")
+                    .setHeader("user-agent", "Insomnia")
                     .uri(URI.create(uri));
-            if (json != null) {
-                builder.setHeader("content-type", "JSON");
+            if (json != null && !json.equals("")) {
+                builder.setHeader("content-type", "application/json");
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.ofString(json));
                 else if (method.equals("PUT"))
@@ -93,28 +93,34 @@ public class Request implements Serializable {
                     builder.method("PATCH", HttpRequest.BodyPublishers.ofString(json));
 
 
-            } else if (data != null) {
+            } else if (data != null && !data.equals("")) {
+                System.out.println("YESYESYES");
                 String[] forms = data.split("&");
-                HashMap<Object, Object> data = new HashMap<>();
+                HashMap<Object, Object> formData = new HashMap<>();
                 for (int i = 0; i < forms.length; i++) {
                     String[] splitForms = forms[i].split("=");
-                    data.put(splitForms[0], splitForms[1]);
+                    formData.put(splitForms[0], splitForms[1]);
                 }
+                System.out.println(formData);
                 try {
-                    builder.setHeader("content-type", "FORM DATA");
-                    if (method.equals("POST"))
-                        builder.POST(ofMimeMultipartData(data, "" + (new Date()).getTime()));
-                    else if (method.equals("PATCH"))
-                        builder.method("PATCH", ofMimeMultipartData(data, "" + (new Date()).getTime()));
-                    else
-                        builder.PUT(ofMimeMultipartData(data, "" + (new Date()).getTime()));
+                    String boundary = ""+new Date().getTime();
+                    builder.setHeader("content-type", "multipart/form-data; boundary=" + boundary);
+                    if (method.equals("POST")) {
+                        builder.POST(ofMimeMultipartData(formData, boundary ));
+                    }
+                    else if (method.equals("PATCH")) {
+                        builder.method("PATCH", ofMimeMultipartData(formData, boundary));
+                    }
+                    else {
+                        builder.PUT(ofMimeMultipartData(formData, boundary));
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else if (upload != null) {
+            } else if (upload != null && !upload.equals("")) {
                 try {
-                    builder.setHeader("content-type", "BINARY");
+                    builder.setHeader("content-type", "application/octet-stream");
                     if (method.equals("POST"))
                         builder.POST(HttpRequest.BodyPublishers.ofFile(Paths.get(upload)));
                     else if (method.equals("PATCH"))
@@ -125,7 +131,7 @@ public class Request implements Serializable {
                     System.out.println("File Not Found");
                 }
             } else {
-                builder.setHeader("content-type", "NO BODY");
+                builder.setHeader("Content-tType", "No-Body");
                 if (method.equals("POST"))
                     builder.POST(HttpRequest.BodyPublishers.noBody());
                 else if (method.equals("PATCH"))
@@ -133,7 +139,7 @@ public class Request implements Serializable {
                 else
                     builder.PUT(HttpRequest.BodyPublishers.noBody());
             }
-            if (headers != null) {
+            if (headers != null && !headers.equals("")) {
                 String[] pairs = headers.split(";");
                 for (int i = 0; i < pairs.length; i++) {
                     String[] splitPairs = pairs[i].split(":");
@@ -380,5 +386,13 @@ public class Request implements Serializable {
 
     public ResponsePanel getResponsePanel() {
         return responsePanel;
+    }
+
+    public void setMiddlePanel(MiddlePanel middlePanel) {
+        this.middlePanel = middlePanel;
+    }
+
+    public void setResponsePanel(ResponsePanel responsePanel) {
+        this.responsePanel = responsePanel;
     }
 }

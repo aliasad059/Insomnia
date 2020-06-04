@@ -99,8 +99,8 @@ public class JsonViewerPanel extends AbstractPanel {
 
         textPane.setCodeFoldingEnabled(true);
         textPane.setHighlightCurrentLine(true);
-        // textPane.setAutoIndentEnabled(true);
-        // textPane.setHyperlinksEnabled(true);
+        textPane.setAutoIndentEnabled(true);
+        textPane.setHyperlinksEnabled(true);
         textPane.setBracketMatchingEnabled(true);
         textPane.setPaintMatchedBracketPair(true);
 
@@ -328,14 +328,11 @@ public class JsonViewerPanel extends AbstractPanel {
             JsonLocation location = jpe.getLocation();
             String locationStr = String.format(" at line %d col %d", location.getLineNr(), location.getColumnNr());
             filteredMsg.append(locationStr);
-        }
-        else if (e instanceof JsonSyntaxException) {
+        } else if (e instanceof JsonSyntaxException) {
 
             String msg = StringUtils.substringAfter(e.getMessage(), "Exception: ");
             filteredMsg.append(msg);
-        }
-
-        else {
+        } else {
             filteredMsg.append(e.getMessage());
         }
 
@@ -346,5 +343,14 @@ public class JsonViewerPanel extends AbstractPanel {
 
     public String getText() {
         return textPane.getText();
+    }
+
+    public void setText(String text) {
+        textPane.setText(text);
+        toPrettyJson();
+        updateUI();
+    }
+    public void setEditable(boolean editable){
+        textPane.setEditable(editable);
     }
 }

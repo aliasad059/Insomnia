@@ -1,7 +1,5 @@
 package GUI;
 
-import com.github.jutil.json.gui.JsonViewerPanel;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
@@ -11,6 +9,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -23,12 +22,13 @@ import static GUI.InsomniaFrame.FRAME_WIDTH;
 public class ResponsePanel extends JPanel {
     JPanel northResponsePanel,
             messageBodyTab, headerTab,
-            rowPanel, JSONPanel;
+            rowPanel, JSONPanel, previewPanel;
     JLabel statusLabel, timeLabel, sizeLabel;
+    JsonViewerPanel jsonViewerPanel;
     DefaultTableModel tableModel;
     JTabbedPane tabs;
-    JTextPane rowTextPane, JSONTextPane;
-    String[] cmStrings = {"Row", "JSON"};
+    JTextPane previewTextPane, rowTextPane, JSONTextPane;
+    String[] cmStrings = { "Row", "Preview","JSON"};
     String[] tableColumnsString = {"NAME", "VALUE"};
     //ArrayList<ArrayList<String>> tableNameValue = new ArrayList<ArrayList<String>>();
     JComboBox cb;
@@ -36,12 +36,14 @@ public class ResponsePanel extends JPanel {
     JButton copyCB;
 
     public ResponsePanel() {
-
+        setResponsePanel();
+    }
+    private void setResponsePanel(){
         setLayout(new BorderLayout());
 
         northResponsePanel = new JPanel(new GridLayout(1, 3));
 
-        statusLabel = new JLabel("ERROR", JLabel.CENTER);
+        statusLabel = new JLabel("Error", JLabel.CENTER);
         statusLabel.setAlignmentX(0);
         statusLabel.setBorder(new LineBorder(Color.GRAY));
         statusLabel.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 20));
@@ -66,12 +68,19 @@ public class ResponsePanel extends JPanel {
         tabs.addTab("Header", headerTab);
         add(tabs);
 
+        previewPanel = new JPanel(new BorderLayout());
+        previewTextPane = new JTextPane();
+        previewTextPane.setEditable(false);
+        previewPanel.add(new JScrollPane(previewTextPane), BorderLayout.CENTER);
+
         rowPanel = new JPanel(new BorderLayout());
         rowTextPane = new JTextPane();
         rowTextPane.setEditable(false);
         rowPanel.add(new JScrollPane(rowTextPane), BorderLayout.CENTER);
+
         JSONPanel = new JPanel(new BorderLayout());
-        JsonViewerPanel jsonViewerPanel = new JsonViewerPanel();
+        jsonViewerPanel = new JsonViewerPanel();
+        jsonViewerPanel.setEditable(false);
         JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
 
         cb = new JComboBox(cmStrings);
@@ -81,7 +90,7 @@ public class ResponsePanel extends JPanel {
 
         cb.addActionListener(new handler());
 
-        headerTable = new JTable( tableModel = new DefaultTableModel());
+        headerTable = new JTable(tableModel = new DefaultTableModel());
         headerTable.setDefaultEditor(Object.class, null);
         JScrollPane sp = new JScrollPane(headerTable);
         headerTab.add(sp, BorderLayout.CENTER);
@@ -105,12 +114,14 @@ public class ResponsePanel extends JPanel {
                 if (comboBox.getSelectedIndex() == 0) {
                     messageBodyTab.remove(1);
                     messageBodyTab.add(rowPanel, BorderLayout.CENTER);
-                    updateUI();
+                } else if (comboBox.getSelectedIndex() == 1) {
+                    messageBodyTab.remove(1);
+                    messageBodyTab.add(previewPanel,BorderLayout.CENTER);
                 } else {
                     messageBodyTab.remove(1);
                     messageBodyTab.add(JSONPanel, BorderLayout.CENTER);
-                    updateUI();
                 }
+                updateUI();
             }
             /**
              * coping the table to the clipboard
@@ -120,7 +131,7 @@ public class ResponsePanel extends JPanel {
                 string += '\n';
                 for (int i = 0; i < headerTable.getRowCount(); i++) {
                     for (int j = 0; j < 2; j++) {
-                        string += headerTable.getValueAt(i,j);
+                        string += headerTable.getValueAt(i, j);
                         string += '\t';
                     }
                     string += '\n';
@@ -136,8 +147,14 @@ public class ResponsePanel extends JPanel {
         this.sizeLabel.setText(size);
     }
 
-    public void setStatusLabel(String status) {
-        this.statusLabel.setText(status);
+    public void setStatusLabel(JLabel status) {
+        status.setAlignmentX(0);
+        status.setBorder(new LineBorder(Color.GRAY));
+        status.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 20));
+        northResponsePanel.remove(0);
+        northResponsePanel.add(status,0);
+        this.statusLabel = status;
+        this.updateUI();
     }
 
     public void setTimeLabel(String time) {
@@ -146,15 +163,24 @@ public class ResponsePanel extends JPanel {
 
     public void setHeaders(Map<String, List<String>> headers) {
         headerTable.removeAll();
-        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"KEY","VALUE"},0);
-        headers.forEach((k, v) -> tableModel.addRow( new String[]{k, v.toString()}));
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"KEY", "VALUE"}, 0);
+        headers.forEach((k, v) -> tableModel.addRow(new String[]{k, v.toString()}));
         headerTable.setModel(tableModel);
     }
 
-    public void setJSONBodyText(String bodyText) {
+    public void setJSONBodyContent(String bodyText) {
+        jsonViewerPanel.setText(bodyText);
     }
 
-    public void setRowBodyText(String bodyText) {
+    public void setRowBodyContent(String bodyText) {
         rowTextPane.setText(bodyText);
+    }
+
+    public void setPreviewContent(Image image) {
+        previewTextPane.insertIcon(new ImageIcon(image));
+    }
+    public void resetPanel(){
+        this.removeAll();
+        setResponsePanel();
     }
 }

@@ -153,8 +153,7 @@ public class MiddlePanel extends JPanel {
         jsonViewerPanel = new JsonViewerPanel();
 
         JSONPanel = new JPanel(new BorderLayout());
-        JScrollPane sp = new JScrollPane(jsonViewerPanel);
-        JSONPanel.add(sp, BorderLayout.CENTER);
+        JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
 
         bodyFormPanel = new JPanel();
 
@@ -247,6 +246,7 @@ public class MiddlePanel extends JPanel {
         public void focusGained(FocusEvent e) {
             if (e.getSource() == url) {
                 urlPreviewField.setText(url.getText());
+                setQueries();
             }
         }
 
@@ -259,6 +259,7 @@ public class MiddlePanel extends JPanel {
         public void focusLost(FocusEvent e) {
             if (e.getSource() == url) {
                 urlPreviewField.setText(url.getText());
+                setQueries();
             }
         }
     }
@@ -267,17 +268,18 @@ public class MiddlePanel extends JPanel {
         owner.setMethod((String) requestMethodType.getSelectedItem());
 
         owner.setUri(urlPreviewField.getText());
+
         if (!urlPreviewField.getText().equals("")) {
             owner.setCompleted(true);
         }
         //no body
-        if (bodyTabStatus.getSelectedIndex() == 1) {
+        if (bodyTabStatus.getSelectedIndex() == 0) {
             owner.setUpload(null);
             owner.setData(null);
             owner.setJson(null);
         }
         //form data
-        else if (bodyTabStatus.getSelectedIndex() == 2) {
+        else if (bodyTabStatus.getSelectedIndex() == 1) {
             String formDataString = "";
             for (Form formDatum : formData) {
                 if (formDatum.IsActive()) {
@@ -294,7 +296,7 @@ public class MiddlePanel extends JPanel {
             owner.setUpload(null);
         }
         //json
-        else if (bodyTabStatus.getSelectedIndex() != 3) {
+        else if (bodyTabStatus.getSelectedIndex() == 2) {
             owner.setJson(jsonViewerPanel.getText());
             owner.setData(null);
             owner.setUpload(null);
@@ -306,18 +308,20 @@ public class MiddlePanel extends JPanel {
             owner.setJson(null);
         }
         owner.setSaveRequest(true);
+
         String headerString = "";
-        for (int i = 0; i < headers.size(); i++) {
-            if (headers.get(i).IsActive()) {
-                headerString += headers.get(i).getNameField().getText();
+        for (Form header : headers) {
+            if (header.IsActive()) {
+                headerString += header.getNameField().getText();
                 headerString += ":";
-                headerString += headers.get(i).getValueField().getText();
+                headerString += header.getValueField().getText();
                 headerString += ";";
             }
         }
         if (!headerString.equals("")) {
             headerString = headerString.substring(0, headerString.length() - 1);
         }
+        System.out.println(headerString);
         owner.setHeaders(headerString);
     }
 
@@ -326,15 +330,15 @@ public class MiddlePanel extends JPanel {
      * a form has name ,value ,status and remove items
      */
     class Form extends JPanel {
-        private JPanel owner;
+        private JPanel formOwner;
         private JTextField nameField, valueField;
         private JCheckBox isActive;
         private JButton removeForm;
         private Form form;
 
-        public Form(JPanel owner) {
+        public Form(JPanel formOwner) {
             this.setBorder(BorderFactory.createLoweredBevelBorder());
-            this.owner = owner;
+            this.formOwner = formOwner;
             nameField = new JTextField("Name");
             //nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
             nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
@@ -356,12 +360,17 @@ public class MiddlePanel extends JPanel {
             removeForm.addActionListener(new handler());
             nameField.addFocusListener(new handler());
             valueField.addFocusListener(new handler());
-            if (owner == queryPanel) {
+            if (formOwner == queryPanel) {
+                System.out.println("ADD to query");
                 queries.add(this);
-            } else if (owner == headerPanel) {
+            } else if (formOwner == headerPanel) {
+                System.out.println("ADD to headers");
                 headers.add(this);
-            } else if (owner == bodyFormPanel) {
+            } else if (formOwner == bodyFormPanel) {
+                System.out.println("ADD to form");
+
                 formData.add(this);
+                System.out.println();
             }
             form = this;
         }
@@ -389,8 +398,9 @@ public class MiddlePanel extends JPanel {
              */
             @Override
             public void focusGained(FocusEvent e) {
+                //add a new form
                 if (e.getSource() == nameField || e.getSource() == valueField) {
-                    owner.add(new Form(owner));
+                    formOwner.add(new Form(formOwner));
                 }
             }
 
@@ -401,6 +411,10 @@ public class MiddlePanel extends JPanel {
              */
             @Override
             public void focusLost(FocusEvent e) {
+                //update query as the fields changed
+                if (e.getSource() == nameField || e.getSource() == valueField) {
+                    setQueries();
+                }
             }
 
             /**
@@ -413,46 +427,21 @@ public class MiddlePanel extends JPanel {
                 if (e.getSource() == isActive) {
                     if (isActive.isSelected()) {
                         form.setBorder(BorderFactory.createRaisedBevelBorder());
-                        if (owner == queryPanel) {
-                            String urlPreview = url.getText();
-                            urlPreview += '?';
-                            for (int i = 0; i < queries.size(); i++) {
-                                if (queries.get(i).IsActive()) {
-                                    urlPreview += Form.this.getNameField().getText();
-                                    urlPreview += '=';
-                                    urlPreview += Form.this.getValueField().getText();
-                                    urlPreview += '&';
-                                }
-                            }
-                            urlPreview = urlPreview.substring(0, urlPreview.length() - 1);
-                            urlPreviewField.setText(urlPreview);
-                        }
                     } else {
                         form.setBorder(BorderFactory.createLoweredBevelBorder());
-                        if (owner == queryPanel) {
-                            String urlPreview = url.getText();
-                            urlPreview += '?';
-                            for (int i = 0; i < queries.size(); i++) {
-                                if (queries.get(i).IsActive() && queries.get(i) != Form.this) {
-                                    urlPreview += Form.this.getNameField().getText();
-                                    urlPreview += '=';
-                                    urlPreview += Form.this.getValueField().getText();
-                                    urlPreview += '&';
-                                }
-                            }
-                            urlPreview = urlPreview.substring(0, urlPreview.length() - 1);
-                            urlPreviewField.setText(urlPreview);
-                        }
+                    }
+                    if (formOwner == queryPanel) {
+                        setQueries();
                     }
                 } else if (e.getSource() == removeForm) {
                     int a = JOptionPane.showConfirmDialog(form, "Are You Sure?");
                     if (a == JOptionPane.YES_OPTION) {
-                        owner.remove(form);
-                        if (owner == queryPanel) {
+                        formOwner.remove(form);
+                        if (formOwner == queryPanel) {
                             queries.remove(form);
-                        } else if (owner == headerPanel) {
+                        } else if (formOwner == headerPanel) {
                             headers.remove(form);
-                        } else if (owner == bodyFormPanel) {
+                        } else if (formOwner == bodyFormPanel) {
                             formData.remove(form);
                         }
                     }
@@ -460,7 +449,20 @@ public class MiddlePanel extends JPanel {
             }
         }
     }
-
+    private void setQueries(){
+        String urlPreview = url.getText();
+        urlPreview += '?';
+        for (Form queryForm : queries) {
+            if (queryForm.IsActive()) {
+                urlPreview += queryForm.getNameField().getText();
+                urlPreview += '=';
+                urlPreview += queryForm.getValueField().getText();
+                urlPreview += '&';
+            }
+        }
+        urlPreview = urlPreview.substring(0, urlPreview.length() - 1);
+        urlPreviewField.setText(urlPreview);
+    }
     public void setOwner(Request owner) {
         this.owner = owner;
     }
