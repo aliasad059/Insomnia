@@ -109,7 +109,7 @@ public class ConsoleClient {
                 double startTime = System.nanoTime();
                 HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
                 double elapsedTime = System.nanoTime() - startTime;
-                request.setLastResponse(response);
+//                request.setLastResponse(response);
 
                 String timeSize = "nS";
                 if (elapsedTime > 1000000000){
@@ -170,7 +170,7 @@ public class ConsoleClient {
      */
     private void load() {
 
-        try (FileInputStream finRequests = new FileInputStream("./../save/requests.insomnia");
+        try (FileInputStream finRequests = new FileInputStream("./../save/requests.txt");
              ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
         ) {
             while (true) {
@@ -185,8 +185,8 @@ public class ConsoleClient {
 
 
         File [] lists = new File("./../save/lists").listFiles();
-        for (int i = 0; i < lists.length; i++) {
 
+        for (int i = 0; i < lists.length; i++) {
             try (FileInputStream finLists = new FileInputStream(lists[i]);
                  ObjectInputStream listsReader = new ObjectInputStream(finLists)
             ) {
@@ -359,7 +359,7 @@ public class ConsoleClient {
                         args.remove(index);
                     }
                 } else {
-                    requestToInterpret.saveRequest();
+                    requestToInterpret.saveRequest("./../save/requests.txt");
                 }
             }
         }

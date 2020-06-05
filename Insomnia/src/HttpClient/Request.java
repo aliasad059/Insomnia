@@ -1,6 +1,5 @@
 package HttpClient;
 
-import GUI.InsomniaFrame;
 import GUI.MiddlePanel;
 import GUI.ResponsePanel;
 
@@ -23,11 +22,10 @@ public class Request implements Serializable {
     private MiddlePanel middlePanel;
     private ResponsePanel responsePanel;
     private JLabel methodLabel;
-    private JButton requestButton;
     private HttpRequest request;
     private boolean completed;
-    private HttpResponse<String> lastResponse;
-    private String uri, method, headers, output, data, json, upload;
+    private HttpResponse<byte[]> lastResponse;
+    private String requestName, uri, method, headers, output, data, json, upload;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
     public Request() {
@@ -104,15 +102,13 @@ public class Request implements Serializable {
                 }
                 System.out.println(formData);
                 try {
-                    String boundary = ""+new Date().getTime();
+                    String boundary = "" + new Date().getTime();
                     builder.setHeader("content-type", "multipart/form-data; boundary=" + boundary);
                     if (method.equals("POST")) {
-                        builder.POST(ofMimeMultipartData(formData, boundary ));
-                    }
-                    else if (method.equals("PATCH")) {
+                        builder.POST(ofMimeMultipartData(formData, boundary));
+                    } else if (method.equals("PATCH")) {
                         builder.method("PATCH", ofMimeMultipartData(formData, boundary));
-                    }
-                    else {
+                    } else {
                         builder.PUT(ofMimeMultipartData(formData, boundary));
                     }
 
@@ -215,7 +211,7 @@ public class Request implements Serializable {
      *
      * @param lastResponse last response
      */
-    public void setLastResponse(HttpResponse<String> lastResponse) {
+    public void setLastResponse(HttpResponse<byte[]> lastResponse) {
         this.lastResponse = lastResponse;
         if (output != null) {
             saveOutput(output);
@@ -225,9 +221,9 @@ public class Request implements Serializable {
     /**
      * save request
      */
-    public void saveRequest() {
+    public void saveRequest(String path) {
         ArrayList<Request> requests = new ArrayList<>();
-        File file = new File("./../save/requests.insomnia");
+        File file = new File(path);
         try (FileInputStream finRequests = new FileInputStream(file);
              ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
         ) {
@@ -244,12 +240,13 @@ public class Request implements Serializable {
 
 
         try (
-                FileOutputStream fout = new FileOutputStream("./../save/requests.insomnia", true);
+                FileOutputStream fout = new FileOutputStream(path, true);
                 ObjectOutputStream objWriter = new ObjectOutputStream(fout)) {
             for (int i = 0; i < requests.size(); i++) {
                 objWriter.writeObject(requests.get(i));
             }
-            objWriter.writeObject(this);
+            if (!requests.contains(this))
+                objWriter.writeObject(this);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -267,7 +264,7 @@ public class Request implements Serializable {
             File file = new File("./../save/outputs/" + outputName + ".txt");
             FileOutputStream fis = new FileOutputStream(file);
             PrintWriter printWriter = new PrintWriter(fis);
-            printWriter.write(lastResponse.body());
+            printWriter.write(new String(lastResponse.body()));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -292,7 +289,7 @@ public class Request implements Serializable {
         this.completed = completed;
     }
 
-    public HttpResponse<String> getLastResponse() {
+    public HttpResponse<byte[]> getLastResponse() {
         return lastResponse;
     }
 
@@ -310,20 +307,16 @@ public class Request implements Serializable {
 
     public void setMethod(String method) {
         this.method = method;
-        methodLabel.setText(method.substring(0,3));
+        methodLabel.setText(method.substring(0, 3));
         if (method.equals("GET")) {
             methodLabel.setForeground(Color.MAGENTA);
-        }
-        else if (method.equals("POST")) {
+        } else if (method.equals("POST")) {
             methodLabel.setForeground(Color.GREEN);
-        }
-        else if (method.equals("PUT")) {
+        } else if (method.equals("PUT")) {
             methodLabel.setForeground(Color.YELLOW);
-        }
-        else if (method.equals("PATCH")) {
+        } else if (method.equals("PATCH")) {
             methodLabel.setForeground(Color.ORANGE);
-        }
-        else if (method.equals("DELETE")) {
+        } else if (method.equals("DELETE")) {
             methodLabel.setForeground(Color.RED);
         }
         methodLabel.updateUI();
@@ -411,5 +404,20 @@ public class Request implements Serializable {
 
     public void setResponsePanel(ResponsePanel responsePanel) {
         this.responsePanel = responsePanel;
+    }
+
+    public String getRequestName() {
+        return requestName;
+    }
+
+    public void setRequestName(String requestName) {
+        this.requestName = requestName;
+    }
+
+    public void initMiddlePanel() {
+    }
+
+    public void initResponsePanel() {
+
     }
 }

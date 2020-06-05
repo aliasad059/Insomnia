@@ -179,7 +179,7 @@ public class MiddlePanel extends JPanel {
     /**
      * handling main events of middle panel
      */
-    private class handler implements ActionListener, FocusListener {
+    public class handler implements ActionListener, FocusListener {
         /**
          * choosing the format of the body panel as selected in combobox
          *
@@ -326,7 +326,7 @@ public class MiddlePanel extends JPanel {
      * this class makes us form
      * a form has name ,value ,status and remove items
      */
-    class Form extends JPanel {
+    public class Form extends JPanel {
         private JPanel formOwner;
         private JTextField nameField, valueField;
         private JCheckBox isActive;
@@ -387,7 +387,7 @@ public class MiddlePanel extends JPanel {
         /**
          * handling form class events
          */
-        class handler implements FocusListener, ActionListener {
+        public class handler implements FocusListener, ActionListener {
             /**
              * if the user focused on the fields , make a new form
              *

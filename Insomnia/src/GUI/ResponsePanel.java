@@ -27,7 +27,8 @@ public class ResponsePanel extends JPanel {
     JsonViewerPanel jsonViewerPanel;
     DefaultTableModel tableModel;
     JTabbedPane tabs;
-    JTextPane previewTextPane, rowTextPane, JSONTextPane;
+    JTextPane previewTextPane, JSONTextPane;
+    JTextArea rowTextArea;
     String[] cmStrings = { "Row", "Preview","JSON"};
     String[] tableColumnsString = {"NAME", "VALUE"};
     //ArrayList<ArrayList<String>> tableNameValue = new ArrayList<ArrayList<String>>();
@@ -74,9 +75,9 @@ public class ResponsePanel extends JPanel {
         previewPanel.add(new JScrollPane(previewTextPane), BorderLayout.CENTER);
 
         rowPanel = new JPanel(new BorderLayout());
-        rowTextPane = new JTextPane();
-        rowTextPane.setEditable(false);
-        rowPanel.add(new JScrollPane(rowTextPane), BorderLayout.CENTER);
+        rowTextArea = new JTextArea();
+        rowTextArea.setEditable(false);
+        rowPanel.add(new JScrollPane(rowTextArea), BorderLayout.CENTER);
 
         JSONPanel = new JPanel(new BorderLayout());
         jsonViewerPanel = new JsonViewerPanel();
@@ -102,7 +103,7 @@ public class ResponsePanel extends JPanel {
     /**
      * handling the main events of the response panel
      */
-    class handler implements ActionListener {
+    public class handler implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -173,7 +174,7 @@ public class ResponsePanel extends JPanel {
     }
 
     public void setRowBodyContent(String bodyText) {
-        rowTextPane.setText(bodyText);
+        rowTextArea.setText(bodyText);
     }
 
     public void setPreviewContent(Image image) {

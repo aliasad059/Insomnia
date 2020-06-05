@@ -1,9 +1,6 @@
 package HttpClient;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 
 public class ReqList implements Serializable {
@@ -13,14 +10,14 @@ public class ReqList implements Serializable {
     public ReqList(String listName) {
         requests = new ArrayList<>();
         this.listName = listName;
-        saveList();
+        saveList("./../save/lists/list_"+listName+".txt");
     }
 
     /**
      * save list
      */
-    public void saveList(){
-        try (FileOutputStream fout=new FileOutputStream("./../save/lists/"+listName+".insomnia");
+    public void saveList(String path){
+        try (FileOutputStream fout=new FileOutputStream(path);
              ObjectOutputStream objWriter=new ObjectOutputStream(fout)){
             objWriter.writeObject(this);
         } catch (IOException e) {
@@ -42,7 +39,7 @@ public class ReqList implements Serializable {
      */
     public void addReq(Request requestToAdd){
         requests.add(requestToAdd);
-        saveList();
+        saveList("./../save/lists/list_"+listName+".txt");
     }
 
     /**
@@ -62,5 +59,9 @@ public class ReqList implements Serializable {
      */
     public Request getRequest(int index) {
         return requests.get(index);
+    }
+
+    public ArrayList<Request> getRequests() {
+        return requests;
     }
 }

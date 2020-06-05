@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import HttpClient.GUIClient;
 import com.github.weisj.darklaf.*;
 import com.github.weisj.darklaf.theme.*;
 
@@ -167,11 +168,12 @@ public class InsomniaMenuBar extends JMenuBar {
     /**
      * handles the main events of the menubar
      */
-    private class handler implements ActionListener, ChangeListener {
+    public class handler implements ActionListener, ChangeListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitItem) {
                 //save setting before terminating or making it system tray
+//                GUIClient.save();
                 System.exit(0);
             } else if (e.getSource() == optionsItem) {
                 makeOptionDialog();
@@ -227,7 +229,7 @@ public class InsomniaMenuBar extends JMenuBar {
         }
     }
 
-    private class InsomniaSystemTray {
+    public class InsomniaSystemTray {
         public void makeSystemTray() {
             //checking for support
             if (!SystemTray.isSupported()) {
@@ -261,6 +263,7 @@ public class InsomniaMenuBar extends JMenuBar {
             close.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+//                    GUIClient.save();
                     System.exit(0);
                 }
             });

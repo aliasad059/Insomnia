@@ -2,12 +2,10 @@ package HttpClient;
 
 import GUI.InsomniaMenuBar;
 import GUI.ResponsePanel;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -26,8 +24,47 @@ public class GUIClient {
     public static void addRequestTo() {
     }
 
+//    public static void save() {
+//        ArrayList<JFrame> workSpaces = Display.getWorkSpaces();
+//        JFrame showingFrame = Display.getShowingFrame();
+//
+//        try (XMLEncoder workSpacesEncoder = new XMLEncoder(new FileOutputStream(new File("workSpaces.xml")));
+//             XMLEncoder showingFrameEncoder = new XMLEncoder(new FileOutputStream(new File("showingFrame.xml")))
+//        ) {
+//            showingFrameEncoder.setExceptionListener(new ExceptionListener() {
+//                public void exceptionThrown(Exception e) {
+//                    System.out.println("Exception! :"+e.toString());
+//                }
+//            });
+//            workSpacesEncoder.setExceptionListener(new ExceptionListener() {
+//                public void exceptionThrown(Exception e) {
+//                    System.out.println("Exception! :"+e.toString());
+//                }
+//            });
+//            workSpacesEncoder.writeObject(workSpaces);
+//            showingFrameEncoder.writeObject(showingFrame);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("save done");
+//    }
+//
+//    public static Display load() {
+//        try {
+//            InputStream inWorkSpaces = ;
+//            XMLDecoder workSpacesDecoder = new XMLDecoder(new FileInputStream("workSpaces.xml"));
+//            ArrayList<JFrame> workSpaces = (ArrayList<JFrame>) workSpacesDecoder.readObject();
+//            InputStream inShowingFrame = new FileInputStream("showingFrame.xml");
+//            XMLDecoder showingFrameDecoder = new XMLDecoder(inShowingFrame);
+//            JFrame showingFrame = (JFrame) showingFrameDecoder.readObject();
+//            return new Display(workSpaces,showingFrame);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+
     public static void runRequest(Request requestToRun) {
-        //TODO: run the request in background and then set the response panel when it is done
         SendRequest sendRequest = new SendRequest(requestToRun);
         try {
             sendRequest.execute();
@@ -58,21 +95,14 @@ public class GUIClient {
          * @throws Exception if unable to compute a result
          */
         @Override
-        protected HttpResponse<byte[]> doInBackground()   {
-            System.out.println("START DOINBACGROUND");
+        protected HttpResponse<byte[]> doInBackground() {
             HttpRequest httpRequest = requestToRun.makeRequest();
-            System.out.println("START DOINBACGROUND");
-
             if (httpRequest == null) {
                 System.out.println("NULL");
                 return null;
             } else {
-                System.out.println("START DOINBACGROUND");
-
                 HttpClient client;
                 HttpClient.Builder builder = HttpClient.newBuilder();
-                System.out.println("START DOINBACGROUND");
-
                 if (InsomniaMenuBar.isFollowRedirect()) {
                     requestToRun.setFollowRedirect(true);
                     builder.followRedirects(HttpClient.Redirect.ALWAYS);
@@ -82,24 +112,16 @@ public class GUIClient {
                 }
                 builder.version(HttpClient.Version.HTTP_1_1);
                 client = builder.build();
-                System.out.println("START DOINBACGROUND");
 
                 double startTime = System.nanoTime();
-                System.out.println("SENDING");
                 HttpResponse<byte[]> response = null;
                 try {
                     response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
                 } catch (IOException | InterruptedException e) {
-                    System.out.println("EXIOIOIOIO");
                     e.printStackTrace();
                 }
-                System.out.println("SENT");
-                if (response == null) {
-                    System.out.println("respone is null");
-                }
                 elapsedTime = System.nanoTime() - startTime;
-//                requestToRun.setLastResponse(response);
-                System.out.println("YES");
+                requestToRun.setLastResponse(response);
                 return response;
             }
         }
@@ -108,14 +130,8 @@ public class GUIClient {
         protected void done() {
             HttpResponse<byte[]> response = null;
             try {
-                System.out.println("Entering GET");
                 response = get();
-                System.out.println("GET DONE");
-                if (response == null) {
-                    System.out.println("GET RETURNS NULL");
-                }
             } catch (InterruptedException | ExecutionException e) {
-                System.out.println("EXEPTIONEXEPTIONEXEPTIONEXEPTIONEXEPTIONEXEPTION");
                 e.printStackTrace();
             }
             ResponsePanel responsePanel = requestToRun.getResponsePanel();
@@ -134,29 +150,29 @@ public class GUIClient {
             responsePanel.setSizeLabel(response.body().length / 1024 + "kB");
 
             int statusCode = response.statusCode();
-            if (statusCode>=500){
-                JLabel label = new JLabel(statusCode+" Error");
+            if (statusCode >= 500) {
+                JLabel label = new JLabel(statusCode + " Error");
                 label.setOpaque(true);
                 label.setBackground(Color.RED);
                 label.setForeground(Color.BLACK);
                 label.setToolTipText("Server Error");
                 responsePanel.setStatusLabel(label);
-            }else if (statusCode>=400){
-                JLabel label = new JLabel(statusCode+" Error");
+            } else if (statusCode >= 400) {
+                JLabel label = new JLabel(statusCode + " Error");
                 label.setOpaque(true);
                 label.setBackground(Color.RED);
                 label.setForeground(Color.BLACK);
                 label.setToolTipText("Client Error");
                 responsePanel.setStatusLabel(label);
-            }else if (statusCode>=300){
-                JLabel label = new JLabel(statusCode+" Moved");
+            } else if (statusCode >= 300) {
+                JLabel label = new JLabel(statusCode + " Moved");
                 label.setOpaque(true);
                 label.setBackground(Color.ORANGE);
                 label.setForeground(Color.BLACK);
                 label.setToolTipText("Redirection");
                 responsePanel.setStatusLabel(label);
-            }else if (statusCode>=200){
-                JLabel label = new JLabel(statusCode+" OK");
+            } else if (statusCode >= 200) {
+                JLabel label = new JLabel(statusCode + " OK");
                 label.setOpaque(true);
                 label.setBackground(Color.GREEN);
                 label.setForeground(Color.BLACK);

@@ -1,6 +1,7 @@
 package GUI;
 
 import HttpClient.GUIClient;
+import HttpClient.ReqList;
 import HttpClient.Request;
 
 import javax.swing.*;
@@ -96,12 +97,11 @@ public class RequestsPanel extends JPanel {
      *
      * @param name   name of request
      * @param method method of request
+     * @param reqList request folder null if it does not belong to any folder
      * @return the made request
      */
-    private JPanel makeRequest(String name, String method) {
+    private JPanel makeRequest(String name, String method,ReqList reqList) {
         Request request = new Request();
-        GUIClient.addRequest(request);
-
         JPanel panel = new JPanel();
         JLabel label = new JLabel(method);
         if (method.substring(0, 3).equals("GET")) {
@@ -136,7 +136,77 @@ public class RequestsPanel extends JPanel {
                 frame.setLeftAndRightPanels();
             }
         });
+
+        requestButton.doClick();
         request.setMethodLabel(label);
+        request.setMethod(method);
+        request.setRequestName(name);
+
+        label.setLabelFor(requestButton);
+        panel.add(label);
+        panel.add(requestButton);
+        panel.setVisible(true);
+        panel.setAlignmentX(0);
+        updateUI();
+        requestsButton.add(panel);
+
+        if (reqList != null){
+            reqList.addReq(request);
+            frame.addReqlistToFrameList(reqList);
+        }else {
+            frame.addRequestToFrameList(request);
+        }
+
+        return panel;
+    }
+
+    /**
+     * loads a request JPanel to be added to the screen
+     * @param request
+     * @return Jpanel contants a Jlaber and a button
+     */
+    private JPanel makeRequest(Request request) {
+        GUIClient.addRequest(request);
+        String method = request.getMethod();
+        String name = request.getRequestName();
+        JPanel panel = new JPanel();
+        JLabel label = new JLabel(method.substring(0,3));
+        if (method.substring(0, 3).equals("GET")) {
+            label.setForeground(Color.MAGENTA);
+        }
+        if (method.substring(0, 3).equals("POS")) {
+            label.setForeground(Color.GREEN);
+        }
+        if (method.substring(0, 3).equals("PUT")) {
+            label.setForeground(Color.YELLOW);
+        }
+        if (method.substring(0, 3).equals("PAT")) {
+            label.setForeground(Color.ORANGE);
+        }
+        if (method.substring(0, 3).equals("DEL")) {
+            label.setForeground(Color.RED);
+        }
+        if (method.substring(0, 3).equals("OPT")) {
+            label.setForeground(Color.BLUE);
+        }
+        if (method.substring(0, 3).equals("HEA")) {
+            label.setForeground(Color.CYAN);
+        }
+
+        JButton requestButton = new JButton(name);
+
+        requestButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setCurrentMiddlePanel(request.getMiddlePanel());
+                frame.setCurrentResponsePanel(request.getResponsePanel());
+                frame.setLeftAndRightPanels();
+            }
+        });
+
+        requestButton.doClick();
+        request.setMethodLabel(label);
+        request.setMethod(method);
 
         label.setLabelFor(requestButton);
         panel.add(label);
@@ -148,12 +218,15 @@ public class RequestsPanel extends JPanel {
         return panel;
     }
 
-    /**
-     * make a folder
-     *
-     * @param name folder's name
-     */
+        /**
+         * make a folder
+         *
+         * @param name folder's name
+         */
     private void addFolder(String name) {
+        ReqList reqList = new ReqList(name);
+        frame.addReqlistToFrameList(reqList);
+
         JButton newFolder = new JButton(name);
         JPanel panel = new JPanel();
         panel.setBorder(new LineBorder(Color.GRAY));
@@ -186,7 +259,7 @@ public class RequestsPanel extends JPanel {
                 newRequestDialog.setVisible(true);
                 JTextField nameFiled = new JTextField("My Request");
                 nameFiled.setBorder(new TitledBorder("Name"));
-                String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"};
+                String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
                 JComboBox cb = new JComboBox(methodsName);
                 cb.setSelectedIndex(0);
 
@@ -201,7 +274,7 @@ public class RequestsPanel extends JPanel {
                                 folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight += 40
                         ));
                         folderPanelToAddComponent.
-                                add(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3)));
+                                add(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3),reqList));
                         newRequestDialog.setVisible(false);
                         newRequestDialog.dispose();
                     }
@@ -335,7 +408,7 @@ public class RequestsPanel extends JPanel {
                         createRequestButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                addRequest(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3)));
+                                addRequest(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3),null));
                                 newRequestDialog.setVisible(false);
                                 newRequestDialog.dispose();
                             }

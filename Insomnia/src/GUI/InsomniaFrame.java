@@ -1,9 +1,14 @@
 package GUI;
 
+import HttpClient.GUIClient;
+import HttpClient.ReqList;
+import HttpClient.Request;
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.theme.DarculaTheme;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import javax.swing.*;
 
 /**
@@ -18,8 +23,10 @@ public class InsomniaFrame extends JFrame {
     static final int FRAME_WIDTH = 1250, FRAME_HEIGHT = 600;
     JPanel requestsPanel, currentMiddlePanel, currentResponsePanel;
     JMenuBar menuBar;
+    ArrayList<Request> requests;
+    ArrayList<ReqList> reqLists;
 
-    InsomniaFrame(String title) {
+    public InsomniaFrame(String title) {
         super(title);
         if (SystemTray.isSupported()) {
 
@@ -32,7 +39,7 @@ public class InsomniaFrame extends JFrame {
             popup.add(openItem);
             popup.add(exitItem);
 
-            Image image = Toolkit.getDefaultToolkit().getImage("./../src/Icons/Insomnia.png");
+            Image image = Toolkit.getDefaultToolkit().getImage("./src/Icons/Insomnia.png");
 
             tray = SystemTray.getSystemTray();
             trayIcon = new TrayIcon(image, "Insomnia", popup);
@@ -45,14 +52,60 @@ public class InsomniaFrame extends JFrame {
         makePanels();
     }
 
-    /**
-     * makes the 3 panels of the insomnia app and relate them with a split pane
-     */
-    private void makePanels(){
+    public InsomniaFrame(String title ,ArrayList<ReqList> reqLists, ArrayList<Request> requests) {
+        super(title);
+        this.reqLists = reqLists;
+        this.requests = requests;
+        if (SystemTray.isSupported()) {
+
+            PopupMenu popup = new PopupMenu();
+            exitItem = new MenuItem("Exit");
+            openItem = new MenuItem("Open");
+            exitItem.addActionListener(new handler());
+            openItem.addActionListener(new handler());
+
+            popup.add(openItem);
+            popup.add(exitItem);
+
+            Image image = Toolkit.getDefaultToolkit().getImage("./src/Icons/Insomnia.png");
+
+            tray = SystemTray.getSystemTray();
+            trayIcon = new TrayIcon(image, "Insomnia", popup);
+            trayIcon.setImageAutoSize(true);
+        } else {
+            System.out.println("system tray not supported");
+        }
+
+        addWindowListener(new handler());
+
         LafManager.install(new DarculaTheme());
         this.validate();
         requestsPanel = new RequestsPanel(this);
-        currentMiddlePanel =new MiddlePanel();
+        currentMiddlePanel = requests.get(0).getMiddlePanel();
+        currentResponsePanel = requests.get(0).getMiddlePanel();
+        menuBar = new InsomniaMenuBar(this);
+
+        this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        //frame.setLayout(new GridLayout(1, 3));
+        this.setJMenuBar(menuBar);
+        currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
+        currentRightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
+        leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels);
+        leftAndRightPanels.setDividerLocation(FRAME_WIDTH / 6);
+
+        this.getContentPane().add(leftAndRightPanels);
+        this.setVisible(false);
+    }
+
+    /**
+     * makes the 3 panels of the insomnia app and relate them with a split pane
+     */
+    private void makePanels() {
+        LafManager.install(new DarculaTheme());
+        this.validate();
+        requestsPanel = new RequestsPanel(this);
+        currentMiddlePanel = new MiddlePanel();
         currentResponsePanel = new ResponsePanel();
         menuBar = new InsomniaMenuBar(this);
 
@@ -77,9 +130,10 @@ public class InsomniaFrame extends JFrame {
         /**
          * Invoked when a window is in the process of being closed.
          * The close operation can be overridden at this point.
-         *
+         * <p>
          * if the window is closing and the user chose exit on close, the program will be terminated
          * else it will be in system tray
+         *
          * @param e
          */
         @Override
@@ -93,6 +147,7 @@ public class InsomniaFrame extends JFrame {
                 }
             } else {
                 //TODO: save before exit
+//                GUIClient.save();
                 System.exit(0);
             }
         }
@@ -130,6 +185,7 @@ public class InsomniaFrame extends JFrame {
 
     /**
      * get right panels
+     *
      * @return right panels
      */
     public JSplitPane getRightPanels() {
@@ -138,6 +194,7 @@ public class InsomniaFrame extends JFrame {
 
     /**
      * get left and right panels means whole of the frame
+     *
      * @return left and right panels
      */
     public JSplitPane getLeftAndRightPanels() {
@@ -148,7 +205,7 @@ public class InsomniaFrame extends JFrame {
         currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
     }
 
-    public void setLeftAndRightPanels( ) {
+    public void setLeftAndRightPanels() {
         setRightPanels();
         this.getContentPane().remove(0);
         this.getContentPane().add(leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels));
@@ -160,6 +217,22 @@ public class InsomniaFrame extends JFrame {
 
     public void setCurrentResponsePanel(JPanel currentResponsePanel) {
         this.currentResponsePanel = currentResponsePanel;
+    }
+
+    public void addRequestToFrameList(Request request) {
+        requests.add(request);
+    }
+
+    public void addReqlistToFrameList(ReqList reqList) {
+        reqLists.add(reqList);
+    }
+
+    public ArrayList<Request> getRequests() {
+        return requests;
+    }
+
+    public ArrayList<ReqList> getReqLists() {
+        return reqLists;
     }
 
     public void setCurrentMiddlePanel(JPanel currentMiddlePanel) {
