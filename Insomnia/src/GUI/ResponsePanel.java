@@ -199,24 +199,26 @@ public class ResponsePanel extends JPanel {
     }
 
     public void updatePanel(Response response) {
-        setTimeLabel(response.getResponseTime());
-        setSizeLabel(response.getResponseSize());
-        setStatusLabel(response.getStatusLabel());
+        if (response != null) {
+            setTimeLabel(response.getResponseTime());
+            setSizeLabel(response.getResponseSize());
+            setStatusLabel(response.getStatusLabel());
 
-        if (response.doesContainPic()) {
-            System.out.println("IMAGE");
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(response.getBody());
-            try {
-                Image image = ImageIO.read(byteArrayInputStream);
-                setPreviewContent(image);
-            } catch (IOException ignored) {
+            if (response.doesContainPic()) {
+                System.out.println("IMAGE");
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(response.getBody());
+                try {
+                    Image image = ImageIO.read(byteArrayInputStream);
+                    setPreviewContent(image);
+                } catch (IOException ignored) {
+                }
             }
+            if (response.isJson()) {
+                setJSONBodyContent(new String(response.getBody()));
+            }
+            setRowBodyContent(new String(response.getBody()));
+            setHeaders(response.getHeaders());
+            revalidate();
         }
-        if (response.isJson()) {
-            setJSONBodyContent(new String(response.getBody()));
-        }
-        setRowBodyContent(new String(response.getBody()));
-        setHeaders(response.getHeaders());
-        revalidate();
     }
 }

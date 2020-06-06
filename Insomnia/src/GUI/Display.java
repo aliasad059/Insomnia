@@ -21,10 +21,13 @@ public class Display {
         showingFrame.setVisible(true);
     }
     public Display(ArrayList<InsomniaFrame> workSpaces,InsomniaFrame showingFrame){
-        workSpaces = new ArrayList<>();
         Display.setWorkSpaces(workSpaces);
         Display.setShowingFrame(showingFrame);
         showingFrame.setVisible(true);
+//        showingFrame.getRequestsPanel().updateRequests();
+//        for (InsomniaFrame frame:workSpaces) {
+//            frame.getRequestsPanel().updateRequests();
+//        }
     }
 
     /**
@@ -80,6 +83,7 @@ public class Display {
                         showingFrame.setVisible(false);
                         showingFrame = workSpaces.get(i);
                         showingFrame.setVisible(true);
+                        showingFrame.getRequestsPanel().updateRequests();
                         break;
                     }
                 }

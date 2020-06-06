@@ -28,7 +28,9 @@ public class RequestsPanel extends JPanel {
     private JTextField filterField;
     private JButton addFolderORRequest;
     private boolean isFilterEnabled = true;
+    private ArrayList<Request> requests;
     private ArrayList<JPanel> filteredRequests;
+    private ArrayList<ReqList> folders;
 
     //to see which panel is for folder button
     private HashMap<JButton, JPanel> foldersPanel;
@@ -41,6 +43,8 @@ public class RequestsPanel extends JPanel {
 
 
     public RequestsPanel(InsomniaFrame frame) {
+        requests = new ArrayList<>();
+        folders = new ArrayList<>();
         this.frame = frame;
         requestsButton = new ArrayList<>();
         foldersPanel = new HashMap<>();
@@ -87,20 +91,22 @@ public class RequestsPanel extends JPanel {
 
         panel.setMaximumSize(new Dimension(this.getSize().width, 40));
         panel.setSize(new Dimension(this.getSize().width, 40));
+        panel.setVisible(true);
+        panel.setBorder(new LineBorder(Color.MAGENTA));
         centerCenterRequestPanel.add(panel);
-        System.out.println("Request");
+        System.out.println("PANEL ADDED");
         updateUI();
     }
 
     /**
      * makes a request
      *
-     * @param name   name of request
-     * @param method method of request
+     * @param name    name of request
+     * @param method  method of request
      * @param reqList request folder null if it does not belong to any folder
      * @return the made request
      */
-    private JPanel makeRequest(String name, String method,ReqList reqList) {
+    private JPanel makeRequest(String name, String method, ReqList reqList) {
         Request request = new Request();
         JPanel panel = new JPanel();
         JLabel label = new JLabel(method);
@@ -138,7 +144,6 @@ public class RequestsPanel extends JPanel {
         });
 
         requestButton.doClick();
-        request.setMethodLabel(label);
         request.setMethod(method);
         request.setRequestName(name);
 
@@ -150,10 +155,10 @@ public class RequestsPanel extends JPanel {
         updateUI();
         requestsButton.add(panel);
 
-        if (reqList != null){
+        if (reqList != null) {
             reqList.addReq(request);
             frame.addReqlistToFrameList(reqList);
-        }else {
+        } else {
             frame.addRequestToFrameList(request);
         }
 
@@ -161,18 +166,18 @@ public class RequestsPanel extends JPanel {
     }
 
     /**
-     * loads a request JPanel to be added to the screen
+     * loads a request JPanel to add it to the screen
+     *
      * @param request
      * @return Jpanel contants a Jlaber and a button
      */
     private JPanel makeRequest(Request request) {
+//        requests.add(request);
         GUIClient.addRequest(request);
         String method = request.getMethod();
-        System.out.println(method);
         String name = request.getRequestName();
-        System.out.println(name);
         JPanel panel = new JPanel();
-        JLabel label = new JLabel(method.substring(0,3));
+        JLabel label = new JLabel(method.substring(0, 3));
         if (method.substring(0, 3).equals("GET")) {
             label.setForeground(Color.MAGENTA);
         }
@@ -200,9 +205,7 @@ public class RequestsPanel extends JPanel {
             }
         });
 
-//        requestButton.doClick();
-        request.setMethodLabel(label);
-        request.setMethod(method);
+//        request.setMethodLabel(label);
 
         label.setLabelFor(requestButton);
         panel.add(label);
@@ -211,19 +214,23 @@ public class RequestsPanel extends JPanel {
         panel.setAlignmentX(0);
         updateUI();
         requestsButton.add(panel);
+        System.out.println("panel created");
+        requestButton.doClick();
         return panel;
     }
 
-        /**
-         * make a folder
-         *
-         * @param name folder's name
-         */
+    /**
+     * make a folder
+     *
+     * @param name folder's name
+     */
     private void addFolder(String name) {
         ReqList reqList = new ReqList(name);
+        folders.add(reqList);
+
         frame.addReqlistToFrameList(reqList);
 
-        JButton newFolder = new JButton(name);
+        JButton newFolder = new JButton("\uD83D\uDCC2"+"      "+name+"       ");
         JPanel panel = new JPanel();
         panel.setBorder(new LineBorder(Color.GRAY));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -270,7 +277,168 @@ public class RequestsPanel extends JPanel {
                                 folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight += 40
                         ));
                         folderPanelToAddComponent.
-                                add(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3),reqList));
+                                add(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3), reqList));
+                        newRequestDialog.setVisible(false);
+                        newRequestDialog.dispose();
+                    }
+                });
+
+                newRequestDialog.setLayout(new BorderLayout());
+                newRequestDialog.add(nameFiled, BorderLayout.CENTER);
+                newRequestDialog.add(cb, BorderLayout.EAST);
+                newRequestDialog.add(createRequestButton, BorderLayout.SOUTH);
+                newRequestDialog.setTitle("New Request");
+                newRequestDialog.setBounds(300, 200, 500, 125);
+
+                newRequestDialog.setVisible(true);
+            }
+        });
+        /**
+         * telling the gui what to do if the user chooses this item
+         * it makes all the panels(requests) visible
+         */
+        open.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                /**
+                 * changing the status of folder icon
+                 */
+                String string = ((JButton) folderPanelToAddComponent.getComponent(0)).getText();
+                string = string.substring(2);
+                string = "\uD83D\uDCC2" + string;
+                ((JButton) folderPanelToAddComponent.getComponent(0)).setText(string);
+
+                for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
+                    folderPanelToAddComponent.getComponent(i).setVisible(true);
+                    folderPanelToAddComponent.setMaximumSize(new Dimension(
+                            folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight
+                    ));
+                    folderPanelToAddComponent.setSize(new Dimension(
+                            folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight
+                    ));
+                }
+                updateUI();
+            }
+        });
+        /**
+         * telling the gui what to do if the user chooses this item
+         * it makes all the panels(requests) invisible
+         */
+        close.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                /**
+                 * changing the status of folder icon
+                 */
+                String string = ((JButton) folderPanelToAddComponent.getComponent(0)).getText();
+                string = string.substring(2);
+                string = "\uD83D\uDCC1" + string;
+                ((JButton) folderPanelToAddComponent.getComponent(0)).setText(string);
+
+                for (int i = 1; i < folderPanelToAddComponent.getComponentCount(); i++) {
+                    folderPanelToAddComponent.getComponent(i).setVisible(false);
+                    folderPanelToAddComponent.setMaximumSize(new Dimension(
+                            folderPanelToAddComponent.getWidth(), 40
+                    ));
+                    folderPanelToAddComponent.setSize(new Dimension(
+                            folderPanelToAddComponent.getWidth(), 40
+                    ));
+                }
+                updateUI();
+            }
+        });
+        /**
+         * helps us to show the popup if the user click right
+         */
+        newFolder.addMouseListener(new MouseAdapter() {
+            /**
+             * {@inheritDoc}
+             *
+             * @param ev
+             */
+            @Override
+            public void mousePressed(MouseEvent ev) {
+                folderPanelToAddComponent = foldersPanel.get(ev.getComponent());
+                if (ev.isPopupTrigger()) {
+                    menu.show(ev.getComponent(), ev.getX(), ev.getY());
+                }
+            }
+
+            /**
+             * {@inheritDoc}
+             *
+             * @param ev
+             */
+            @Override
+            public void mouseReleased(MouseEvent ev) {
+                folderPanelToAddComponent = foldersPanel.get(ev.getComponent());
+                if (ev.isPopupTrigger()) {
+                    menu.show(ev.getComponent(), ev.getX(), ev.getY());
+                }
+            }
+        });
+    }
+
+    private void addFolder(ReqList reqList) {
+
+        JButton newFolder = new JButton("\uD83D\uDCC2"+"      "+reqList.getListName()+"       ");
+        JPanel panel = new JPanel();
+        panel.setBorder(new LineBorder(Color.GRAY));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(newFolder);
+        panel.setMaximumSize(new Dimension(this.getSize().width, 40));
+        panel.setSize(new Dimension(this.getSize().width, 40));
+        panel.setAlignmentX(0);
+        ArrayList<Request> requests = reqList.getRequests();
+        for (int i = 0; i < requests.size(); i++) {
+            panel.setMaximumSize(new Dimension(
+                    panel.getWidth(), folderPanelToAddComponentHeight += 40
+            ));
+            panel.setSize(new Dimension(
+                    panel.getWidth(), folderPanelToAddComponentHeight += 40
+            ));
+            panel.add(makeRequest(requests.get(i)));
+        }
+
+
+        centerCenterRequestPanel.add(panel);
+        updateUI();
+        foldersPanel.put(newFolder, panel);
+        JPopupMenu menu = new JPopupMenu("Creat");
+        JMenuItem creat = new JMenuItem("Creat Request");
+        JMenuItem open = new JMenuItem("Open");
+        JMenuItem close = new JMenuItem("Close");
+        menu.add(open);
+        menu.add(close);
+        menu.add(creat);
+        /**
+         * telling the gui what to do if the user chooses this item
+         * first make a dialog and give the entered info to creat request
+         */
+        creat.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JDialog newRequestDialog = new JDialog();
+                newRequestDialog.setVisible(true);
+                JTextField nameFiled = new JTextField("My Request");
+                nameFiled.setBorder(new TitledBorder("Name"));
+                String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
+                JComboBox cb = new JComboBox(methodsName);
+                cb.setSelectedIndex(0);
+
+                JButton createRequestButton = new JButton("Creat");
+                createRequestButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        folderPanelToAddComponent.setMaximumSize(new Dimension(
+                                folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight += 40
+                        ));
+                        folderPanelToAddComponent.setSize(new Dimension(
+                                folderPanelToAddComponent.getWidth(), folderPanelToAddComponentHeight += 40
+                        ));
+                        folderPanelToAddComponent.
+                                add(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3), reqList));
                         newRequestDialog.setVisible(false);
                         newRequestDialog.dispose();
                     }
@@ -404,7 +572,7 @@ public class RequestsPanel extends JPanel {
                         createRequestButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                addRequest(makeRequest(nameFiled.getText(), ((String) cb.getSelectedItem()).substring(0, 3),null));
+                                addRequest(makeRequest(nameFiled.getText(), (String) cb.getSelectedItem(), null));
                                 newRequestDialog.setVisible(false);
                                 newRequestDialog.dispose();
                             }
@@ -433,7 +601,8 @@ public class RequestsPanel extends JPanel {
                         creatFolderButton.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                addFolder("\uD83D\uDCC2" + "      " + nameFiled.getText() + "       ");
+//                                addFolder("\uD83D\uDCC2" + "      " + nameFiled.getText() + "       ");
+                                addFolder(nameFiled.getText());
                                 newFolderDialog.setVisible(false);
                                 newFolderDialog.dispose();
                             }
@@ -515,12 +684,21 @@ public class RequestsPanel extends JPanel {
             }
         }
     }
-    public void addRequests(ArrayList<Request>requests){
-        for (Request request:requests) {
-            addRequest(makeRequest(request));
+
+    public void setRequests(ArrayList<Request> requests) {
+        this.requests = requests;
+    }
+
+    public void updateRequests() {
+        centerCenterRequestPanel.removeAll();
+        for (int i = 0; i < requests.size(); i++) {
+            addRequest(makeRequest(requests.get(i)));
+        }
+        for (int i = 0; i < folders.size(); i++) {
+            addFolder(folders.get(i));
         }
     }
-    public void addFolders(ArrayList<ReqList>reqLists){
-
+    public void setFolders(ArrayList<ReqList> reqLists) {
+        folders = reqLists;
     }
 }

@@ -27,7 +27,7 @@ public class Request implements Serializable {
     private transient HttpResponse<byte[]> lastResponse;
 
     private Response response;
-    private JLabel methodLabel;
+//    private JLabel methodLabel;
     private boolean completed;
     private String requestName, uri, method, headers, output, data, json, upload;
     private Map<String, String> headersMap,formsMap,queries;
@@ -313,19 +313,19 @@ public class Request implements Serializable {
 
     public void setMethod(String method) {
         this.method = method;
-        methodLabel.setText(method.substring(0, 3));
-        if (method.equals("GET")) {
-            methodLabel.setForeground(Color.MAGENTA);
-        } else if (method.equals("POST")) {
-            methodLabel.setForeground(Color.GREEN);
-        } else if (method.equals("PUT")) {
-            methodLabel.setForeground(Color.YELLOW);
-        } else if (method.equals("PATCH")) {
-            methodLabel.setForeground(Color.ORANGE);
-        } else if (method.equals("DELETE")) {
-            methodLabel.setForeground(Color.RED);
-        }
-        methodLabel.updateUI();
+//        methodLabel.setText(method.substring(0, 3));
+//        if (method.equals("GET")) {
+//            methodLabel.setForeground(Color.MAGENTA);
+//        } else if (method.equals("POST")) {
+//            methodLabel.setForeground(Color.GREEN);
+//        } else if (method.equals("PUT")) {
+//            methodLabel.setForeground(Color.YELLOW);
+//        } else if (method.equals("PATCH")) {
+//            methodLabel.setForeground(Color.ORANGE);
+//        } else if (method.equals("DELETE")) {
+//            methodLabel.setForeground(Color.RED);
+//        }
+//        methodLabel.updateUI();
     }
 
     public String getHeaders() {
@@ -392,9 +392,9 @@ public class Request implements Serializable {
         this.saveRequest = saveRequest;
     }
 
-    public void setMethodLabel(JLabel methodLabel) {
-        this.methodLabel = methodLabel;
-    }
+//    public void setMethodLabel(JLabel methodLabel) {
+//        this.methodLabel = methodLabel;
+//    }
 
     public MiddlePanel getMiddlePanel() {
         return middlePanel;

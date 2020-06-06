@@ -80,28 +80,9 @@ public class InsomniaFrame extends JFrame {
         }
 
         addWindowListener(new handler());
-
-        LafManager.install(new DarculaTheme());
-        this.validate();
-        requestsPanel = new RequestsPanel(this);
-        requestsPanel.addRequests(requests);
-        requestsPanel.addFolders(reqLists);
-
-        currentMiddlePanel = requests.get(0).getMiddlePanel();
-        currentResponsePanel = requests.get(0).getResponsePanel();
-        menuBar = new InsomniaMenuBar(this);
-
-        this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        //frame.setLayout(new GridLayout(1, 3));
-        this.setJMenuBar(menuBar);
-        currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
-        currentRightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
-        leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels);
-        leftAndRightPanels.setDividerLocation(FRAME_WIDTH / 6);
-
-        this.getContentPane().add(leftAndRightPanels);
-        this.setVisible(false);
+        makePanels();
+        requestsPanel.setRequests(requests);
+        requestsPanel.setFolders(reqLists);
     }
 
     /**
@@ -117,7 +98,6 @@ public class InsomniaFrame extends JFrame {
 
         this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
-        //frame.setLayout(new GridLayout(1, 3));
         this.setJMenuBar(menuBar);
         currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
         currentRightPanels.setDividerLocation(FRAME_WIDTH / 3 + FRAME_WIDTH / 20);
@@ -244,5 +224,9 @@ public class InsomniaFrame extends JFrame {
 
     public void setCurrentMiddlePanel(JPanel currentMiddlePanel) {
         this.currentMiddlePanel = currentMiddlePanel;
+    }
+
+    public RequestsPanel getRequestsPanel() {
+        return requestsPanel;
     }
 }

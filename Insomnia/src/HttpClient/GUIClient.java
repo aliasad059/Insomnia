@@ -51,10 +51,9 @@ public class GUIClient {
                             ) {
                                 while (true) {
                                     Request request = (Request) requestsReader.readObject();
-                                    System.out.println(request.getRequestName());
+                                    requests.add(request);
                                     request.initMiddlePanel();
                                     request.initResponsePanel();
-                                    requests.add(request);
                                 }
                             } catch (ClassNotFoundException | IOException ignored) {
                             }
@@ -78,6 +77,8 @@ public class GUIClient {
     public static void save() {
         ArrayList<InsomniaFrame>workSpaces = Display.getWorkSpaces();
         for (InsomniaFrame frame : workSpaces) {
+            File file = new File("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
+            file.delete();
             for (Request request : frame.getRequests()) {
                 System.out.println("yes");
                 request.saveRequest("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
