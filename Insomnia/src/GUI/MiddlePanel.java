@@ -10,8 +10,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Map;
 
 import HttpClient.GUIClient;
 import HttpClient.Request;
@@ -32,7 +34,7 @@ public class MiddlePanel extends JPanel {
     JPanel headerPanel;
     JComboBox bodyTabStatus, requestMethodType;
     JPanel binaryPanel;
-    JButton fileChooserButton, sendRequest , copyURLButton;
+    JButton fileChooserButton, sendRequest, copyURLButton;
     JTextField url, filePath;
     JPanel JSONPanel;
     JPanel noBodyPanel;
@@ -40,6 +42,7 @@ public class MiddlePanel extends JPanel {
     JTextField urlPreviewField;
     Request owner;
     ArrayList<Form> formData, queries, headers;
+    File binaryFile;
 
 
     /**
@@ -85,6 +88,47 @@ public class MiddlePanel extends JPanel {
 
     }
 
+    public MiddlePanel(Request request) {
+        formData = new ArrayList<>();
+        queries = new ArrayList<>();
+        headers = new ArrayList<>();
+
+        setLayout(new BorderLayout());
+        northMiddlePanel = new JPanel();
+        northMiddlePanel.setLayout(new GridLayout(1, 3));
+        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
+        requestMethodType = new JComboBox(methodsName);
+        requestMethodType.setSelectedItem(request.getMethod());
+
+        requestMethodType.addActionListener(new handler());
+        northMiddlePanel.add(requestMethodType);
+        northMiddlePanel.add(url = new JTextField());
+        url.setText(request.getUri());
+        url.addFocusListener(new handler());
+        northMiddlePanel.add(sendRequest = new JButton("Send" + '\u21E8'));
+        sendRequest.addActionListener(new handler());
+        add(northMiddlePanel, BorderLayout.NORTH);
+        tabs = new JTabbedPane();
+        bodyPanel = new JPanel();
+        bodyPanel.setLayout(new BorderLayout());
+        authPanel = new JPanel();
+        queryPanel = new JPanel();
+        headerPanel = new JPanel();
+
+        tabs.addTab("Body", bodyPanel);
+        tabs.addTab("Auth", authPanel);
+        tabs.addTab("Query", queryPanel);
+        tabs.addTab("Header", headerPanel);
+
+        makeBodyPanel(request);
+        makeAuthPanel();
+        makeHeaderPanel(request);
+        makeQueryPanel(request);
+
+        add(tabs, BorderLayout.CENTER);
+
+    }
+
     /**
      * makes query panel
      */
@@ -94,13 +138,31 @@ public class MiddlePanel extends JPanel {
         urlPreviewField = new JTextField();
         urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
         urlPreviewField.setEnabled(false);
-         copyURLButton = new JButton("Copy URL");
+        copyURLButton = new JButton("Copy URL");
         copyURLButton.addActionListener(new handler());
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
         queryPanel.add(copyURLButton);
-        queryPanel.add(new Form(queryPanel));
+        queryPanel.add(new Form(queryPanel, "Name", "Value"));
 
+        //////////////////////////////////////////////////////
+    }
+
+    private void makeQueryPanel(Request request) {
+        ////////////////////making query panel
+        JLabel urlPreviewLabel = new JLabel("URL Preview");
+        urlPreviewField = new JTextField();
+        urlPreviewLabel.setText(request.getUri());
+        urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
+        urlPreviewField.setEnabled(false);
+        copyURLButton = new JButton("Copy URL");
+        copyURLButton.addActionListener(new handler());
+        queryPanel.add(urlPreviewLabel);
+        queryPanel.add(urlPreviewField);
+        queryPanel.add(copyURLButton);
+        for (Map.Entry<String, String> entry : request.getQueries().entrySet()) {
+            queryPanel.add(new Form(queryPanel, entry.getKey(), entry.getValue()));
+        }
         //////////////////////////////////////////////////////
     }
 
@@ -160,8 +222,43 @@ public class MiddlePanel extends JPanel {
 
         bodyFormPanel = new JPanel();
 
-        bodyFormPanel.add(new Form(bodyFormPanel));
+        bodyFormPanel.add(new Form(bodyFormPanel, "Name", "Value"));
 
+        noBodyPanel = new JPanel();
+
+        bodyPanel.add(noBodyPanel);
+
+        bodyTabStatus.addActionListener(new handler());
+    }
+
+    private void makeBodyPanel(Request request) {
+        String[] bodyTab = {"No Body", "Form", "JASON", "Binary"};
+        bodyTabStatus = new JComboBox(bodyTab);
+        bodyPanel.add(bodyTabStatus, BorderLayout.NORTH);
+
+        binaryPanel = new JPanel();
+        binaryPanel.setLayout(new FlowLayout());
+        fileChooserButton = new JButton("Choose file");
+        filePath = new JTextField("         Path of chosen file          ");
+        filePath.setText(request.getUpload());
+        if (new File(request.getUpload()).isFile()) {
+            binaryFile = new File(request.getUpload());
+        }
+        binaryPanel.add(fileChooserButton);
+        binaryPanel.add(filePath);
+
+        fileChooserButton.addActionListener(new handler());
+
+        jsonViewerPanel = new JsonViewerPanel();
+        jsonViewerPanel.setText(request.getJson());
+        JSONPanel = new JPanel(new BorderLayout());
+        JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
+
+        bodyFormPanel = new JPanel();
+
+        for (Map.Entry<String, String> entry : request.getFormsMap().entrySet()) {
+            bodyFormPanel.add(new Form(bodyFormPanel, entry.getKey(), entry.getValue()));
+        }
         noBodyPanel = new JPanel();
 
         bodyPanel.add(noBodyPanel);
@@ -173,7 +270,14 @@ public class MiddlePanel extends JPanel {
      * makes a header panel
      */
     private void makeHeaderPanel() {
-        headerPanel.add(new Form(headerPanel));
+        headerPanel.add(new Form(headerPanel, "Name", "Value"));
+    }
+
+    private void makeHeaderPanel(Request request) {
+        for (Map.Entry<String, String> entry : request.getHeadersMap().entrySet()) {
+            headerPanel.add(new Form(headerPanel, entry.getKey(), entry.getValue()));
+
+        }
     }
 
     /**
@@ -213,7 +317,7 @@ public class MiddlePanel extends JPanel {
                 owner.setMethod((String) cb.getSelectedItem());
                 updateUI();
             }
-            if (e.getSource() == copyURLButton){
+            if (e.getSource() == copyURLButton) {
                 StringSelection stringSelection = new StringSelection(urlPreviewField.getText());
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clipboard.setContents(stringSelection, null);
@@ -225,8 +329,8 @@ public class MiddlePanel extends JPanel {
                 JFileChooser fc = new JFileChooser();
                 int i = fc.showOpenDialog(null);
                 if (i == JFileChooser.APPROVE_OPTION) {
-                    File f = fc.getSelectedFile();
-                    String filepath = f.getPath();
+                    binaryFile = fc.getSelectedFile();
+                    String filepath = binaryFile.getPath();
                     JOptionPane.showMessageDialog(null, filepath, "You have chosen following file ...", 1);
                     filePath.setText(filepath);
                     updateUI();
@@ -333,14 +437,14 @@ public class MiddlePanel extends JPanel {
         private JButton removeForm;
         private Form form;
 
-        public Form(JPanel formOwner) {
+        public Form(JPanel formOwner, String name, String value) {
             this.setBorder(BorderFactory.createLoweredBevelBorder());
             this.formOwner = formOwner;
-            nameField = new JTextField("Name");
+            nameField = new JTextField(name);
             //nameField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
             nameField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
             nameField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
-            valueField = new JTextField("Value");
+            valueField = new JTextField(value);
             //valueField.setMinimumSize(new Dimension(FRAME_WIDTH / 8 - 50, 25));
             valueField.setPreferredSize(new Dimension(FRAME_WIDTH / 8 + 50, 25));
             valueField.setMaximumSize(new Dimension(FRAME_WIDTH / 8 + 100, 25));
@@ -359,6 +463,8 @@ public class MiddlePanel extends JPanel {
             valueField.addFocusListener(new handler());
             if (formOwner == queryPanel) {
                 System.out.println("ADD to query");
+                if (owner != null)
+                    owner.addQuery(this.getNameField().getText(), this.getValueField().getText());
                 queries.add(this);
             } else if (formOwner == headerPanel) {
                 System.out.println("ADD to headers");
@@ -397,7 +503,7 @@ public class MiddlePanel extends JPanel {
             public void focusGained(FocusEvent e) {
                 //add a new form
                 if (e.getSource() == nameField || e.getSource() == valueField) {
-                    formOwner.add(new Form(formOwner));
+                    formOwner.add(new Form(formOwner, "Name", "Value"));
                 }
             }
 
@@ -446,20 +552,22 @@ public class MiddlePanel extends JPanel {
             }
         }
     }
-    private void setQueries(){
+
+    private void setQueries() {
         String urlPreview = url.getText();
         urlPreview += '?';
         for (Form queryForm : queries) {
             if (queryForm.IsActive()) {
                 urlPreview += queryForm.getNameField().getText();
                 urlPreview += '=';
-                urlPreview += queryForm.getValueField().getText();
+                urlPreview += queryForm.getNameField().getText();
                 urlPreview += '&';
             }
         }
         urlPreview = urlPreview.substring(0, urlPreview.length() - 1);
         urlPreviewField.setText(urlPreview);
     }
+
     public void setOwner(Request owner) {
         this.owner = owner;
     }

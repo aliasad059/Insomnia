@@ -6,11 +6,10 @@ import HttpClient.GUIClient;
  */
 public class RunGUIClient{
     public static void main(String[] args) {
-//        Display display = GUIClient.load();
-//        if (display == null){
-//            display = new Display();
-//        }
-        Display display = new Display();
+        Display display = GUIClient.load();
+        if (display == null){
+             display = new Display();
+        }
         GUIClient client = new GUIClient();
     }
 }

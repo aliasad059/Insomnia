@@ -19,16 +19,24 @@ import java.util.*;
  * request
  */
 public class Request implements Serializable {
-    private MiddlePanel middlePanel;
-    private ResponsePanel responsePanel;
+    private static final long serialVersionUID = 6529685098267757690L;
+
+    private transient MiddlePanel middlePanel;
+    private transient ResponsePanel responsePanel;
+    private transient HttpRequest request;
+    private transient HttpResponse<byte[]> lastResponse;
+
+    private Response response;
     private JLabel methodLabel;
-    private HttpRequest request;
     private boolean completed;
-    private HttpResponse<byte[]> lastResponse;
     private String requestName, uri, method, headers, output, data, json, upload;
+    private Map<String, String> headersMap,formsMap,queries;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
     public Request() {
+        headersMap= new HashMap<>();
+        formsMap = new HashMap<>();
+        queries = new HashMap<>();
         middlePanel = new MiddlePanel();
         responsePanel = new ResponsePanel();
         middlePanel.setOwner(this);
@@ -93,11 +101,11 @@ public class Request implements Serializable {
 
 
             } else if (data != null && !data.equals("")) {
-                System.out.println("YESYESYES");
                 String[] forms = data.split("&");
                 HashMap<Object, Object> formData = new HashMap<>();
                 for (int i = 0; i < forms.length; i++) {
                     String[] splitForms = forms[i].split("=");
+                    formsMap.put(splitForms[0],splitForms[1]);
                     formData.put(splitForms[0], splitForms[1]);
                 }
                 System.out.println(formData);
@@ -140,6 +148,7 @@ public class Request implements Serializable {
                 String[] pairs = headers.split(";");
                 for (int i = 0; i < pairs.length; i++) {
                     String[] splitPairs = pairs[i].split(":");
+                    headersMap.put(splitPairs[0],splitPairs[1]);
                     builder.header(splitPairs[0], splitPairs[1]);
                 }
             }
@@ -213,6 +222,7 @@ public class Request implements Serializable {
      */
     public void setLastResponse(HttpResponse<byte[]> lastResponse) {
         this.lastResponse = lastResponse;
+        response = new Response(lastResponse);
         if (output != null) {
             saveOutput(output);
         }
@@ -287,10 +297,6 @@ public class Request implements Serializable {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
-    }
-
-    public HttpResponse<byte[]> getLastResponse() {
-        return lastResponse;
     }
 
     public String getUri() {
@@ -415,9 +421,33 @@ public class Request implements Serializable {
     }
 
     public void initMiddlePanel() {
+        setMiddlePanel(new MiddlePanel(this));
     }
 
     public void initResponsePanel() {
+        setResponsePanel(new ResponsePanel(this.response));
+    }
 
+    public Map<String, String> getFormsMap() {
+        return formsMap;
+    }
+
+    public Map<String, String> getHeadersMap() {
+        return headersMap;
+    }
+    public void addQuery(String key,String value){
+        queries.put(key, value);
+    }
+
+    public Map<String, String> getQueries() {
+        return queries;
+    }
+
+    public Response getResponse() {
+        return response;
+    }
+
+    public void setResponse(Response response) {
+        this.response = response;
     }
 }

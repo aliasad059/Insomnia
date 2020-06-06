@@ -21,13 +21,16 @@ public class InsomniaFrame extends JFrame {
     MenuItem exitItem, openItem;
     JSplitPane currentRightPanels, leftAndRightPanels;
     static final int FRAME_WIDTH = 1250, FRAME_HEIGHT = 600;
-    JPanel requestsPanel, currentMiddlePanel, currentResponsePanel;
+    RequestsPanel requestsPanel;
+    JPanel currentMiddlePanel, currentResponsePanel;
     JMenuBar menuBar;
     ArrayList<Request> requests;
     ArrayList<ReqList> reqLists;
 
     public InsomniaFrame(String title) {
         super(title);
+        requests = new ArrayList<>();
+        reqLists = new ArrayList<>();
         if (SystemTray.isSupported()) {
 
             PopupMenu popup = new PopupMenu();
@@ -81,6 +84,9 @@ public class InsomniaFrame extends JFrame {
         LafManager.install(new DarculaTheme());
         this.validate();
         requestsPanel = new RequestsPanel(this);
+        requestsPanel.addRequests(requests);
+        requestsPanel.addFolders(reqLists);
+
         currentMiddlePanel = requests.get(0).getMiddlePanel();
         currentResponsePanel = requests.get(0).getMiddlePanel();
         menuBar = new InsomniaMenuBar(this);
@@ -147,7 +153,7 @@ public class InsomniaFrame extends JFrame {
                 }
             } else {
                 //TODO: save before exit
-//                GUIClient.save();
+                GUIClient.save();
                 System.exit(0);
             }
         }
@@ -173,6 +179,7 @@ public class InsomniaFrame extends JFrame {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitItem) {
                 //TODO: save before exit
+                GUIClient.save();
                 System.exit(0);
             } else if (e.getSource() == openItem) {
 

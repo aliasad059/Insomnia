@@ -87,8 +87,8 @@ public class RequestsPanel extends JPanel {
 
         panel.setMaximumSize(new Dimension(this.getSize().width, 40));
         panel.setSize(new Dimension(this.getSize().width, 40));
-
         centerCenterRequestPanel.add(panel);
+        System.out.println("Request");
         updateUI();
     }
 
@@ -168,7 +168,9 @@ public class RequestsPanel extends JPanel {
     private JPanel makeRequest(Request request) {
         GUIClient.addRequest(request);
         String method = request.getMethod();
+        System.out.println(method);
         String name = request.getRequestName();
+        System.out.println(name);
         JPanel panel = new JPanel();
         JLabel label = new JLabel(method.substring(0,3));
         if (method.substring(0, 3).equals("GET")) {
@@ -186,12 +188,6 @@ public class RequestsPanel extends JPanel {
         if (method.substring(0, 3).equals("DEL")) {
             label.setForeground(Color.RED);
         }
-        if (method.substring(0, 3).equals("OPT")) {
-            label.setForeground(Color.BLUE);
-        }
-        if (method.substring(0, 3).equals("HEA")) {
-            label.setForeground(Color.CYAN);
-        }
 
         JButton requestButton = new JButton(name);
 
@@ -204,7 +200,7 @@ public class RequestsPanel extends JPanel {
             }
         });
 
-        requestButton.doClick();
+//        requestButton.doClick();
         request.setMethodLabel(label);
         request.setMethod(method);
 
@@ -518,5 +514,13 @@ public class RequestsPanel extends JPanel {
                 }
             }
         }
+    }
+    public void addRequests(ArrayList<Request>requests){
+        for (Request request:requests) {
+            addRequest(makeRequest(request));
+        }
+    }
+    public void addFolders(ArrayList<ReqList>reqLists){
+
     }
 }

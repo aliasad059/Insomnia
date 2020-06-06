@@ -24,6 +24,7 @@ public class Display {
         workSpaces = new ArrayList<>();
         Display.setWorkSpaces(workSpaces);
         Display.setShowingFrame(showingFrame);
+        showingFrame.setVisible(true);
     }
 
     /**

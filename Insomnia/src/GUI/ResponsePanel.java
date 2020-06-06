@@ -1,5 +1,9 @@
 package GUI;
 
+import HttpClient.Request;
+import HttpClient.Response;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
@@ -9,7 +13,9 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -38,6 +44,10 @@ public class ResponsePanel extends JPanel {
 
     public ResponsePanel() {
         setResponsePanel();
+    }
+    public ResponsePanel(Response response){
+        setResponsePanel();
+        updatePanel(response);
     }
     private void setResponsePanel(){
         setLayout(new BorderLayout());
@@ -183,5 +193,26 @@ public class ResponsePanel extends JPanel {
     public void resetPanel(){
         this.removeAll();
         setResponsePanel();
+    }
+    public void updatePanel(Response response){
+        setTimeLabel(response.getResponseTime());
+        setSizeLabel(response.getResponseSize());
+        setStatusLabel(response.getStatusLabel());
+
+        if (response.doesContainPic()) {
+            System.out.println("IMAGE");
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(response.getBody());
+            try {
+                Image image = ImageIO.read(byteArrayInputStream);
+                setPreviewContent(image);
+            } catch (IOException ignored) {
+            }
+        }
+        if (response.isJson()) {
+            setJSONBodyContent(new String(response.getBody()));
+        }
+        setRowBodyContent(new String(response.getBody()));
+        setHeaders(response.getHeaders());
+        revalidate();
     }
 }

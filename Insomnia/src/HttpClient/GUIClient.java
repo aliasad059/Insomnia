@@ -1,5 +1,7 @@
 package HttpClient;
 
+import GUI.Display;
+import GUI.InsomniaFrame;
 import GUI.InsomniaMenuBar;
 import GUI.ResponsePanel;
 import javax.imageio.ImageIO;
@@ -9,10 +11,85 @@ import java.io.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 public class GUIClient {
     public GUIClient() {
+    }
+
+    public static Display load() {
+        System.out.println("Enter of load");
+        File[] workSpaces = new File("./save/workSpaces").listFiles();
+        if (workSpaces == null) {
+            System.out.println("Not found :./save/workSpaces");
+            return null;
+        }
+        ArrayList<InsomniaFrame> workSpaceFrames = new ArrayList<>();
+        for (File file : workSpaces) {
+            ArrayList<Request> requests = new ArrayList<>();
+            ArrayList<ReqList> reqLists = new ArrayList<>();
+            if (file.isDirectory()) {
+                File[] workSpaceContent = file.listFiles();
+                if (workSpaceContent != null) {
+                    for (File workSpaceFile : workSpaceContent) {
+                        if (workSpaceFile.getName().contains("list")) {
+                            try (FileInputStream finLists = new FileInputStream(workSpaceFile);
+                                 ObjectInputStream listsReader = new ObjectInputStream(finLists)
+                            ) {
+                                ReqList reqList = (ReqList) listsReader.readObject();
+                                reqLists.add(reqList);
+                                for (Request request : reqList.getRequests()) {
+                                    request.initResponsePanel();
+                                    request.initMiddlePanel();
+                                }
+                            } catch (ClassNotFoundException | IOException ignored) {
+                            }
+                        } else {
+                            try (FileInputStream finRequests = new FileInputStream(workSpaceFile);
+                                 ObjectInputStream requestsReader = new ObjectInputStream(finRequests);
+                            ) {
+                                while (true) {
+                                    Request request = (Request) requestsReader.readObject();
+                                    System.out.println(request.getRequestName());
+                                    request.initMiddlePanel();
+                                    request.initResponsePanel();
+                                    requests.add(request);
+                                }
+                            } catch (ClassNotFoundException | IOException ignored) {
+                            }
+                        }
+                    }
+                }
+            }
+            if(reqLists.size()!=0 || requests.size()!=0) {
+                workSpaceFrames.add(makeInsomniaFrame(file.getName(), reqLists, requests));
+            }
+        }
+        if (workSpaceFrames.size()!= 0) {
+            System.out.println("load done");
+
+            return new Display(workSpaceFrames, workSpaceFrames.get(0));
+        }
+        System.out.println("load failed");
+        return null;
+    }
+
+    public static void save() {
+        ArrayList<InsomniaFrame>workSpaces = Display.getWorkSpaces();
+        for (InsomniaFrame frame : workSpaces) {
+            for (Request request : frame.getRequests()) {
+                System.out.println("yes");
+                request.saveRequest("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
+            }
+            for (ReqList reqList : frame.getReqLists()) {
+                reqList.saveList("./save/workSpaces/" + frame.getTitle() + "/" + reqList.getListName() + "_list.txt");
+            }
+        }
+        System.out.println("SAVE DONE");
+    }
+    private static InsomniaFrame makeInsomniaFrame(String name ,ArrayList<ReqList>reqLists,ArrayList<Request>requests){
+        return new InsomniaFrame(name,reqLists,requests);
     }
 
     public static void addRequest(Request requestToAdd) {
@@ -23,46 +100,6 @@ public class GUIClient {
 
     public static void addRequestTo() {
     }
-
-//    public static void save() {
-//        ArrayList<JFrame> workSpaces = Display.getWorkSpaces();
-//        JFrame showingFrame = Display.getShowingFrame();
-//
-//        try (XMLEncoder workSpacesEncoder = new XMLEncoder(new FileOutputStream(new File("workSpaces.xml")));
-//             XMLEncoder showingFrameEncoder = new XMLEncoder(new FileOutputStream(new File("showingFrame.xml")))
-//        ) {
-//            showingFrameEncoder.setExceptionListener(new ExceptionListener() {
-//                public void exceptionThrown(Exception e) {
-//                    System.out.println("Exception! :"+e.toString());
-//                }
-//            });
-//            workSpacesEncoder.setExceptionListener(new ExceptionListener() {
-//                public void exceptionThrown(Exception e) {
-//                    System.out.println("Exception! :"+e.toString());
-//                }
-//            });
-//            workSpacesEncoder.writeObject(workSpaces);
-//            showingFrameEncoder.writeObject(showingFrame);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println("save done");
-//    }
-//
-//    public static Display load() {
-//        try {
-//            InputStream inWorkSpaces = ;
-//            XMLDecoder workSpacesDecoder = new XMLDecoder(new FileInputStream("workSpaces.xml"));
-//            ArrayList<JFrame> workSpaces = (ArrayList<JFrame>) workSpacesDecoder.readObject();
-//            InputStream inShowingFrame = new FileInputStream("showingFrame.xml");
-//            XMLDecoder showingFrameDecoder = new XMLDecoder(inShowingFrame);
-//            JFrame showingFrame = (JFrame) showingFrameDecoder.readObject();
-//            return new Display(workSpaces,showingFrame);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
     public static void runRequest(Request requestToRun) {
         SendRequest sendRequest = new SendRequest(requestToRun);
@@ -128,73 +165,17 @@ public class GUIClient {
 
         @Override
         protected void done() {
-            HttpResponse<byte[]> response = null;
+            HttpResponse<byte[]> httpResponse = null;
             try {
-                response = get();
+                httpResponse = get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+            Response response = new Response(httpResponse);
+            response.setResponseTime(elapsedTime);
+            requestToRun.setResponse(response);
             ResponsePanel responsePanel = requestToRun.getResponsePanel();
-            String timeSize = "nS";
-            if (elapsedTime > 1000000000) {
-                timeSize = " S";
-                elapsedTime /= 1000000000;
-            } else if (elapsedTime > 1000000) {
-                timeSize = " mS";
-                elapsedTime /= 1000000;
-            } else if (elapsedTime > 1000) {
-                timeSize = " μS";
-                elapsedTime /= 1000;
-            }
-            responsePanel.setTimeLabel(elapsedTime + timeSize);
-            responsePanel.setSizeLabel(response.body().length / 1024 + "kB");
-
-            int statusCode = response.statusCode();
-            if (statusCode >= 500) {
-                JLabel label = new JLabel(statusCode + " Error");
-                label.setOpaque(true);
-                label.setBackground(Color.RED);
-                label.setForeground(Color.BLACK);
-                label.setToolTipText("Server Error");
-                responsePanel.setStatusLabel(label);
-            } else if (statusCode >= 400) {
-                JLabel label = new JLabel(statusCode + " Error");
-                label.setOpaque(true);
-                label.setBackground(Color.RED);
-                label.setForeground(Color.BLACK);
-                label.setToolTipText("Client Error");
-                responsePanel.setStatusLabel(label);
-            } else if (statusCode >= 300) {
-                JLabel label = new JLabel(statusCode + " Moved");
-                label.setOpaque(true);
-                label.setBackground(Color.ORANGE);
-                label.setForeground(Color.BLACK);
-                label.setToolTipText("Redirection");
-                responsePanel.setStatusLabel(label);
-            } else if (statusCode >= 200) {
-                JLabel label = new JLabel(statusCode + " OK");
-                label.setOpaque(true);
-                label.setBackground(Color.GREEN);
-                label.setForeground(Color.BLACK);
-                label.setToolTipText("Successful");
-                responsePanel.setStatusLabel(label);
-            }
-
-            if (response.headers().map().get("content-type").get(0).contains("image")) {
-                System.out.println("IMAGE");
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(response.body());
-                try {
-                    Image image = ImageIO.read(byteArrayInputStream);
-                    responsePanel.setPreviewContent(image);
-                } catch (IOException ignored) {
-                }
-            }
-            if (response.headers().map().get("content-type").get(0).contains("application/json")) {
-                responsePanel.setJSONBodyContent(new String(response.body()));
-            }
-            responsePanel.setRowBodyContent(new String(response.body()));
-            responsePanel.setHeaders(response.headers().map());
-            responsePanel.revalidate();
+            responsePanel.updatePanel(response);
         }
     }
 }

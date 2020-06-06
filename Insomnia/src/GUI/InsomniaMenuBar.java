@@ -173,7 +173,7 @@ public class InsomniaMenuBar extends JMenuBar {
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitItem) {
                 //save setting before terminating or making it system tray
-//                GUIClient.save();
+                GUIClient.save();
                 System.exit(0);
             } else if (e.getSource() == optionsItem) {
                 makeOptionDialog();
@@ -263,7 +263,7 @@ public class InsomniaMenuBar extends JMenuBar {
             close.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-//                    GUIClient.save();
+                    GUIClient.save();
                     System.exit(0);
                 }
             });
