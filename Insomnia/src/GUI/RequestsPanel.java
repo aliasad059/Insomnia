@@ -140,6 +140,7 @@ public class RequestsPanel extends JPanel {
                 frame.setCurrentMiddlePanel(request.getMiddlePanel());
                 frame.setCurrentResponsePanel(request.getResponsePanel());
                 frame.setLeftAndRightPanels();
+                frame.updateTheme();
             }
         });
 
@@ -202,6 +203,7 @@ public class RequestsPanel extends JPanel {
                 frame.setCurrentMiddlePanel(request.getMiddlePanel());
                 frame.setCurrentResponsePanel(request.getResponsePanel());
                 frame.setLeftAndRightPanels();
+                frame.updateTheme();
             }
         });
 

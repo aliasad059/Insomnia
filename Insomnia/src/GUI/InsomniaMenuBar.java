@@ -22,6 +22,7 @@ public class InsomniaMenuBar extends JMenuBar {
     private Display display;
     private static boolean isSystemTrayEnabled = true;
     private static boolean followRedirect = false;
+    private String themeTypeString;
     InsomniaSystemTray systemTray;
     JDialog optionDialog;
     JCheckBox followRedirectCheckBox, ExitOnClose;
@@ -132,16 +133,22 @@ public class InsomniaMenuBar extends JMenuBar {
              */
             public void actionPerformed(ActionEvent e) {
                 if (darculaTheme.isSelected()) {
+                    themeTypeString = "darculaTheme";
                     LafManager.install(new DarculaTheme());
                 } else if (highContrastLightTheme.isSelected()) {
+                    themeTypeString = "highContrastLightTheme";
                     LafManager.install(new HighContrastLightTheme());
                 } else if (solarizedLightTheme.isSelected()) {
+                    themeTypeString = "solarizedLightTheme";
                     LafManager.install(new SolarizedLightTheme());
                 } else if (solarizedDarkTheme.isSelected()) {
+                    themeTypeString = "solarizedDarkTheme";
                     LafManager.install(new SolarizedDarkTheme());
                 } else if (highContrastDarkTheme.isSelected()) {
+                    themeTypeString = "highContrastDarkTheme";
                     LafManager.install(new HighContrastDarkTheme());
                 } else if (intelliJTheme.isSelected()) {
+                    themeTypeString = "intelliJTheme";
                     LafManager.install(new IntelliJTheme());
                 }
                 frame.revalidate();
@@ -161,7 +168,8 @@ public class InsomniaMenuBar extends JMenuBar {
     public static boolean isIsSystemTrayEnabled() {
         return isSystemTrayEnabled;
     }
-    public static boolean isFollowRedirect(){
+
+    public static boolean isFollowRedirect() {
         return followRedirect;
     }
 
@@ -283,4 +291,56 @@ public class InsomniaMenuBar extends JMenuBar {
 
     }
 
+    public String getThemeType() {
+        return themeTypeString;
+    }
+
+    public JCheckBox getExitOnClose() {
+        return ExitOnClose;
+    }
+
+    public JCheckBox getFollowRedirectCheckBox() {
+        return followRedirectCheckBox;
+    }
+
+    public void setExitOnClose(boolean status) {
+        if ((ExitOnClose.isSelected() && !status) || (!ExitOnClose.isSelected() && status)) {
+            ExitOnClose.doClick();
+        }
+    }
+
+    public void setFollowRedirect(boolean status) {
+        if ((followRedirectCheckBox.isSelected() && !status) || (!followRedirectCheckBox.isSelected() && status)) {
+            followRedirectCheckBox.doClick();
+        }
+    }
+
+    public void setTheme(String theme) {
+        if (theme == null){
+            darculaTheme.doClick();
+            LafManager.install(new DarculaTheme());
+        }else {
+            if (theme.equals("highContrastLightTheme")) {
+                highContrastLightTheme.doClick();
+                LafManager.install(new HighContrastLightTheme());
+            } else if (theme.equals("solarizedLightTheme")) {
+                solarizedLightTheme.doClick();
+                LafManager.install(new SolarizedLightTheme());
+            } else if (theme.equals("solarizedDarkTheme")) {
+                solarizedDarkTheme.doClick();
+                LafManager.install(new SolarizedDarkTheme());
+            } else if (theme.equals("highContrastDarkTheme")) {
+                highContrastDarkTheme.doClick();
+                LafManager.install(new HighContrastDarkTheme());
+            } else if (theme.equals("intelliJTheme")) {
+                intelliJTheme.doClick();
+                LafManager.install(new IntelliJTheme());
+            } else {
+                darculaTheme.doClick();
+                LafManager.install(new DarculaTheme());
+            }
+        }
+        frame.revalidate();
+        frame.repaint();
+    }
 }

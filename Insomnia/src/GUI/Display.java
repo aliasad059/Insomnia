@@ -24,10 +24,8 @@ public class Display {
         Display.setWorkSpaces(workSpaces);
         Display.setShowingFrame(showingFrame);
         showingFrame.setVisible(true);
-//        showingFrame.getRequestsPanel().updateRequests();
-//        for (InsomniaFrame frame:workSpaces) {
-//            frame.getRequestsPanel().updateRequests();
-//        }
+        showingFrame.getRequestsPanel().updateRequests();
+
     }
 
     /**

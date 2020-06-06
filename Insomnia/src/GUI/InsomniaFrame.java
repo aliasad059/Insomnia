@@ -1,13 +1,15 @@
 package GUI;
 
 import HttpClient.GUIClient;
+import HttpClient.InsomniaConfiguration;
 import HttpClient.ReqList;
 import HttpClient.Request;
 import com.github.weisj.darklaf.LafManager;
-import com.github.weisj.darklaf.theme.DarculaTheme;
+import com.github.weisj.darklaf.theme.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.*;
 
@@ -23,7 +25,7 @@ public class InsomniaFrame extends JFrame {
     static final int FRAME_WIDTH = 1250, FRAME_HEIGHT = 600;
     RequestsPanel requestsPanel;
     JPanel currentMiddlePanel, currentResponsePanel;
-    JMenuBar menuBar;
+    InsomniaMenuBar menuBar;
     ArrayList<Request> requests;
     ArrayList<ReqList> reqLists;
 
@@ -55,7 +57,7 @@ public class InsomniaFrame extends JFrame {
         makePanels();
     }
 
-    public InsomniaFrame(String title ,ArrayList<ReqList> reqLists, ArrayList<Request> requests) {
+    public InsomniaFrame(String title , ArrayList<ReqList> reqLists, ArrayList<Request> requests, InsomniaConfiguration configuration) {
         super(title);
         this.reqLists = reqLists;
         this.requests = requests;
@@ -81,6 +83,11 @@ public class InsomniaFrame extends JFrame {
 
         addWindowListener(new handler());
         makePanels();
+        if (configuration!=null) {
+            menuBar.setFollowRedirect(configuration.isFollowRedirect());
+            menuBar.setExitOnClose(configuration.isExitOnClose());
+            menuBar.setTheme(configuration.getTheme());
+        }
         requestsPanel.setRequests(requests);
         requestsPanel.setFolders(reqLists);
     }
@@ -226,7 +233,31 @@ public class InsomniaFrame extends JFrame {
         this.currentMiddlePanel = currentMiddlePanel;
     }
 
+    public InsomniaMenuBar getInsomniaMenuBar() {
+        return menuBar;
+    }
+
     public RequestsPanel getRequestsPanel() {
         return requestsPanel;
+    }
+    public void updateTheme(){
+        try {
+            if (menuBar.highContrastLightTheme.isSelected()) {
+                LafManager.install(new HighContrastLightTheme());
+            } else if (menuBar.solarizedLightTheme.isSelected()) {
+                LafManager.install(new SolarizedLightTheme());
+            } else if (menuBar.solarizedDarkTheme.isSelected()) {
+                LafManager.install(new SolarizedDarkTheme());
+            } else if (menuBar.highContrastDarkTheme.isSelected()) {
+                LafManager.install(new HighContrastDarkTheme());
+            } else if (menuBar.intelliJTheme.isSelected()) {
+                LafManager.install(new IntelliJTheme());
+            } else
+                LafManager.install(new DarculaTheme());
+            this.revalidate();
+            this.repaint();
+        }catch (Exception ignored){
+
+        }
     }
 }

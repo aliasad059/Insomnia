@@ -4,10 +4,12 @@ import GUI.Display;
 import GUI.InsomniaFrame;
 import GUI.InsomniaMenuBar;
 import GUI.ResponsePanel;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.lang.module.Configuration;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -29,6 +31,7 @@ public class GUIClient {
         for (File file : workSpaces) {
             ArrayList<Request> requests = new ArrayList<>();
             ArrayList<ReqList> reqLists = new ArrayList<>();
+            InsomniaConfiguration configuration = null;
             if (file.isDirectory()) {
                 File[] workSpaceContent = file.listFiles();
                 if (workSpaceContent != null) {
@@ -43,6 +46,13 @@ public class GUIClient {
                                     request.initResponsePanel();
                                     request.initMiddlePanel();
                                 }
+                            } catch (ClassNotFoundException | IOException ignored) {
+                            }
+                        } else if (workSpaceFile.getName().contains("config")) {
+                            try (FileInputStream finconfig = new FileInputStream(workSpaceFile);
+                                 ObjectInputStream configReader = new ObjectInputStream(finconfig);
+                            ) {
+                                configuration = (InsomniaConfiguration) configReader.readObject();
                             } catch (ClassNotFoundException | IOException ignored) {
                             }
                         } else {
@@ -61,11 +71,11 @@ public class GUIClient {
                     }
                 }
             }
-            if(reqLists.size()!=0 || requests.size()!=0) {
-                workSpaceFrames.add(makeInsomniaFrame(file.getName(), reqLists, requests));
+            if (reqLists.size() != 0 || requests.size() != 0) {
+                workSpaceFrames.add(makeInsomniaFrame(file.getName(), reqLists, requests,configuration));
             }
         }
-        if (workSpaceFrames.size()!= 0) {
+        if (workSpaceFrames.size() != 0) {
             System.out.println("load done");
 
             return new Display(workSpaceFrames, workSpaceFrames.get(0));
@@ -75,22 +85,27 @@ public class GUIClient {
     }
 
     public static void save() {
-        ArrayList<InsomniaFrame>workSpaces = Display.getWorkSpaces();
+        ArrayList<InsomniaFrame> workSpaces = Display.getWorkSpaces();
         for (InsomniaFrame frame : workSpaces) {
             File file = new File("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
             file.delete();
             for (Request request : frame.getRequests()) {
-                System.out.println("yes");
                 request.saveRequest("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
             }
             for (ReqList reqList : frame.getReqLists()) {
                 reqList.saveList("./save/workSpaces/" + frame.getTitle() + "/" + reqList.getListName() + "_list.txt");
             }
+//            Configuration configuration = new Configuration(frame.getInsomniaMenuBar());
+            InsomniaConfiguration insomniaConfiguration = new InsomniaConfiguration(frame.getInsomniaMenuBar());
+            insomniaConfiguration.save("./save/workSpaces/" + frame.getTitle() + "/config.txt");
+
         }
-        System.out.println("SAVE DONE");
     }
-    private static InsomniaFrame makeInsomniaFrame(String name ,ArrayList<ReqList>reqLists,ArrayList<Request>requests){
-        return new InsomniaFrame(name,reqLists,requests);
+
+    private static InsomniaFrame makeInsomniaFrame(String name, ArrayList<ReqList> reqLists,
+                                                   ArrayList<Request> requests,
+                                                   InsomniaConfiguration configuration) {
+        return new InsomniaFrame(name, reqLists, requests,configuration);
     }
 
     public static void addRequest(Request requestToAdd) {
