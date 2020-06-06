@@ -88,7 +88,7 @@ public class InsomniaFrame extends JFrame {
         requestsPanel.addFolders(reqLists);
 
         currentMiddlePanel = requests.get(0).getMiddlePanel();
-        currentResponsePanel = requests.get(0).getMiddlePanel();
+        currentResponsePanel = requests.get(0).getResponsePanel();
         menuBar = new InsomniaMenuBar(this);
 
         this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);

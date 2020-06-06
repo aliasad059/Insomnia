@@ -240,9 +240,11 @@ public class MiddlePanel extends JPanel {
         binaryPanel.setLayout(new FlowLayout());
         fileChooserButton = new JButton("Choose file");
         filePath = new JTextField("         Path of chosen file          ");
-        filePath.setText(request.getUpload());
-        if (new File(request.getUpload()).isFile()) {
-            binaryFile = new File(request.getUpload());
+        if (request.getUpload()!= null) {
+            filePath.setText(request.getUpload());
+            if (new File(request.getUpload()).isFile()) {
+                binaryFile = new File(request.getUpload());
+            }
         }
         binaryPanel.add(fileChooserButton);
         binaryPanel.add(filePath);
@@ -250,7 +252,9 @@ public class MiddlePanel extends JPanel {
         fileChooserButton.addActionListener(new handler());
 
         jsonViewerPanel = new JsonViewerPanel();
-        jsonViewerPanel.setText(request.getJson());
+        if (request.getJson()!= null) {
+            jsonViewerPanel.setText(request.getJson());
+        }
         JSONPanel = new JPanel(new BorderLayout());
         JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
 

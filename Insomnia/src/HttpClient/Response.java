@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public class Response implements Serializable {
     private JLabel statusLabel;
     public Response(HttpResponse<byte[]>httpResponse) {
         this.httpResponse = httpResponse;
+        headers = new HashMap<>();
         setBody();
         setContainsPic();
         setHeaders();
@@ -87,7 +89,7 @@ public class Response implements Serializable {
     }
 
     public Map<String, List<String>> getHeaders() {
-        return headers = httpResponse.headers().map();
+        return headers;
     }
 
     private void setHeaders() {

@@ -35,7 +35,7 @@ public class ResponsePanel extends JPanel {
     JTabbedPane tabs;
     JTextPane previewTextPane, JSONTextPane;
     JTextArea rowTextArea;
-    String[] cmStrings = { "Row", "Preview","JSON"};
+    String[] cmStrings = {"Row", "Preview", "JSON"};
     String[] tableColumnsString = {"NAME", "VALUE"};
     //ArrayList<ArrayList<String>> tableNameValue = new ArrayList<ArrayList<String>>();
     JComboBox cb;
@@ -45,11 +45,13 @@ public class ResponsePanel extends JPanel {
     public ResponsePanel() {
         setResponsePanel();
     }
-    public ResponsePanel(Response response){
+
+    public ResponsePanel(Response response) {
         setResponsePanel();
         updatePanel(response);
     }
-    private void setResponsePanel(){
+
+    private void setResponsePanel() {
         setLayout(new BorderLayout());
 
         northResponsePanel = new JPanel(new GridLayout(1, 3));
@@ -127,7 +129,7 @@ public class ResponsePanel extends JPanel {
                     messageBodyTab.add(rowPanel, BorderLayout.CENTER);
                 } else if (comboBox.getSelectedIndex() == 1) {
                     messageBodyTab.remove(1);
-                    messageBodyTab.add(previewPanel,BorderLayout.CENTER);
+                    messageBodyTab.add(previewPanel, BorderLayout.CENTER);
                 } else {
                     messageBodyTab.remove(1);
                     messageBodyTab.add(JSONPanel, BorderLayout.CENTER);
@@ -163,7 +165,7 @@ public class ResponsePanel extends JPanel {
         status.setBorder(new LineBorder(Color.GRAY));
         status.setPreferredSize(new Dimension(FRAME_WIDTH / 20, 20));
         northResponsePanel.remove(0);
-        northResponsePanel.add(status,0);
+        northResponsePanel.add(status, 0);
         this.statusLabel = status;
         this.updateUI();
     }
@@ -190,11 +192,13 @@ public class ResponsePanel extends JPanel {
     public void setPreviewContent(Image image) {
         previewTextPane.insertIcon(new ImageIcon(image));
     }
-    public void resetPanel(){
+
+    public void resetPanel() {
         this.removeAll();
         setResponsePanel();
     }
-    public void updatePanel(Response response){
+
+    public void updatePanel(Response response) {
         setTimeLabel(response.getResponseTime());
         setSizeLabel(response.getResponseSize());
         setStatusLabel(response.getStatusLabel());
