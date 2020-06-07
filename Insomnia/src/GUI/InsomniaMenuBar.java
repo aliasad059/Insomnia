@@ -32,6 +32,10 @@ public class InsomniaMenuBar extends JMenuBar {
     private boolean isSlideToggledActive = false;
     JPanel requestsPanel;
 
+    /**
+     * creat an insomnia menu bar and set its owner frame
+     * @param frame owner frame
+     */
     public InsomniaMenuBar(InsomniaFrame frame) {
         this.frame = frame;
         applicationMenu = new JMenu("Application");
@@ -162,13 +166,16 @@ public class InsomniaMenuBar extends JMenuBar {
 
     /**
      * return the isSystemTrayEnabled value
-     *
-     * @return
+     * @return true if enabled
      */
     public static boolean isIsSystemTrayEnabled() {
         return isSystemTrayEnabled;
     }
 
+    /**
+     * return the isFollowRedirect value
+     * @return true if enabled
+     */
     public static boolean isFollowRedirect() {
         return followRedirect;
     }
@@ -237,6 +244,9 @@ public class InsomniaMenuBar extends JMenuBar {
         }
     }
 
+    /**
+     * insomnia system tray
+     */
     public class InsomniaSystemTray {
         public void makeSystemTray() {
             //checking for support
@@ -291,30 +301,53 @@ public class InsomniaMenuBar extends JMenuBar {
 
     }
 
+    /**
+     * get theme type as user chose
+     * @return string that contains theme name
+     */
     public String getThemeType() {
         return themeTypeString;
     }
 
+    /**
+     * get exit on close check box
+     * @return exit on close
+     */
     public JCheckBox getExitOnClose() {
         return ExitOnClose;
     }
-
+    /**
+     * getFollowRedirectCheckBox
+     * @return FollowRedirect
+     */
     public JCheckBox getFollowRedirectCheckBox() {
         return followRedirectCheckBox;
     }
 
+    /**
+     * this is used when loading the configs and loads the last selections
+     * @param status the last chosen status of exit on close
+     */
     public void setExitOnClose(boolean status) {
         if ((ExitOnClose.isSelected() && !status) || (!ExitOnClose.isSelected() && status)) {
             ExitOnClose.doClick();
         }
     }
 
+    /**
+     * this is used when loading the configs and loads the last selections
+     * @param status the last chosen status  of follow redirect
+     */
     public void setFollowRedirect(boolean status) {
         if ((followRedirectCheckBox.isSelected() && !status) || (!followRedirectCheckBox.isSelected() && status)) {
             followRedirectCheckBox.doClick();
         }
     }
 
+    /**
+     * set theme
+     * @param theme theme to set
+     */
     public void setTheme(String theme) {
         if (theme == null){
             darculaTheme.doClick();

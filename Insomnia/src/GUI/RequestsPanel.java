@@ -94,7 +94,6 @@ public class RequestsPanel extends JPanel {
         panel.setVisible(true);
         panel.setBorder(new LineBorder(Color.MAGENTA));
         centerCenterRequestPanel.add(panel);
-        System.out.println("PANEL ADDED");
         updateUI();
     }
 
@@ -110,6 +109,7 @@ public class RequestsPanel extends JPanel {
         Request request = new Request();
         JPanel panel = new JPanel();
         JLabel label = new JLabel(method);
+        request.getMiddlePanel().setOwner(request);
         if (method.substring(0, 3).equals("GET")) {
             label.setForeground(Color.MAGENTA);
         }
@@ -140,7 +140,7 @@ public class RequestsPanel extends JPanel {
                 frame.setCurrentMiddlePanel(request.getMiddlePanel());
                 frame.setCurrentResponsePanel(request.getResponsePanel());
                 frame.setLeftAndRightPanels();
-                frame.updateTheme();
+//                frame.updateTheme();
             }
         });
 
@@ -169,12 +169,12 @@ public class RequestsPanel extends JPanel {
     /**
      * loads a request JPanel to add it to the screen
      *
-     * @param request
-     * @return Jpanel contants a Jlaber and a button
+     * @param request request
+     * @return JPanel contains a JLabel and a button
      */
     private JPanel makeRequest(Request request) {
 //        requests.add(request);
-        GUIClient.addRequest(request);
+        request.getMiddlePanel().setOwner(request);
         String method = request.getMethod();
         String name = request.getRequestName();
         JPanel panel = new JPanel();
@@ -203,10 +203,9 @@ public class RequestsPanel extends JPanel {
                 frame.setCurrentMiddlePanel(request.getMiddlePanel());
                 frame.setCurrentResponsePanel(request.getResponsePanel());
                 frame.setLeftAndRightPanels();
-                frame.updateTheme();
             }
         });
-
+//        frame.updateTheme();
 //        request.setMethodLabel(label);
 
         label.setLabelFor(requestButton);
@@ -216,7 +215,6 @@ public class RequestsPanel extends JPanel {
         panel.setAlignmentX(0);
         updateUI();
         requestsButton.add(panel);
-        System.out.println("panel created");
         requestButton.doClick();
         return panel;
     }
@@ -380,7 +378,11 @@ public class RequestsPanel extends JPanel {
             }
         });
     }
-
+    /**
+     * make a folder as reqlist input
+     *
+     * @param reqList folder
+     */
     private void addFolder(ReqList reqList) {
 
         JButton newFolder = new JButton("\uD83D\uDCC2"+"      "+reqList.getListName()+"       ");
@@ -687,10 +689,18 @@ public class RequestsPanel extends JPanel {
         }
     }
 
+    /**
+     * set requsts of the panel
+     * @param requests requests
+     */
     public void setRequests(ArrayList<Request> requests) {
         this.requests = requests;
     }
 
+    /**
+     * remove all the requests and add new requsts as reqeusts array list
+     * remove all the lists and add new list as reqlists array list
+     */
     public void updateRequests() {
         centerCenterRequestPanel.removeAll();
         for (int i = 0; i < requests.size(); i++) {
@@ -700,6 +710,11 @@ public class RequestsPanel extends JPanel {
             addFolder(folders.get(i));
         }
     }
+
+    /**
+     * set folders
+     * @param reqLists folders
+     */
     public void setFolders(ArrayList<ReqList> reqLists) {
         folders = reqLists;
     }

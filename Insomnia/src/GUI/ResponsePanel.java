@@ -1,24 +1,19 @@
 package GUI;
 
-import HttpClient.Request;
 import HttpClient.Response;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
@@ -41,16 +36,25 @@ public class ResponsePanel extends JPanel {
     JComboBox cb;
     JTable headerTable;
     JButton copyCB;
-
+    /**
+     * creat a response panel
+     */
     public ResponsePanel() {
         setResponsePanel();
     }
 
+    /**
+     * creat a response panel as Response object
+     * @param response
+     */
     public ResponsePanel(Response response) {
         setResponsePanel();
         updatePanel(response);
     }
 
+    /**
+     * sets the changes to the panel
+     */
     private void setResponsePanel() {
         setLayout(new BorderLayout());
 
@@ -156,10 +160,17 @@ public class ResponsePanel extends JPanel {
         }
     }
 
+    /**
+     * set size label
+     * @param size size
+     */
     public void setSizeLabel(String size) {
         this.sizeLabel.setText(size);
     }
-
+    /**
+     * set status label
+     * @param status status
+     */
     public void setStatusLabel(JLabel status) {
         status.setAlignmentX(0);
         status.setBorder(new LineBorder(Color.GRAY));
@@ -169,35 +180,58 @@ public class ResponsePanel extends JPanel {
         this.statusLabel = status;
         this.updateUI();
     }
-
+    /**
+     * set time label
+     * @param time time
+     */
     public void setTimeLabel(String time) {
         this.timeLabel.setText(time);
     }
 
+    /**
+     * set headers map
+     * @param headers headers
+     */
     public void setHeaders(Map<String, List<String>> headers) {
         headerTable.removeAll();
         DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"KEY", "VALUE"}, 0);
         headers.forEach((k, v) -> tableModel.addRow(new String[]{k, v.toString()}));
         headerTable.setModel(tableModel);
     }
-
+    /**
+     * setJSONBodyContent
+     * @param bodyText bodyText
+     */
     public void setJSONBodyContent(String bodyText) {
         jsonViewerPanel.setText(bodyText);
     }
-
+    /**
+     * setRowBodyContent
+     * @param bodyText bodyText
+     */
     public void setRowBodyContent(String bodyText) {
         rowTextArea.setText(bodyText);
     }
-
+    /**
+     * setPreviewContent
+     * @param image image
+     */
     public void setPreviewContent(Image image) {
         previewTextPane.insertIcon(new ImageIcon(image));
     }
 
+    /**
+     * reset panel
+     */
     public void resetPanel() {
         this.removeAll();
         setResponsePanel();
     }
 
+    /**
+     * update panel as Response object
+     * @param response response
+     */
     public void updatePanel(Response response) {
         if (response != null) {
             setTimeLabel(response.getResponseTime());
@@ -205,7 +239,6 @@ public class ResponsePanel extends JPanel {
             setStatusLabel(response.getStatusLabel());
 
             if (response.doesContainPic()) {
-                System.out.println("IMAGE");
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(response.getBody());
                 try {
                     Image image = ImageIO.read(byteArrayInputStream);

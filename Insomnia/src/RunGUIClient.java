@@ -2,7 +2,7 @@ import GUI.Display;
 import HttpClient.GUIClient;
 
 /**
- * just to test the GUI
+ * runs GUI client
  */
 public class RunGUIClient{
     public static void main(String[] args) {
@@ -10,6 +10,5 @@ public class RunGUIClient{
         if (display == null){
              display = new Display();
         }
-        GUIClient client = new GUIClient();
     }
 }

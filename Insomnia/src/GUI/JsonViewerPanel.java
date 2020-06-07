@@ -37,6 +37,11 @@ import com.github.jutil.core.gui.GuiUtils;
 import com.github.jutil.gui.GuiConstants;
 import com.google.gson.JsonSyntaxException;
 
+/**
+ * this class is copied from the jsonviewer-filecompare-1.0.0-jar-with-dependencies library
+ * some methods are added
+ */
+
 public class JsonViewerPanel extends AbstractPanel {
 
     private static final long serialVersionUID = 7554118114747990205L;

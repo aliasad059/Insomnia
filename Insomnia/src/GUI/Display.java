@@ -15,11 +15,21 @@ public class Display {
     private static ArrayList<InsomniaFrame> workSpaces;
     private static InsomniaFrame showingFrame;
 
+    /**
+     * a new display with empty screen
+     */
     public Display() {
         workSpaces = new ArrayList<>();
         makeWorkSpace("Insomnia");
         showingFrame.setVisible(true);
     }
+
+    /**
+     * a new display , its data will load form file
+     * in other word it is used for loading
+     * @param workSpaces
+     * @param showingFrame
+     */
     public Display(ArrayList<InsomniaFrame> workSpaces,InsomniaFrame showingFrame){
         Display.setWorkSpaces(workSpaces);
         Display.setShowingFrame(showingFrame);
@@ -94,18 +104,35 @@ public class Display {
         dialog.setVisible(true);
     }
 
+    /**
+     * get workspaces
+     * @return workspaces
+     */
     public static ArrayList<InsomniaFrame> getWorkSpaces() {
         return workSpaces;
     }
+
+    /**
+     * get showing frame
+     * @return showing frame
+     */
     public static JFrame getShowingFrame(){
         return showingFrame;
     }
-
+    /**
+     * set showing frame
+     * @param showingFrame showing frame
+     */
     public static void setShowingFrame(InsomniaFrame showingFrame) {
         Display.showingFrame = showingFrame;
     }
 
-    public static void setWorkSpaces(ArrayList<InsomniaFrame> workSpaces) {
+    /**
+     * set workspaces
+     * @param workSpaces workspaces
+     */
+    public static void setWorkSpaces(ArrayList<InsomniaFrame> workSpaces)
+    {
         Display.workSpaces = workSpaces;
     }
 }

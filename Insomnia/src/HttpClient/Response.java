@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * gets an HttpResponse and initialize its fields,as HttpResponse are not serializable
+ */
 public class Response implements Serializable {
     transient HttpResponse<byte[]>httpResponse;
     private String responseSize,responseTime;

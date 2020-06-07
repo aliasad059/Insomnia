@@ -10,14 +10,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
-
 import HttpClient.GUIClient;
 import HttpClient.Request;
-import com.github.jutil.json.gui.*;
 
 import static GUI.InsomniaFrame.FRAME_WIDTH;
 
@@ -51,6 +48,7 @@ public class MiddlePanel extends JPanel {
      * center panel holds a tabbed pane with different items
      */
     public MiddlePanel() {
+        System.out.println("YES");
         formData = new ArrayList<>();
         queries = new ArrayList<>();
         headers = new ArrayList<>();
@@ -87,12 +85,19 @@ public class MiddlePanel extends JPanel {
         add(tabs, BorderLayout.CENTER);
 
     }
-
+    /**
+     * this panel is divided by border layout into north and center
+     * in north the are controlling buttons
+     * center panel holds a tabbed pane with different items
+     *
+     * it will make a Middle panel as the request data
+     */
     public MiddlePanel(Request request) {
+        System.out.println("yesagadgsfgsdfgsgs");
         formData = new ArrayList<>();
         queries = new ArrayList<>();
         headers = new ArrayList<>();
-
+        this.setOwner(request);
         setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
         northMiddlePanel.setLayout(new GridLayout(1, 3));
@@ -147,12 +152,14 @@ public class MiddlePanel extends JPanel {
 
         //////////////////////////////////////////////////////
     }
-
+    /**
+     * makes query panel as the request data
+     */
     private void makeQueryPanel(Request request) {
         ////////////////////making query panel
         JLabel urlPreviewLabel = new JLabel("URL Preview");
         urlPreviewField = new JTextField();
-        urlPreviewLabel.setText(request.getUri());
+        urlPreviewField.setText(request.getUri());
         urlPreviewField.setPreferredSize(new Dimension(FRAME_WIDTH / 6, 30));
         urlPreviewField.setEnabled(false);
         copyURLButton = new JButton("Copy URL");
@@ -160,6 +167,7 @@ public class MiddlePanel extends JPanel {
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
         queryPanel.add(copyURLButton);
+        System.out.println("questire map:"+request.getQueries().toString());
         for (Map.Entry<String, String> entry : request.getQueries().entrySet()) {
             queryPanel.add(new Form(queryPanel, entry.getKey(), entry.getValue()));
         }
@@ -230,7 +238,9 @@ public class MiddlePanel extends JPanel {
 
         bodyTabStatus.addActionListener(new handler());
     }
-
+    /**
+     * makes body panel as the request data
+     */
     private void makeBodyPanel(Request request) {
         String[] bodyTab = {"No Body", "Form", "JASON", "Binary"};
         bodyTabStatus = new JComboBox(bodyTab);
@@ -259,7 +269,7 @@ public class MiddlePanel extends JPanel {
         JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
 
         bodyFormPanel = new JPanel();
-
+        System.out.println("forms map:"+request.getFormsMap().toString());
         for (Map.Entry<String, String> entry : request.getFormsMap().entrySet()) {
             bodyFormPanel.add(new Form(bodyFormPanel, entry.getKey(), entry.getValue()));
         }
@@ -277,12 +287,17 @@ public class MiddlePanel extends JPanel {
         headerPanel.add(new Form(headerPanel, "Name", "Value"));
     }
 
-    private void makeHeaderPanel(Request request) {
+    /**
+     * makes header panel as the request data
+     */
+    private void makeHeaderPanel(Request request){
+        System.out.println("headers:"+request.getHeadersMap().toString());
+
         for (Map.Entry<String, String> entry : request.getHeadersMap().entrySet()) {
             headerPanel.add(new Form(headerPanel, entry.getKey(), entry.getValue()));
-
         }
     }
+
 
     /**
      * handling main events of middle panel
@@ -369,7 +384,10 @@ public class MiddlePanel extends JPanel {
         }
     }
 
-    private void initializeRequest() {
+    /**
+     * initialize the request as panel's info
+     */
+    public void initializeRequest() {
         owner.setMethod((String) requestMethodType.getSelectedItem());
 
         owner.setUri(urlPreviewField.getText());
@@ -379,9 +397,9 @@ public class MiddlePanel extends JPanel {
         }
         //no body
         if (bodyTabStatus.getSelectedIndex() == 0) {
-            owner.setUpload(null);
-            owner.setData(null);
-            owner.setJson(null);
+//            owner.setUpload(null);
+//            owner.setData(null);
+//            owner.setJson(null);
         }
         //form data
         else if (bodyTabStatus.getSelectedIndex() == 1) {
@@ -395,25 +413,25 @@ public class MiddlePanel extends JPanel {
                 }
             }
             //removing the last & of the string
-            formDataString = formDataString.substring(0, formDataString.length() - 1);
-            owner.setData(formDataString);
-            owner.setJson(null);
-            owner.setUpload(null);
+            if (!formDataString.equals("")) {
+                formDataString = formDataString.substring(0, formDataString.length() - 1);
+                owner.setData(formDataString);
+            }
+//            owner.setJson(null);
+//            owner.setUpload(null);
         }
         //json
         else if (bodyTabStatus.getSelectedIndex() == 2) {
             owner.setJson(jsonViewerPanel.getText());
-            owner.setData(null);
-            owner.setUpload(null);
+//            owner.setData(null);
+//            owner.setUpload(null);
         }
         //binary file
         else {
             owner.setUpload(filePath.getText());
-            owner.setData(null);
-            owner.setJson(null);
+//            owner.setData(null);
+//            owner.setJson(null);
         }
-        owner.setSaveRequest(true);
-
         String headerString = "";
         for (Form header : headers) {
             if (header.IsActive()) {
@@ -426,7 +444,7 @@ public class MiddlePanel extends JPanel {
         if (!headerString.equals("")) {
             headerString = headerString.substring(0, headerString.length() - 1);
         }
-        System.out.println(headerString);
+        System.out.println("headers:"+headerString);
         owner.setHeaders(headerString);
     }
 
@@ -434,7 +452,7 @@ public class MiddlePanel extends JPanel {
      * this class makes us form
      * a form has name ,value ,status and remove items
      */
-    public class Form extends JPanel {
+    public class Form extends JPanel implements Serializable {
         private JPanel formOwner;
         private JTextField nameField, valueField;
         private JCheckBox isActive;
@@ -472,12 +490,14 @@ public class MiddlePanel extends JPanel {
                 queries.add(this);
             } else if (formOwner == headerPanel) {
                 System.out.println("ADD to headers");
+                if (owner != null)
+                    owner.addHeader(this.getNameField().getText(), this.getValueField().getText());
                 headers.add(this);
             } else if (formOwner == bodyFormPanel) {
                 System.out.println("ADD to form");
-
+                if (owner != null)
+                    owner.addForm(this.getNameField().getText(), this.getValueField().getText());
                 formData.add(this);
-                System.out.println();
             }
             form = this;
         }
@@ -557,6 +577,9 @@ public class MiddlePanel extends JPanel {
         }
     }
 
+    /**
+     * change the url preview as active query forms
+     */
     private void setQueries() {
         String urlPreview = url.getText();
         urlPreview += '?';
@@ -572,8 +595,13 @@ public class MiddlePanel extends JPanel {
         urlPreviewField.setText(urlPreview);
     }
 
+    /**
+     * set the middle panel owner
+     * @param owner owner
+     */
     public void setOwner(Request owner) {
         this.owner = owner;
     }
+
 }
 

@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+/**
+ * save the configs of the menu bar to a file
+ */
 public class InsomniaConfiguration implements Serializable {
-    InsomniaMenuBar insomniaMenuBar;
     boolean followRedirect,exitOnClose;
     String theme;
     public InsomniaConfiguration(InsomniaMenuBar insomniaMenuBar) {
@@ -17,21 +19,34 @@ public class InsomniaConfiguration implements Serializable {
         theme = insomniaMenuBar.getThemeType();
     }
 
-    public InsomniaMenuBar getInsomniaMenuBar() {
-        return insomniaMenuBar;
-    }
-
+    /**
+     * isFollowRedirect
+     * @return FollowRedirect value
+     */
     public boolean isFollowRedirect() {
         return followRedirect;
     }
 
+    /**
+     * isExitOnClose
+     * @return exitOnClose value
+     */
     public boolean isExitOnClose() {
         return exitOnClose;
     }
 
+    /**
+     * get theme
+     * @return theme
+     */
     public String getTheme() {
         return theme;
     }
+
+    /**
+     * save the configs
+     * @param path path to save
+     */
     public void save(String path){
         try (FileOutputStream fout=new FileOutputStream(path);
              ObjectOutputStream objWriter=new ObjectOutputStream(fout)){

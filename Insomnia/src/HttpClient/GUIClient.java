@@ -5,11 +5,8 @@ import GUI.InsomniaFrame;
 import GUI.InsomniaMenuBar;
 import GUI.ResponsePanel;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
 import java.io.*;
-import java.lang.module.Configuration;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -17,11 +14,13 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 public class GUIClient {
-    public GUIClient() {
-    }
+    public GUIClient() {}
 
+    /**
+     * loads saved data
+     * @return Display
+     */
     public static Display load() {
-        System.out.println("Enter of load");
         File[] workSpaces = new File("./save/workSpaces").listFiles();
         if (workSpaces == null) {
             System.out.println("Not found :./save/workSpaces");
@@ -42,10 +41,7 @@ public class GUIClient {
                             ) {
                                 ReqList reqList = (ReqList) listsReader.readObject();
                                 reqLists.add(reqList);
-                                for (Request request : reqList.getRequests()) {
-                                    request.initResponsePanel();
-                                    request.initMiddlePanel();
-                                }
+
                             } catch (ClassNotFoundException | IOException ignored) {
                             }
                         } else if (workSpaceFile.getName().contains("config")) {
@@ -62,8 +58,6 @@ public class GUIClient {
                                 while (true) {
                                     Request request = (Request) requestsReader.readObject();
                                     requests.add(request);
-                                    request.initMiddlePanel();
-                                    request.initResponsePanel();
                                 }
                             } catch (ClassNotFoundException | IOException ignored) {
                             }
@@ -72,27 +66,31 @@ public class GUIClient {
                 }
             }
             if (reqLists.size() != 0 || requests.size() != 0) {
-                workSpaceFrames.add(makeInsomniaFrame(file.getName(), reqLists, requests,configuration));
+                workSpaceFrames.add(makeInsomniaFrame(file.getName(), reqLists, requests, configuration));
             }
         }
         if (workSpaceFrames.size() != 0) {
-            System.out.println("load done");
-
             return new Display(workSpaceFrames, workSpaceFrames.get(0));
         }
-        System.out.println("load failed");
         return null;
     }
 
+    /**
+     * save data:requests, reqLists, configs
+     */
     public static void save() {
         ArrayList<InsomniaFrame> workSpaces = Display.getWorkSpaces();
         for (InsomniaFrame frame : workSpaces) {
             File file = new File("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
             file.delete();
             for (Request request : frame.getRequests()) {
+                request.getMiddlePanel().initializeRequest();
                 request.saveRequest("./save/workSpaces/" + frame.getTitle() + "/requests.txt");
             }
             for (ReqList reqList : frame.getReqLists()) {
+                for (int i = 0; i < reqList.getRequests().size(); i++) {
+                    reqList.getRequests().get(i).getMiddlePanel().initializeRequest();
+                }
                 reqList.saveList("./save/workSpaces/" + frame.getTitle() + "/" + reqList.getListName() + "_list.txt");
             }
 //            Configuration configuration = new Configuration(frame.getInsomniaMenuBar());
@@ -102,21 +100,24 @@ public class GUIClient {
         }
     }
 
+    /**
+     * makes a insomnia frame with entered inputs
+     * @param name name
+     * @param reqLists reqLists
+     * @param requests requests
+     * @param configuration configuration
+     * @return Insomnia frame
+     */
     private static InsomniaFrame makeInsomniaFrame(String name, ArrayList<ReqList> reqLists,
                                                    ArrayList<Request> requests,
                                                    InsomniaConfiguration configuration) {
-        return new InsomniaFrame(name, reqLists, requests,configuration);
+        return new InsomniaFrame(name, reqLists, requests, configuration);
     }
 
-    public static void addRequest(Request requestToAdd) {
-    }
-
-    public static void addFolder() {
-    }
-
-    public static void addRequestTo() {
-    }
-
+    /**
+     * run request
+     * @param requestToRun requestToRun
+     */
     public static void runRequest(Request requestToRun) {
         SendRequest sendRequest = new SendRequest(requestToRun);
         try {
@@ -126,6 +127,9 @@ public class GUIClient {
         }
     }
 
+    /**
+     * swing worker for sending the request
+     */
     private static class SendRequest extends SwingWorker<HttpResponse<byte[]>, String> {
         Request requestToRun;
         double elapsedTime;
@@ -151,7 +155,6 @@ public class GUIClient {
         protected HttpResponse<byte[]> doInBackground() {
             HttpRequest httpRequest = requestToRun.makeRequest();
             if (httpRequest == null) {
-                System.out.println("NULL");
                 return null;
             } else {
                 HttpClient client;

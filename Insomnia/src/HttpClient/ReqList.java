@@ -60,7 +60,9 @@ public class ReqList implements Serializable {
     public Request getRequest(int index) {
         return requests.get(index);
     }
-
+    /**
+     * gets requests of the list
+     */
     public ArrayList<Request> getRequests() {
         return requests;
     }

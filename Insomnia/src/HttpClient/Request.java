@@ -2,9 +2,6 @@ package HttpClient;
 
 import GUI.MiddlePanel;
 import GUI.ResponsePanel;
-
-import javax.swing.*;
-import java.awt.*;
 import java.io.*;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -30,7 +27,7 @@ public class Request implements Serializable {
 //    private JLabel methodLabel;
     private boolean completed;
     private String requestName, uri, method, headers, output, data, json, upload;
-    private Map<String, String> headersMap,formsMap,queries;
+    private HashMap<String, String> headersMap,formsMap,queries;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
     public Request() {
@@ -105,10 +102,8 @@ public class Request implements Serializable {
                 HashMap<Object, Object> formData = new HashMap<>();
                 for (int i = 0; i < forms.length; i++) {
                     String[] splitForms = forms[i].split("=");
-                    formsMap.put(splitForms[0],splitForms[1]);
                     formData.put(splitForms[0], splitForms[1]);
                 }
-                System.out.println(formData);
                 try {
                     String boundary = "" + new Date().getTime();
                     builder.setHeader("content-type", "multipart/form-data; boundary=" + boundary);
@@ -148,7 +143,6 @@ public class Request implements Serializable {
                 String[] pairs = headers.split(";");
                 for (int i = 0; i < pairs.length; i++) {
                     String[] splitPairs = pairs[i].split(":");
-                    headersMap.put(splitPairs[0],splitPairs[1]);
                     builder.header(splitPairs[0], splitPairs[1]);
                 }
             }
@@ -313,19 +307,6 @@ public class Request implements Serializable {
 
     public void setMethod(String method) {
         this.method = method;
-//        methodLabel.setText(method.substring(0, 3));
-//        if (method.equals("GET")) {
-//            methodLabel.setForeground(Color.MAGENTA);
-//        } else if (method.equals("POST")) {
-//            methodLabel.setForeground(Color.GREEN);
-//        } else if (method.equals("PUT")) {
-//            methodLabel.setForeground(Color.YELLOW);
-//        } else if (method.equals("PATCH")) {
-//            methodLabel.setForeground(Color.ORANGE);
-//        } else if (method.equals("DELETE")) {
-//            methodLabel.setForeground(Color.RED);
-//        }
-//        methodLabel.updateUI();
     }
 
     public String getHeaders() {
@@ -392,10 +373,6 @@ public class Request implements Serializable {
         this.saveRequest = saveRequest;
     }
 
-//    public void setMethodLabel(JLabel methodLabel) {
-//        this.methodLabel = methodLabel;
-//    }
-
     public MiddlePanel getMiddlePanel() {
         return middlePanel;
     }
@@ -419,15 +396,6 @@ public class Request implements Serializable {
     public void setRequestName(String requestName) {
         this.requestName = requestName;
     }
-
-    public void initMiddlePanel() {
-        setMiddlePanel(new MiddlePanel(this));
-    }
-
-    public void initResponsePanel() {
-        setResponsePanel(new ResponsePanel(this.response));
-    }
-
     public Map<String, String> getFormsMap() {
         return formsMap;
     }
@@ -438,7 +406,6 @@ public class Request implements Serializable {
     public void addQuery(String key,String value){
         queries.put(key, value);
     }
-
     public Map<String, String> getQueries() {
         return queries;
     }
@@ -450,4 +417,30 @@ public class Request implements Serializable {
     public void setResponse(Response response) {
         this.response = response;
     }
+
+    /**
+     * initialize middle panel withe its fields
+     */
+    public void initMiddlePanel() {
+        setMiddlePanel(new MiddlePanel(this));
+    }
+    /**
+     * initialize response panel withe its fields
+     */
+    public void initResponsePanel() {
+        setResponsePanel(new ResponsePanel(this.response));
+    }
+    /**
+     * adds a new header to the headersMap
+     */
+    public void addHeader(String key , String value){
+        headersMap.put(key, value);
+    }
+    /**
+     * adds a new form to the formsMap
+     */
+    public void addForm(String key , String value){
+        formsMap.put(key, value);
+    }
+
 }

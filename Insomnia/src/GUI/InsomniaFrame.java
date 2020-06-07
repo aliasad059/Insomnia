@@ -29,6 +29,10 @@ public class InsomniaFrame extends JFrame {
     ArrayList<Request> requests;
     ArrayList<ReqList> reqLists;
 
+    /**
+     * creat a new insomnia frame with empty data
+     * @param title frame title
+     */
     public InsomniaFrame(String title) {
         super(title);
         requests = new ArrayList<>();
@@ -57,6 +61,13 @@ public class InsomniaFrame extends JFrame {
         makePanels();
     }
 
+    /**
+     * creat a new insomnia frame with input data (data that are loaded from file)
+     * @param title title
+     * @param reqLists reqlists
+     * @param requests requests
+     * @param configuration configuration relate to the menu bar settings
+     */
     public InsomniaFrame(String title , ArrayList<ReqList> reqLists, ArrayList<Request> requests, InsomniaConfiguration configuration) {
         super(title);
         this.reqLists = reqLists;
@@ -88,8 +99,19 @@ public class InsomniaFrame extends JFrame {
             menuBar.setExitOnClose(configuration.isExitOnClose());
             menuBar.setTheme(configuration.getTheme());
         }
+
         requestsPanel.setRequests(requests);
         requestsPanel.setFolders(reqLists);
+        for (int i = 0; i < requests.size(); i++) {
+            requests.get(i).initMiddlePanel();
+            requests.get(i).initResponsePanel();
+        }
+        for (int i = 0; i < reqLists.size(); i++) {
+            for (int j = 0; j < reqLists.get(i).getRequests().size(); j++) {
+                reqLists.get(i).getRequests().get(j).initMiddlePanel();
+                reqLists.get(i).getRequests().get(j).initResponsePanel();
+            }
+        }
     }
 
     /**
@@ -139,7 +161,6 @@ public class InsomniaFrame extends JFrame {
                 } catch (AWTException ex) {
                 }
             } else {
-                //TODO: save before exit
                 GUIClient.save();
                 System.exit(0);
             }
@@ -160,16 +181,14 @@ public class InsomniaFrame extends JFrame {
         /**
          * Invoked when an action occurs.
          *
-         * @param e
+         * @param e action event
          */
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitItem) {
-                //TODO: save before exit
                 GUIClient.save();
                 System.exit(0);
             } else if (e.getSource() == openItem) {
-
                 tray.remove(trayIcon);
                 setVisible(true);
                 setExtendedState(JFrame.NORMAL);
@@ -195,10 +214,16 @@ public class InsomniaFrame extends JFrame {
         return leftAndRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestsPanel, currentRightPanels);
     }
 
+    /**
+     * set right panels
+     */
     public void setRightPanels() {
         currentRightPanels = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, currentMiddlePanel, currentResponsePanel);
     }
 
+    /**
+     * set left and right panels in other word the whole panels
+     */
     public void setLeftAndRightPanels() {
         setRightPanels();
         this.getContentPane().remove(0);
@@ -209,37 +234,74 @@ public class InsomniaFrame extends JFrame {
         this.repaint();
     }
 
+    /**
+     * as different request has different panels we have a current response panel
+     * @param currentResponsePanel
+     */
     public void setCurrentResponsePanel(JPanel currentResponsePanel) {
         this.currentResponsePanel = currentResponsePanel;
     }
 
+    /**
+     * add a new request to the frame list
+     * this list can be used in save and load
+     * @param request request to save
+     */
     public void addRequestToFrameList(Request request) {
         requests.add(request);
     }
 
+    /**
+     * add a new reqlist to the frame reqlists
+     * @param reqList
+     */
     public void addReqlistToFrameList(ReqList reqList) {
         reqLists.add(reqList);
     }
 
+    /**
+     * get stored requests
+     * @return requests
+     */
     public ArrayList<Request> getRequests() {
         return requests;
     }
 
+    /**
+     * get stored reqlists
+     * @return reqlists
+     */
     public ArrayList<ReqList> getReqLists() {
         return reqLists;
     }
 
+    /**
+     *      * as different request has different panels we have a current middle panel
+     * @param currentMiddlePanel
+     */
     public void setCurrentMiddlePanel(JPanel currentMiddlePanel) {
         this.currentMiddlePanel = currentMiddlePanel;
     }
 
+    /**
+     * get menu bar of the frame
+     * @return menu bar
+     */
     public InsomniaMenuBar getInsomniaMenuBar() {
         return menuBar;
     }
 
+    /**
+     * get requestpanel of the frame
+     * @return
+     */
     public RequestsPanel getRequestsPanel() {
         return requestsPanel;
     }
+
+    /**
+     * reinstall the theme as choosed in insomnia menu bar
+     */
     public void updateTheme(){
         try {
             if (menuBar.highContrastLightTheme.isSelected()) {
