@@ -2,6 +2,9 @@ package HttpClient;
 
 import GUI.MiddlePanel;
 import GUI.ResponsePanel;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.*;
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -16,27 +19,24 @@ import java.util.*;
  * request
  */
 public class Request implements Serializable {
-    private static final long serialVersionUID = 6529685098267757690L;
-
     private transient MiddlePanel middlePanel;
     private transient ResponsePanel responsePanel;
     private transient HttpRequest request;
     private transient HttpResponse<byte[]> lastResponse;
+    private transient JLabel methodLabel;
 
     private Response response;
-//    private JLabel methodLabel;
     private boolean completed;
     private String requestName, uri, method, headers, output, data, json, upload;
-    private HashMap<String, String> headersMap,formsMap,queries;
+    private HashMap<String, String> headersMap, formsMap, queries;
     private boolean showResponseHeaders, followRedirect, saveRequest;
 
     public Request() {
-        headersMap= new HashMap<>();
+        headersMap = new HashMap<>();
         formsMap = new HashMap<>();
         queries = new HashMap<>();
-        middlePanel = new MiddlePanel();
+        middlePanel = new MiddlePanel(this, false);
         responsePanel = new ResponsePanel();
-        middlePanel.setOwner(this);
     }
 
 
@@ -308,7 +308,28 @@ public class Request implements Serializable {
     public void setMethod(String method) {
         this.method = method;
     }
+    public void updateLabel(){
+        methodLabel.setText(method.substring(0,3));
+        if (method.substring(0, 3).equals("GET")) {
+            methodLabel.setForeground(Color.MAGENTA);
+        }
+        if (method.substring(0, 3).equals("POS")) {
+            methodLabel.setForeground(Color.GREEN);
+        }
+        if (method.substring(0, 3).equals("PUT")) {
+            methodLabel.setForeground(Color.YELLOW);
+        }
+        if (method.substring(0, 3).equals("PAT")) {
+            methodLabel.setForeground(Color.ORANGE);
+        }
+        if (method.substring(0, 3).equals("DEL")) {
+            methodLabel.setForeground(Color.RED);
+        }
+    }
 
+    public void setMethodLabel(JLabel methodLabel) {
+        this.methodLabel = methodLabel;
+    }
     public String getHeaders() {
         return headers;
     }
@@ -396,17 +417,20 @@ public class Request implements Serializable {
     public void setRequestName(String requestName) {
         this.requestName = requestName;
     }
-    public Map<String, String> getFormsMap() {
+
+    public HashMap<String, String> getFormsMap() {
         return formsMap;
     }
 
-    public Map<String, String> getHeadersMap() {
+    public HashMap<String, String> getHeadersMap() {
         return headersMap;
     }
-    public void addQuery(String key,String value){
-        queries.put(key, value);
-    }
-    public Map<String, String> getQueries() {
+
+//    public void addQuery(String key, String value) {
+//        queries.put(key, value);
+//    }
+
+    public HashMap<String, String> getQueries() {
         return queries;
     }
 
@@ -422,25 +446,39 @@ public class Request implements Serializable {
      * initialize middle panel withe its fields
      */
     public void initMiddlePanel() {
-        setMiddlePanel(new MiddlePanel(this));
+        setMiddlePanel(new MiddlePanel(this, true));
     }
+
     /**
      * initialize response panel withe its fields
      */
     public void initResponsePanel() {
         setResponsePanel(new ResponsePanel(this.response));
     }
-    /**
-     * adds a new header to the headersMap
-     */
-    public void addHeader(String key , String value){
-        headersMap.put(key, value);
-    }
-    /**
-     * adds a new form to the formsMap
-     */
-    public void addForm(String key , String value){
-        formsMap.put(key, value);
+
+//    /**
+//     * adds a new header to the headersMap
+//     */
+//    public void addHeader(String key, String value) {
+//        headersMap.put(key, value);
+//    }
+//
+//    /**
+//     * adds a new form to the formsMap
+//     */
+//    public void addForm(String key, String value) {
+//        formsMap.put(key, value);
+//    }
+
+    public void setQueries(HashMap<String, String> queries) {
+        this.queries = queries;
     }
 
+    public void setHeadersMap(HashMap<String, String> headersMap) {
+        this.headersMap = headersMap;
+    }
+
+    public void setFormsMap(HashMap<String, String> formsMap) {
+        this.formsMap = formsMap;
+    }
 }

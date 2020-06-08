@@ -12,7 +12,9 @@ import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+
 import HttpClient.GUIClient;
 import HttpClient.Request;
 
@@ -39,6 +41,7 @@ public class MiddlePanel extends JPanel {
     JTextField urlPreviewField;
     Request owner;
     ArrayList<Form> formData, queries, headers;
+    HashMap<String, String> formDataMap, queriesMap, headersMap;
     File binaryFile;
 
 
@@ -46,12 +49,20 @@ public class MiddlePanel extends JPanel {
      * this panel is divided by border layout into north and center
      * in north the are controlling buttons
      * center panel holds a tabbed pane with different items
+     * <p>
+     * request will be null when there is no request created
+     * load is true when we want to load from request data
      */
-    public MiddlePanel() {
-        System.out.println("YES");
+    public MiddlePanel(Request request, boolean load) {
+        if (owner != null) {
+            setOwner(request);
+        }
         formData = new ArrayList<>();
         queries = new ArrayList<>();
         headers = new ArrayList<>();
+        headersMap = new HashMap<>();
+        formDataMap = new HashMap<>();
+        queriesMap = new HashMap<>();
 
         setLayout(new BorderLayout());
         northMiddlePanel = new JPanel();
@@ -76,63 +87,72 @@ public class MiddlePanel extends JPanel {
         tabs.addTab("Auth", authPanel);
         tabs.addTab("Query", queryPanel);
         tabs.addTab("Header", headerPanel);
+        if (load) {
+            this.queriesMap = request.getQueries();
+            this.headersMap = request.getHeadersMap();
+            this.formDataMap = request.getFormsMap();
 
-        makeBodyPanel();
+            url.setText(request.getUri());
+            makeBodyPanel(request);
+            makeHeaderPanel(request);
+            makeQueryPanel(request);
+        } else {
+            makeBodyPanel();
+            makeHeaderPanel();
+            makeQueryPanel();
+        }
         makeAuthPanel();
-        makeHeaderPanel();
-        makeQueryPanel();
-
         add(tabs, BorderLayout.CENTER);
 
     }
-    /**
-     * this panel is divided by border layout into north and center
-     * in north the are controlling buttons
-     * center panel holds a tabbed pane with different items
-     *
-     * it will make a Middle panel as the request data
-     */
-    public MiddlePanel(Request request) {
-        System.out.println("yesagadgsfgsdfgsgs");
-        formData = new ArrayList<>();
-        queries = new ArrayList<>();
-        headers = new ArrayList<>();
-        this.setOwner(request);
-        setLayout(new BorderLayout());
-        northMiddlePanel = new JPanel();
-        northMiddlePanel.setLayout(new GridLayout(1, 3));
-        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
-        requestMethodType = new JComboBox(methodsName);
-        requestMethodType.setSelectedItem(request.getMethod());
 
-        requestMethodType.addActionListener(new handler());
-        northMiddlePanel.add(requestMethodType);
-        northMiddlePanel.add(url = new JTextField());
-        url.setText(request.getUri());
-        url.addFocusListener(new handler());
-        northMiddlePanel.add(sendRequest = new JButton("Send" + '\u21E8'));
-        sendRequest.addActionListener(new handler());
-        add(northMiddlePanel, BorderLayout.NORTH);
-        tabs = new JTabbedPane();
-        bodyPanel = new JPanel();
-        bodyPanel.setLayout(new BorderLayout());
-        authPanel = new JPanel();
-        queryPanel = new JPanel();
-        headerPanel = new JPanel();
-
-        tabs.addTab("Body", bodyPanel);
-        tabs.addTab("Auth", authPanel);
-        tabs.addTab("Query", queryPanel);
-        tabs.addTab("Header", headerPanel);
-
-        makeBodyPanel(request);
-        makeAuthPanel();
-        makeHeaderPanel(request);
-        makeQueryPanel(request);
-
-        add(tabs, BorderLayout.CENTER);
-
-    }
+//    /**
+//     * this panel is divided by border layout into north and center
+//     * in north the are controlling buttons
+//     * center panel holds a tabbed pane with different items
+//     * <p>
+//     * it will make a Middle panel as the request data
+//     */
+//    public MiddlePanel(Request request) {
+//        formData = new ArrayList<>();
+//        queries = new ArrayList<>();
+//        headers = new ArrayList<>();
+//        this.setOwner(request);
+//        setLayout(new BorderLayout());
+//        northMiddlePanel = new JPanel();
+//        northMiddlePanel.setLayout(new GridLayout(1, 3));
+//        String[] methodsName = {"GET", "POST", "PUT", "PATCH", "DELETE"};
+//        requestMethodType = new JComboBox(methodsName);
+//        requestMethodType.setSelectedItem(request.getMethod());
+//
+//        requestMethodType.addActionListener(new handler());
+//        northMiddlePanel.add(requestMethodType);
+//        northMiddlePanel.add(url = new JTextField());
+//        url.setText(request.getUri());
+//        url.addFocusListener(new handler());
+//        northMiddlePanel.add(sendRequest = new JButton("Send" + '\u21E8'));
+//        sendRequest.addActionListener(new handler());
+//        add(northMiddlePanel, BorderLayout.NORTH);
+//        tabs = new JTabbedPane();
+//        bodyPanel = new JPanel();
+//        bodyPanel.setLayout(new BorderLayout());
+//        authPanel = new JPanel();
+//        queryPanel = new JPanel();
+//        headerPanel = new JPanel();
+//
+//        tabs.addTab("Body", bodyPanel);
+//        tabs.addTab("Auth", authPanel);
+//        tabs.addTab("Query", queryPanel);
+//        tabs.addTab("Header", headerPanel);
+//
+//        makeBodyPanel(request);
+//        makeAuthPanel();
+//        makeHeaderPanel(request);
+//        makeQueryPanel(request);
+//
+//        add(tabs, BorderLayout.CENTER);
+//
+//    }
 
     /**
      * makes query panel
@@ -152,6 +172,7 @@ public class MiddlePanel extends JPanel {
 
         //////////////////////////////////////////////////////
     }
+
     /**
      * makes query panel as the request data
      */
@@ -167,10 +188,8 @@ public class MiddlePanel extends JPanel {
         queryPanel.add(urlPreviewLabel);
         queryPanel.add(urlPreviewField);
         queryPanel.add(copyURLButton);
-        System.out.println("questire map:"+request.getQueries().toString());
-        for (Map.Entry<String, String> entry : request.getQueries().entrySet()) {
-            queryPanel.add(new Form(queryPanel, entry.getKey(), entry.getValue()));
-        }
+        queriesMap.forEach((k, v) -> queryPanel.add(new Form(queryPanel, k, v)));
+
         //////////////////////////////////////////////////////
     }
 
@@ -238,6 +257,7 @@ public class MiddlePanel extends JPanel {
 
         bodyTabStatus.addActionListener(new handler());
     }
+
     /**
      * makes body panel as the request data
      */
@@ -250,7 +270,7 @@ public class MiddlePanel extends JPanel {
         binaryPanel.setLayout(new FlowLayout());
         fileChooserButton = new JButton("Choose file");
         filePath = new JTextField("         Path of chosen file          ");
-        if (request.getUpload()!= null) {
+        if (request.getUpload() != null) {
             filePath.setText(request.getUpload());
             if (new File(request.getUpload()).isFile()) {
                 binaryFile = new File(request.getUpload());
@@ -262,17 +282,14 @@ public class MiddlePanel extends JPanel {
         fileChooserButton.addActionListener(new handler());
 
         jsonViewerPanel = new JsonViewerPanel();
-        if (request.getJson()!= null) {
+        if (request.getJson() != null) {
             jsonViewerPanel.setText(request.getJson());
         }
         JSONPanel = new JPanel(new BorderLayout());
         JSONPanel.add(jsonViewerPanel, BorderLayout.CENTER);
 
         bodyFormPanel = new JPanel();
-        System.out.println("forms map:"+request.getFormsMap().toString());
-        for (Map.Entry<String, String> entry : request.getFormsMap().entrySet()) {
-            bodyFormPanel.add(new Form(bodyFormPanel, entry.getKey(), entry.getValue()));
-        }
+        formDataMap.forEach((k, v) -> bodyFormPanel.add(new Form(bodyFormPanel, k, v)));
         noBodyPanel = new JPanel();
 
         bodyPanel.add(noBodyPanel);
@@ -290,12 +307,8 @@ public class MiddlePanel extends JPanel {
     /**
      * makes header panel as the request data
      */
-    private void makeHeaderPanel(Request request){
-        System.out.println("headers:"+request.getHeadersMap().toString());
-
-        for (Map.Entry<String, String> entry : request.getHeadersMap().entrySet()) {
-            headerPanel.add(new Form(headerPanel, entry.getKey(), entry.getValue()));
-        }
+    private void makeHeaderPanel(Request request) {
+        headersMap.forEach((k, v) -> headerPanel.add(new Form(headerPanel, k, v)));
     }
 
 
@@ -334,6 +347,7 @@ public class MiddlePanel extends JPanel {
             if (e.getSource() == requestMethodType) {
                 JComboBox cb = (JComboBox) e.getSource();
                 owner.setMethod((String) cb.getSelectedItem());
+                owner.updateLabel();
                 updateUI();
             }
             if (e.getSource() == copyURLButton) {
@@ -388,8 +402,11 @@ public class MiddlePanel extends JPanel {
      * initialize the request as panel's info
      */
     public void initializeRequest() {
-        owner.setMethod((String) requestMethodType.getSelectedItem());
+        owner.setFormsMap(getFormDataMap());
+        owner.setHeadersMap(getHeadersMap());
+        owner.setQueries(getQueriesMap());
 
+        owner.setMethod((String) requestMethodType.getSelectedItem());
         owner.setUri(urlPreviewField.getText());
 
         if (!urlPreviewField.getText().equals("")) {
@@ -444,7 +461,6 @@ public class MiddlePanel extends JPanel {
         if (!headerString.equals("")) {
             headerString = headerString.substring(0, headerString.length() - 1);
         }
-        System.out.println("headers:"+headerString);
         owner.setHeaders(headerString);
     }
 
@@ -484,19 +500,13 @@ public class MiddlePanel extends JPanel {
             nameField.addFocusListener(new handler());
             valueField.addFocusListener(new handler());
             if (formOwner == queryPanel) {
-                System.out.println("ADD to query");
-                if (owner != null)
-                    owner.addQuery(this.getNameField().getText(), this.getValueField().getText());
+                queriesMap.put(nameField.getText(), valueField.getText());
                 queries.add(this);
             } else if (formOwner == headerPanel) {
-                System.out.println("ADD to headers");
-                if (owner != null)
-                    owner.addHeader(this.getNameField().getText(), this.getValueField().getText());
+                headersMap.put(nameField.getText(), valueField.getText());
                 headers.add(this);
             } else if (formOwner == bodyFormPanel) {
-                System.out.println("ADD to form");
-                if (owner != null)
-                    owner.addForm(this.getNameField().getText(), this.getValueField().getText());
+                formDataMap.put(nameField.getText(), valueField.getText());
                 formData.add(this);
             }
             form = this;
@@ -540,7 +550,14 @@ public class MiddlePanel extends JPanel {
             public void focusLost(FocusEvent e) {
                 //update query as the fields changed
                 if (e.getSource() == nameField || e.getSource() == valueField) {
-                    setQueries();
+                    if (formOwner == bodyFormPanel) {
+                        setFormDataMap();
+                    } else if (formOwner == queryPanel) {
+                        setQueriesMap();
+                    } else if (formOwner == headerPanel) {
+                        setHeadersMap();
+                        setQueries();
+                    }
                 }
             }
 
@@ -595,13 +612,47 @@ public class MiddlePanel extends JPanel {
         urlPreviewField.setText(urlPreview);
     }
 
+    private void setQueriesMap() {
+        queriesMap = new HashMap<>();
+        for (int i = 0; i < queries.size(); i++) {
+            queriesMap.put(queries.get(i).getNameField().getText(), queries.get(i).getValueField().getText());
+        }
+    }
+
+    private void setFormDataMap() {
+        formDataMap = new HashMap<>();
+        for (int i = 0; i < formData.size(); i++) {
+            formDataMap.put(formData.get(i).getNameField().getText(), formData.get(i).getValueField().getText());
+        }
+    }
+
+    private void setHeadersMap() {
+        headersMap = new HashMap<>();
+        for (int i = 0; i < headers.size(); i++) {
+            headersMap.put(headers.get(i).getNameField().getText(), headers.get(i).getValueField().getText());
+        }
+
+    }
+
     /**
      * set the middle panel owner
+     *
      * @param owner owner
      */
     public void setOwner(Request owner) {
         this.owner = owner;
     }
 
+    public HashMap<String, String> getHeadersMap() {
+        return headersMap;
+    }
+
+    public HashMap<String, String> getFormDataMap() {
+        return formDataMap;
+    }
+
+    public HashMap<String, String> getQueriesMap() {
+        return queriesMap;
+    }
 }
 

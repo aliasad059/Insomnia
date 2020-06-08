@@ -92,7 +92,7 @@ public class RequestsPanel extends JPanel {
         panel.setMaximumSize(new Dimension(this.getSize().width, 40));
         panel.setSize(new Dimension(this.getSize().width, 40));
         panel.setVisible(true);
-        panel.setBorder(new LineBorder(Color.MAGENTA));
+        panel.setBackground(Color.RED);
         centerCenterRequestPanel.add(panel);
         updateUI();
     }
@@ -107,9 +107,9 @@ public class RequestsPanel extends JPanel {
      */
     private JPanel makeRequest(String name, String method, ReqList reqList) {
         Request request = new Request();
+        request.getMiddlePanel().setOwner(request);
         JPanel panel = new JPanel();
         JLabel label = new JLabel(method);
-        request.getMiddlePanel().setOwner(request);
         if (method.substring(0, 3).equals("GET")) {
             label.setForeground(Color.MAGENTA);
         }
@@ -137,6 +137,7 @@ public class RequestsPanel extends JPanel {
         requestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                request.getMiddlePanel().setOwner(request);
                 frame.setCurrentMiddlePanel(request.getMiddlePanel());
                 frame.setCurrentResponsePanel(request.getResponsePanel());
                 frame.setLeftAndRightPanels();
@@ -147,6 +148,7 @@ public class RequestsPanel extends JPanel {
         requestButton.doClick();
         request.setMethod(method);
         request.setRequestName(name);
+        request.setMethodLabel(label);
 
         label.setLabelFor(requestButton);
         panel.add(label);
@@ -174,7 +176,6 @@ public class RequestsPanel extends JPanel {
      */
     private JPanel makeRequest(Request request) {
 //        requests.add(request);
-        request.getMiddlePanel().setOwner(request);
         String method = request.getMethod();
         String name = request.getRequestName();
         JPanel panel = new JPanel();
@@ -196,17 +197,17 @@ public class RequestsPanel extends JPanel {
         }
 
         JButton requestButton = new JButton(name);
-
         requestButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                request.getMiddlePanel().setOwner(request);
                 frame.setCurrentMiddlePanel(request.getMiddlePanel());
                 frame.setCurrentResponsePanel(request.getResponsePanel());
                 frame.setLeftAndRightPanels();
             }
         });
 //        frame.updateTheme();
-//        request.setMethodLabel(label);
+        request.setMethodLabel(label);
 
         label.setLabelFor(requestButton);
         panel.add(label);

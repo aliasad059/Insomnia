@@ -10,14 +10,14 @@ public class ReqList implements Serializable {
     public ReqList(String listName) {
         requests = new ArrayList<>();
         this.listName = listName;
-        saveList("./../save/lists/list_"+listName+".txt");
     }
 
     /**
      * save list
      */
     public void saveList(String path){
-        try (FileOutputStream fout=new FileOutputStream(path);
+        File file = new File(path);
+        try (FileOutputStream fout=new FileOutputStream(file);
              ObjectOutputStream objWriter=new ObjectOutputStream(fout)){
             objWriter.writeObject(this);
         } catch (IOException e) {

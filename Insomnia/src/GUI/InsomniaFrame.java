@@ -121,7 +121,7 @@ public class InsomniaFrame extends JFrame {
         LafManager.install(new DarculaTheme());
         this.validate();
         requestsPanel = new RequestsPanel(this);
-        currentMiddlePanel = new MiddlePanel();
+        currentMiddlePanel = new MiddlePanel(null,false);
         currentResponsePanel = new ResponsePanel();
         menuBar = new InsomniaMenuBar(this);
 

@@ -80,6 +80,7 @@ public class ConsoleClient {
             help();
         } else if (args[0].equals("creat")) {
             ReqList reqList = new ReqList(args[1]);
+            reqList.saveList("./../save/lists/list_"+reqList.getListName()+".txt");
             reqLists.add(reqList);
         } else {
             System.out.println("Incorrect pattern.");
